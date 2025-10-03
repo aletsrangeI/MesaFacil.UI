@@ -1,0 +1,123 @@
+.ui-btn {
+  --btn-bg: #fff;
+  --btn-fg: var(--color-text);
+  --btn-bd: rgba(0, 0, 0, 0.1);
+  --btn-pad-y: 10px;
+  --btn-pad-x: 14px;
+  --btn-gap: 8px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--btn-gap);
+  border-radius: var(--radius);
+  padding: var(--btn-pad-y) var(--btn-pad-x);
+  border: 1px solid var(--btn-bd);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 0.02s ease, box-shadow 0.2s ease, background 0.2s ease,
+    color 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+.ui-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.ui-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Variants */
+.ui-btn--primary {
+  --btn-bg: var(--color-primary);
+  --btn-fg: #fff;
+  --btn-bd: transparent;
+}
+.ui-btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-600);
+}
+
+.ui-btn--secondary {
+  --btn-bg: var(--color-secondary);
+  --btn-fg: #2c2205;
+  --btn-bd: transparent;
+}
+
+.ui-btn--ghost {
+  --btn-bg: #ffffff;
+  --btn-fg: var(--color-text);
+  --btn-bd: rgba(0, 0, 0, 0.12);
+  box-shadow: none;
+}
+
+.ui-btn--link {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-primary);
+  --btn-bd: transparent;
+  box-shadow: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+.ui-btn--link:hover {
+  text-decoration: underline;
+}
+
+/* Sizes */
+.ui-btn--sm {
+  --btn-pad-y: 6px;
+  --btn-pad-x: 10px;
+  font-size: 14px;
+}
+.ui-btn--md {
+  --btn-pad-y: 10px;
+  --btn-pad-x: 14px;
+  font-size: 15px;
+}
+.ui-btn--lg {
+  --btn-pad-y: 14px;
+  --btn-pad-x: 18px;
+  font-size: 16px;
+}
+
+/* Icon slots */
+.ui-btn__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+}
+.ui-btn__icon--left {
+  margin-right: calc(var(--btn-gap) - 2px);
+}
+.ui-btn__icon--right {
+  margin-left: calc(var(--btn-gap) - 2px);
+}
+
+/* Loading state */
+.is-loading {
+  position: relative;
+  color: transparent !important;
+}
+.is-loading .ui-btn__icon,
+.is-loading .ui-btn__label {
+  visibility: hidden;
+}
+.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 1.15em;
+  height: 1.15em;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-top-color: rgba(255, 255, 255, 0.2);
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

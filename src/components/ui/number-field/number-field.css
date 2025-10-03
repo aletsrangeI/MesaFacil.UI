@@ -1,0 +1,78 @@
+.ui-nf {
+  --pad-y: 8px;
+  --pad-x: 10px;
+  --radius: var(--radius, 12px);
+  --bd: rgba(0, 0, 0, 0.12);
+  --bg: #fff;
+  --fg: var(--color-text, #1f1f1f);
+
+  display: inline-grid;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--bd);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  padding: var(--pad-y) var(--pad-x);
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.06));
+}
+
+.ui-nf--sm {
+  --pad-y: 4px;
+  --pad-x: 8px;
+}
+.ui-nf--md {
+  --pad-y: 8px;
+  --pad-x: 10px;
+}
+.ui-nf--lg {
+  --pad-y: 12px;
+  --pad-x: 12px;
+}
+
+.ui-nf__btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  color: var(--color-text, #1f1f1f);
+  cursor: pointer;
+}
+.ui-nf__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ui-nf__btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.ui-nf__input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  width: 72px;
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  /* Remueve los spinners nativos (WebKit) */
+  -moz-appearance: textfield;
+}
+.ui-nf__input::-webkit-outer-spin-button,
+.ui-nf__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ui-nf:focus-within {
+  border-color: var(--color-primary, #d64545);
+  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.18),
+    var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.06));
+}
+.is-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}

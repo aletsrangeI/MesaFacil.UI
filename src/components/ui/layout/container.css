@@ -1,0 +1,23 @@
+.container {
+  /* --container-max se setea inline desde el componente */
+  --container-max: 1200px;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Punto de partida cómodo en desktop */
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* Variante sin padding (útil para grids a full-bleed) */
+.container--no-pad {
+  padding-left: 0;
+  padding-right: 0;
+}

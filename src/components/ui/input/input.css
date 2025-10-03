@@ -1,0 +1,87 @@
+/* Base */
+.ui-input { display: grid; gap: 6px; }
+
+/* Label */
+.ui-input__label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text, #1f1f1f);
+}
+.ui-input__req { color: var(--color-primary, #D64545); }
+
+/* Field wrapper */
+.ui-input__field {
+  --pad-y: 10px;
+  --pad-x: 12px;
+  --border: rgba(0,0,0,.12);
+  --bg: #fff;
+  --fg: var(--color-text, #1f1f1f);
+
+  position: relative;
+  display: grid;
+  align-items: center;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 12px);
+  padding: var(--pad-y) var(--pad-x);
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0,0,0,.06));
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+/* Sizes */
+.ui-input__field--sm { --pad-y: 6px; --pad-x: 10px; }
+.ui-input__field--md { --pad-y: 10px; --pad-x: 12px; }
+.ui-input__field--lg { --pad-y: 14px; --pad-x: 14px; }
+
+/* Icons presence adjusts padding using grid gaps */
+.ui-input__icon { display: inline-grid; place-items: center; width: 1.1em; height: 1.1em; opacity: .75; }
+.ui-input__icon--left { order: 1; }
+.ui-input__control { order: 2; }
+.ui-input__icon--right { order: 3; }
+
+/* Without icons, collapse columns */
+.ui-input__field:not(.has-left) { grid-template-columns: 1fr auto; }
+.ui-input__field:not(.has-left) .ui-input__control { order: 1; }
+.ui-input__field:not(.has-right) { grid-template-columns: auto 1fr; }
+
+/* Input element */
+.ui-input__control {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+}
+
+/* Focus */
+.ui-input__control:focus-visible {
+  outline: none;
+}
+.ui-input__field:has(.ui-input__control:focus-visible) {
+  border-color: var(--color-primary, #D64545);
+  box-shadow: 0 0 0 3px rgba(214,69,69,.18), var(--shadow-sm, 0 4px 12px rgba(0,0,0,.06));
+}
+
+/* States */
+.ui-input__field.is-error {
+  border-color: color-mix(in srgb, var(--color-primary, #D64545) 60%, #0000);
+  box-shadow: 0 0 0 3px rgba(214,69,69,.12);
+}
+.ui-input__field.is-ok:hover {
+  border-color: color-mix(in srgb, #000 18%, #ffffff 0%);
+}
+
+/* Helper & error */
+.ui-input__helper {
+  font-size: 12px;
+  color: var(--color-muted, #6b7280);
+}
+.ui-input__error {
+  font-size: 12px;
+  color: var(--color-primary, #D64545);
+  font-weight: 600;
+}

@@ -1,0 +1,113 @@
+.ui-select {
+  display: grid;
+  gap: 6px;
+}
+
+.ui-select__label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text, #1f1f1f);
+}
+.ui-select__req {
+  color: var(--color-primary, #d64545);
+}
+
+.ui-select__field {
+  --pad-y: 10px;
+  --pad-x: 12px;
+  --bd: rgba(0, 0, 0, 0.12);
+  --bg: #fff;
+  --fg: var(--color-text, #1f1f1f);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius, 12px);
+  padding: var(--pad-y) var(--pad-x);
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.06));
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+/* sizes */
+.ui-select__field--sm {
+  --pad-y: 6px;
+  --pad-x: 10px;
+}
+.ui-select__field--md {
+  --pad-y: 10px;
+  --pad-x: 12px;
+}
+.ui-select__field--lg {
+  --pad-y: 14px;
+  --pad-x: 14px;
+}
+
+.ui-select__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.1em;
+  height: 1.1em;
+  opacity: 0.75;
+}
+.ui-select__icon--left {
+  order: 1;
+}
+.ui-select__control {
+  order: 2;
+}
+.ui-select__chevron {
+  order: 3;
+  color: var(--color-muted, #6b7280);
+}
+
+.ui-select__field:not(.has-left) {
+  grid-template-columns: 1fr auto;
+}
+.ui-select__field:not(.has-left) .ui-select__control {
+  order: 1;
+}
+
+/* select nativo */
+.ui-select__control {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* focus */
+.ui-select__control:focus-visible {
+  outline: none;
+}
+.ui-select__field:has(.ui-select__control:focus-visible) {
+  border-color: var(--color-primary, #d64545);
+  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.18),
+    var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.06));
+}
+
+/* states */
+.ui-select__field.is-error {
+  border-color: color-mix(in srgb, var(--color-primary, #d64545) 60%, #0000);
+  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.12);
+}
+
+/* helper & error */
+.ui-select__helper {
+  font-size: 12px;
+  color: var(--color-muted, #6b7280);
+}
+.ui-select__error {
+  font-size: 12px;
+  color: var(--color-primary, #d64545);
+  font-weight: 600;
+}

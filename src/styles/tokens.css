@@ -1,0 +1,15 @@
+:root {
+--color-primary: #D64545; /* terracota */
+--color-primary-600: #b93c3c;
+--color-secondary: #E2A72E; /* mostaza */
+--color-text: #1f1f1f;
+--color-muted: #6b7280;
+--color-bg: #f5f5f5;
+--radius: 12px;
+--shadow-sm: 0 4px 12px rgba(0,0,0,.06);
+--focus: 0 0 0 3px rgba(214,69,69,.25);
+
+
+/* Tipografías base */
+--font-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
