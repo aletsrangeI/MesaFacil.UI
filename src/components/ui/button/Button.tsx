@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from '../../../lib/cn';
+import { cn } from "../../../lib/cn";
 import "./button.css";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "link";
@@ -9,10 +9,12 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  asChild?: false; // reservado si luego quieres polimorfismo
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  fullWidth?: boolean;
+  block?: boolean;
+  iconOnly?: boolean; // si solo hay icono + aria-label
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -26,6 +28,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       leftIcon,
       rightIcon,
       children,
+      fullWidth = false,
+      block = false,
+      iconOnly = false,
       ...rest
     },
     ref
@@ -39,10 +44,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           "ui-btn",
           `ui-btn--${variant}`,
           `ui-btn--${size}`,
+          iconOnly && "ui-btn--icon",
+          (fullWidth || block) && "ui-btn--block",
           isLoading && "is-loading",
+          fullWidth && "w-100", // si usas css utilitario; si no, crea una clase .ui-btn--block{width:100%}
           className
         )}
         disabled={isDisabled}
+        aria-busy={isLoading || undefined}
         {...rest}
       >
         {leftIcon && (
@@ -60,5 +69,3 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   }
 );
-
-Button.displayName = "Button";
