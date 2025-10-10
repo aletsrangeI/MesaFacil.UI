@@ -5,6 +5,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { NumberField } from "../components/ui/number-field";
 import { Select } from "../components/ui/select";
+import Icon from "../components/ui/icons/Icon";
 
 export default function HomePage() {
   const [search, setSearch] = React.useState("");
@@ -49,13 +50,14 @@ export default function HomePage() {
         <Input
           label="Buscar platillo"
           placeholder="Ej. Taco, Hamburguesa, Ensalada…"
-          rightIcon={<span>🔍</span>}
+          rightIcon={<Icon name="Search" />}
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
           helperText="Escribe para filtrar el catálogo"
           size="md"
         />
       </section>
+  
 
       {/* Form breve (nombre + precio) */}
       <section
@@ -73,7 +75,7 @@ export default function HomePage() {
           label="Precio"
           type="number"
           placeholder="Ej. 95"
-          leftIcon={<span>$</span>}
+          leftIcon={<Icon name="BadgeDollarSign" />}
           value={price}
           onChange={(e) =>
             setPrice(
