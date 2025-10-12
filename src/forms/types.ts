@@ -4,7 +4,8 @@ export type ValidationType =
   | "email"
   | "confirmPassword"
   | "phone"
-  | "date";
+  | "date"
+  | "minLength";
 
 export interface ValidationRule {
   type: ValidationType;
