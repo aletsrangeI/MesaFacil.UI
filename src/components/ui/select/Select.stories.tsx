@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
 import { Select } from "./Select";
+import Icon from "../../ui/icons/Icon";
 
 const meta: Meta<typeof Select> = {
   title: "UI/Select",
@@ -11,6 +11,7 @@ const meta: Meta<typeof Select> = {
     helperText: { control: "text" },
     errorText: { control: "text" },
     leftIcon: { control: false },
+    leftIconName: { control: "text" },
     onChange: { action: "changed" },
   },
   args: {
@@ -36,7 +37,23 @@ const Options = () => (
 
 export const Default: Story = {
   render: (args) => (
-    <Select {...args} leftIcon={<span>🍽️</span>}>
+    <Select
+      {...args}
+      leftIconName="Utensils" // 👈 lucide, sin emojis
+      aria-label="Seleccionar categoría"
+    >
+      <Options />
+    </Select>
+  ),
+};
+
+export const ConIconManual: Story = {
+  render: (args) => (
+    <Select
+      {...args}
+      leftIcon={<Icon name="ChefHat" />}
+      helperText="Opcional: puedes pasar un JSX manual"
+    >
       <Options />
     </Select>
   ),
@@ -54,16 +71,25 @@ export const Error: Story = {
 export const Sizes: Story = {
   render: (args) => (
     <div style={{ display: "grid", gap: 12 }}>
-      <Select {...args} size="sm">
+      <Select {...args} size="sm" leftIconName="Utensils">
         <Options />
       </Select>
-      <Select {...args} size="md">
+      <Select {...args} size="md" leftIconName="Utensils">
         <Options />
       </Select>
-      <Select {...args} size="lg">
+      <Select {...args} size="lg" leftIconName="Utensils">
         <Options />
       </Select>
     </div>
   ),
   args: { helperText: "" },
+};
+
+export const Disabled: Story = {
+  render: (args) => (
+    <Select {...args} disabled leftIconName="SquareSlash">
+      <Options />
+    </Select>
+  ),
+  args: { helperText: "Control deshabilitado" },
 };

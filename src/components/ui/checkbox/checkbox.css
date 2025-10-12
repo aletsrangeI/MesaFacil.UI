@@ -1,0 +1,135 @@
+.ui-cb {
+  display: grid;
+  gap: 6px;
+  color: var(--color-text, #1f1f1f);
+  font-family: inherit;
+}
+
+/* Tamaños */
+.ui-cb--sm {
+  --cb-size: 16px;
+  --cb-radius: 4px;
+  --cb-gap: 8px;
+  --cb-pad: 2px;
+}
+.ui-cb--md {
+  --cb-size: 18px;
+  --cb-radius: 5px;
+  --cb-gap: 10px;
+  --cb-pad: 2px;
+}
+.ui-cb--lg {
+  --cb-size: 20px;
+  --cb-radius: 6px;
+  --cb-gap: 12px;
+  --cb-pad: 3px;
+}
+
+.ui-cb__labelwrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cb-gap, 10px);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ui-cb.is-disabled .ui-cb__labelwrap {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Caja + input nativo */
+.ui-cb__box {
+  position: relative;
+  width: var(--cb-size, 18px);
+  height: var(--cb-size, 18px);
+  border-radius: var(--cb-radius, 5px);
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  display: inline-grid;
+  place-items: center;
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.06));
+}
+
+.ui-cb__box.is-error {
+  border-color: color-mix(in srgb, var(--color-primary, #d64545) 60%, #0000);
+  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.12);
+}
+
+.ui-cb__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: inherit;
+}
+
+/* Marca (check/guion) */
+.ui-cb__mark {
+  width: calc(var(--cb-size, 18px) - var(--cb-pad, 2px) * 2);
+  height: calc(var(--cb-size, 18px) - var(--cb-pad, 2px) * 2);
+  border-radius: calc(var(--cb-radius, 5px) - 1px);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  position: relative;
+}
+
+/* Focus visible */
+.ui-cb__input:focus-visible + .ui-cb__mark {
+  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.18);
+  outline: none;
+}
+
+/* Estados: checked */
+.ui-cb__input:checked + .ui-cb__mark {
+  background: var(--color-primary, #d64545);
+}
+.ui-cb__input:checked + .ui-cb__mark::before {
+  content: "";
+  width: 60%;
+  height: 60%;
+  mask: conic-gradient(from 315deg at 35% 60%, #000 0 25%, transparent 0 100%),
+    linear-gradient(#000 0 0); /* truco para el check */
+  -webkit-mask: conic-gradient(
+      from 315deg at 35% 60%,
+      #000 0 25%,
+      transparent 0 100%
+    ),
+    linear-gradient(#000 0 0);
+  background: #fff;
+}
+
+/* Estado: indeterminate (cuando input.indeterminate === true y !checked) */
+.ui-cb__input:not(:checked) + .ui-cb__mark::after {
+  content: "";
+  position: absolute;
+  width: 60%;
+  height: 2px;
+  border-radius: 2px;
+  background: transparent;
+}
+.ui-cb__input:indeterminate + .ui-cb__mark,
+.ui-cb__input:not(:checked) + .ui-cb__mark {
+  /* nada particular aquí; el guión lo controlamos con JS + pseudo */
+}
+.ui-cb__input:indeterminate + .ui-cb__mark::after,
+.ui-cb__input:not(:checked) + .ui-cb__mark::after {
+  background: var(--color-primary, #d64545);
+}
+
+/* Label y mensajes */
+.ui-cb__labeltext {
+  line-height: 1.2;
+}
+.ui-cb__helper {
+  font-size: 12px;
+  color: var(--color-text-muted, #6b7280);
+}
+.ui-cb__error {
+  font-size: 12px;
+  color: var(--color-primary, #d64545);
+  font-weight: 600;
+}

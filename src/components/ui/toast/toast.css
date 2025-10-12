@@ -1,0 +1,119 @@
+/* Viewport (posiciones) */
+.ui-toast__viewport {
+  position: fixed;
+  z-index: 70;
+  display: grid;
+  gap: 10px;
+  max-width: min(92vw, 420px);
+  pointer-events: none; /* deja pasar clics por detrás salvo en los toasts */
+}
+
+/* posiciones */
+.pos-top-left {
+  top: 20px;
+  left: 20px;
+}
+.pos-top-right {
+  top: 20px;
+  right: 20px;
+}
+.pos-top-center {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.pos-bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+.pos-bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+.pos-bottom-center {
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Card */
+.ui-toast {
+  --bg: #111;
+  --fg: #fff;
+  --bd: rgba(255, 255, 255, 0.08);
+
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 12px 12px 14px;
+  border-radius: var(--radius, 12px);
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--bd);
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.06));
+  pointer-events: auto; /* re-activa interacciones dentro */
+  animation: toast-in 0.18s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Variantes */
+.ui-toast--info {
+  --bg: #111;
+  --fg: #fff;
+  --bd: rgba(255, 255, 255, 0.08);
+}
+.ui-toast--success {
+  --bg: var(--color-success, #3c8d40);
+  --fg: #fff;
+  --bd: rgba(0, 0, 0, 0.08);
+}
+.ui-toast--error {
+  --bg: var(--color-primary, #d64545);
+  --fg: #fff;
+  --bd: rgba(0, 0, 0, 0.08);
+}
+
+/* Contenido */
+.ui-toast__content {
+  font-weight: 600;
+}
+
+/* Acción */
+.ui-toast__action {
+  border: 0;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.ui-toast__action:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Cerrar */
+.ui-toast__close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+.ui-toast__close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}

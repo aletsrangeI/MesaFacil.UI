@@ -1,13 +1,13 @@
-import React from 'react';
-import * as Lucide from 'lucide-react';
+import React from "react";
+import * as Lucide from "lucide-react";
 
 type IconName = keyof typeof Lucide; // p.ej. "Search", "ShoppingCart", etc.
 
 export interface IconProps extends React.SVGAttributes<SVGElement> {
   name: IconName;
-  size?: number;        // px
+  size?: number; // px
   strokeWidth?: number; // grosor de línea
-  title?: string;       // accesibilidad
+  title?: string; // accesibilidad
 }
 
 export default function Icon({
@@ -32,10 +32,11 @@ export default function Icon({
       height={size}
       strokeWidth={strokeWidth}
       aria-hidden={title ? undefined : true}
-      role={title ? 'img' : 'presentation'}
+      role={title ? "img" : "presentation"}
       {...rest}
     >
       {title ? <title>{title}</title> : null}
     </Cmp>
   );
 }
+export type { IconName };

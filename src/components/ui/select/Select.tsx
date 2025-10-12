@@ -1,6 +1,10 @@
 import React from "react";
 import "./select.css";
 
+// 👉 Si tienes el Icon en otra ruta, ajusta este import:
+import Icon from "../../ui/icons/Icon"; // o "@/components/Icon"
+import type { IconName } from "../../ui/icons/Icon";
+
 export type SelectVisualSize = "sm" | "md" | "lg";
 
 export interface SelectProps
@@ -14,6 +18,10 @@ export interface SelectProps
   selectSize?: number;
   /** Ícono opcional a la izquierda (no interactivo) */
   leftIcon?: React.ReactNode;
+  /** Nombre de ícono lucide (opción ergonómica). Tiene prioridad sobre `leftIcon`. */
+  leftIconName?: IconName;
+  /** Grosor del ícono (lucide) */
+  iconStrokeWidth?: number;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
@@ -26,9 +34,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       size = "md",
       selectSize,
       leftIcon,
+      leftIconName,
+      iconStrokeWidth = 2,
       required,
       className,
       children,
+      disabled,
       ...rest
     },
     ref
@@ -58,12 +69,22 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             "ui-select__field",
             `ui-select__field--${size}`,
             hasError ? "is-error" : "is-ok",
-            leftIcon ? "has-left" : "",
+            leftIcon || leftIconName ? "has-left" : "",
+            disabled ? "is-disabled" : "",
           ].join(" ")}
         >
-          {leftIcon && (
+          {(leftIconName || leftIcon) && (
             <span className="ui-select__icon ui-select__icon--left" aria-hidden>
-              {leftIcon}
+              {leftIconName ? (
+                <Icon
+                  name={leftIconName}
+                  size={18}
+                  strokeWidth={iconStrokeWidth}
+                  aria-hidden
+                />
+              ) : (
+                leftIcon
+              )}
             </span>
           )}
 
@@ -72,25 +93,19 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             aria-invalid={hasError || undefined}
             aria-describedby={describedBy}
+            aria-required={required || undefined}
             required={required}
             size={selectSize}
             className="ui-select__control"
+            disabled={disabled}
             {...rest}
           >
             {children}
           </select>
 
-          {/* Chevron decorativo */}
+          {/* Chevron consistente con el set de iconos */}
           <span className="ui-select__chevron" aria-hidden>
-            <svg width="14" height="14" viewBox="0 0 24 24">
-              <path
-                d="M6 9l6 6 6-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
+            <Icon name="ChevronDown" size={18} strokeWidth={iconStrokeWidth} />
           </span>
         </div>
 
@@ -100,7 +115,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </div>
         )}
         {hasError && (
-          <div id={errorId} className="ui-select__error" role="alert">
+          <div
+            id={errorId}
+            className="ui-select__error"
+            role="alert"
+            aria-live="polite"
+          >
             {errorText}
           </div>
         )}

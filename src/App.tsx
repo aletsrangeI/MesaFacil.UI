@@ -1,7 +1,7 @@
-import HomePage from "./pages/HomePage";
+import RegistroUsuario from "./pages/RegistroUsuario";
 
 export default function App() {
   return (
-    <HomePage />
+    <RegistroUsuario />
   );
 }
