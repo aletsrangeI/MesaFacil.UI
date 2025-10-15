@@ -1,7 +1,7 @@
 export type AuthSlicePayload = {
   accessToken: string;
-  refreshToken: string;
-  expiresAt: string;
+  refreshToken: string; // obligatorio en el payload (si no viene, se deja "")
+  expiresAt: string; // obligatorio en el payload (si no viene, se usa now ISO)
   usuarioId: number;
   idEmpresa: number;
   correo: string;
@@ -23,7 +23,7 @@ export function isAuthSlicePayload(x: any): x is AuthSlicePayload {
 
 /**
  * Convierte la respuesta cruda del backend a AuthSlicePayload.
- * 
+ *
  * Caso actual:
  * {
  *   data: {
@@ -37,22 +37,32 @@ export function isAuthSlicePayload(x: any): x is AuthSlicePayload {
  * }
  */
 export function toAuthSlicePayload(res: any): AuthSlicePayload | null {
-  const data = res?.data;
+  const token = res?.data?.token;
+  const session = res?.data?.session;
 
-  if (!data || typeof data.accessToken !== "string") {
-    console.error("Respuesta inválida del backend:", res);
+  if (!token || typeof token.accessToken !== "string" || !session) {
+    console.error(
+      "Respuesta inválida del backend (se espera { data: { token, session } }):",
+      res
+    );
     return null;
   }
 
+  const roles = session.roles;
+  const expiresAt: string =
+    typeof token.expiresAtUtc === "string"
+      ? token.expiresAtUtc
+      : new Date().toISOString();
+
   const payload: AuthSlicePayload = {
-    accessToken: data.accessToken,
-    refreshToken: data.refreshToken ?? "",
-    expiresAt: data.expiresAtUtc ?? new Date().toISOString(),
-    usuarioId: 0, // ⚠️ tu backend aún no lo devuelve
-    idEmpresa: 0, // ⚠️ tu backend aún no lo devuelve
-    correo: "",   // ⚠️ tu backend aún no lo devuelve
-    nombreCompleto: "",
-    roles: [],    // ⚠️ tu backend aún no lo devuelve
+    accessToken: token.accessToken,
+    refreshToken: token.refreshToken ?? "",
+    expiresAt,
+    usuarioId: Number(session.usuarioId ?? 0),
+    idEmpresa: Number(session.idEmpresa ?? 0),
+    correo: String(session.correo ?? ""),
+    nombreCompleto: session.nombreCompleto ?? undefined,
+    roles,
   };
 
   return payload;

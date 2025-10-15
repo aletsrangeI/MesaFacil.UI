@@ -32,6 +32,8 @@ export const addTagTypes = [
   "UsuarioRol",
   "VarianteProducto",
   "FormField",
+  "AccesoRuta",
+  "RolAccesoRuta",
 ] as const;
 const injectedRtkApi = api
   .enhanceEndpoints({
@@ -4040,6 +4042,278 @@ const injectedRtkApi = api
         }),
         providesTags: ["FormField"],
       }),
+      accesoRutaInsert: build.mutation<
+        AccesoRutaInsertApiResponse,
+        AccesoRutaInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/insert`,
+          method: "POST",
+          body: queryArg.accesoRutaDto,
+        }),
+        invalidatesTags: ["AccesoRuta"],
+      }),
+      accesoRutaInsertAsync: build.mutation<
+        AccesoRutaInsertAsyncApiResponse,
+        AccesoRutaInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/insert-async`,
+          method: "POST",
+          body: queryArg.accesoRutaDto,
+        }),
+        invalidatesTags: ["AccesoRuta"],
+      }),
+      accesoRutaUpdate: build.mutation<
+        AccesoRutaUpdateApiResponse,
+        AccesoRutaUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/update/${queryArg.id}`,
+          method: "PUT",
+          body: queryArg.accesoRutaDto,
+        }),
+        invalidatesTags: ["AccesoRuta"],
+      }),
+      accesoRutaUpdateAsync: build.mutation<
+        AccesoRutaUpdateAsyncApiResponse,
+        AccesoRutaUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/update-async/${queryArg.id}`,
+          method: "PUT",
+          body: queryArg.accesoRutaDto,
+        }),
+        invalidatesTags: ["AccesoRuta"],
+      }),
+      accesoRutaDelete: build.mutation<
+        AccesoRutaDeleteApiResponse,
+        AccesoRutaDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["AccesoRuta"],
+      }),
+      accesoRutaDeleteAsync: build.mutation<
+        AccesoRutaDeleteAsyncApiResponse,
+        AccesoRutaDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/delete-async/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["AccesoRuta"],
+      }),
+      accesoRutaGetAll: build.query<
+        AccesoRutaGetAllApiResponse,
+        AccesoRutaGetAllApiArg
+      >({
+        query: () => ({ url: `/api/accesoruta/getall` }),
+        providesTags: ["AccesoRuta"],
+      }),
+      accesoRutaGetAllAsync: build.query<
+        AccesoRutaGetAllAsyncApiResponse,
+        AccesoRutaGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/accesoruta/getall-async` }),
+        providesTags: ["AccesoRuta"],
+      }),
+      accesoRutaGetById: build.query<
+        AccesoRutaGetByIdApiResponse,
+        AccesoRutaGetByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/getbyid/${queryArg.id}`,
+        }),
+        providesTags: ["AccesoRuta"],
+      }),
+      accesoRutaGetByIdAsync: build.query<
+        AccesoRutaGetByIdAsyncApiResponse,
+        AccesoRutaGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/getbyid-async/${queryArg.id}`,
+        }),
+        providesTags: ["AccesoRuta"],
+      }),
+      accesoRutaGetPaged: build.query<
+        AccesoRutaGetPagedApiResponse,
+        AccesoRutaGetPagedApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/getpaged`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["AccesoRuta"],
+      }),
+      accesoRutaGetPagedAsync: build.query<
+        AccesoRutaGetPagedAsyncApiResponse,
+        AccesoRutaGetPagedAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/accesoruta/getpaged-async`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["AccesoRuta"],
+      }),
+      accesoRutaCount: build.query<
+        AccesoRutaCountApiResponse,
+        AccesoRutaCountApiArg
+      >({
+        query: () => ({ url: `/api/accesoruta/count` }),
+        providesTags: ["AccesoRuta"],
+      }),
+      accesoRutaCountAsync: build.query<
+        AccesoRutaCountAsyncApiResponse,
+        AccesoRutaCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/accesoruta/count-async` }),
+        providesTags: ["AccesoRuta"],
+      }),
+      rolAccesoRutaInsert: build.mutation<
+        RolAccesoRutaInsertApiResponse,
+        RolAccesoRutaInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/insert`,
+          method: "POST",
+          body: queryArg.rolAccesoRutaDto,
+        }),
+        invalidatesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaInsertAsync: build.mutation<
+        RolAccesoRutaInsertAsyncApiResponse,
+        RolAccesoRutaInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/insert-async`,
+          method: "POST",
+          body: queryArg.rolAccesoRutaDto,
+        }),
+        invalidatesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaUpdate: build.mutation<
+        RolAccesoRutaUpdateApiResponse,
+        RolAccesoRutaUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/update/${queryArg.id}`,
+          method: "PUT",
+          body: queryArg.rolAccesoRutaDto,
+        }),
+        invalidatesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaUpdateAsync: build.mutation<
+        RolAccesoRutaUpdateAsyncApiResponse,
+        RolAccesoRutaUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/update-async/${queryArg.id}`,
+          method: "PUT",
+          body: queryArg.rolAccesoRutaDto,
+        }),
+        invalidatesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaDelete: build.mutation<
+        RolAccesoRutaDeleteApiResponse,
+        RolAccesoRutaDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaDeleteAsync: build.mutation<
+        RolAccesoRutaDeleteAsyncApiResponse,
+        RolAccesoRutaDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/delete-async/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaGetAll: build.query<
+        RolAccesoRutaGetAllApiResponse,
+        RolAccesoRutaGetAllApiArg
+      >({
+        query: () => ({ url: `/api/rolaccesoruta/getall` }),
+        providesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaGetAllAsync: build.query<
+        RolAccesoRutaGetAllAsyncApiResponse,
+        RolAccesoRutaGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/rolaccesoruta/getall-async` }),
+        providesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaGetById: build.query<
+        RolAccesoRutaGetByIdApiResponse,
+        RolAccesoRutaGetByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/getbyid/${queryArg.id}`,
+        }),
+        providesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaGetByIdAsync: build.query<
+        RolAccesoRutaGetByIdAsyncApiResponse,
+        RolAccesoRutaGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/getbyid-async/${queryArg.id}`,
+        }),
+        providesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaGetPaged: build.query<
+        RolAccesoRutaGetPagedApiResponse,
+        RolAccesoRutaGetPagedApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/getpaged`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaGetPagedAsync: build.query<
+        RolAccesoRutaGetPagedAsyncApiResponse,
+        RolAccesoRutaGetPagedAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/rolaccesoruta/getpaged-async`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaCount: build.query<
+        RolAccesoRutaCountApiResponse,
+        RolAccesoRutaCountApiArg
+      >({
+        query: () => ({ url: `/api/rolaccesoruta/count` }),
+        providesTags: ["RolAccesoRuta"],
+      }),
+      rolAccesoRutaCountAsync: build.query<
+        RolAccesoRutaCountAsyncApiResponse,
+        RolAccesoRutaCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/rolaccesoruta/count-async` }),
+        providesTags: ["RolAccesoRuta"],
+      }),
     }),
     overrideExisting: false,
   });
@@ -4288,7 +4562,8 @@ export type ClienteCountApiResponse = /** status 200 OK */ ResponseOfint;
 export type ClienteCountApiArg = void;
 export type ClienteCountAsyncApiResponse = /** status 200 OK */ ResponseOfint;
 export type ClienteCountAsyncApiArg = void;
-export type AuthLoginApiResponse = /** status 200 OK */ ResponseOfTokenDto;
+export type AuthLoginApiResponse =
+  /** status 200 OK */ ResponseOfAuthResponseDto;
 export type AuthLoginApiArg = {
   loginRequest: LoginRequest;
 };
@@ -5973,6 +6248,136 @@ export type FormFieldGetFormFieldByFormCatIdAsyncAsyncApiResponse =
 export type FormFieldGetFormFieldByFormCatIdAsyncAsyncApiArg = {
   id: number;
 };
+export type AccesoRutaInsertApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AccesoRutaInsertApiArg = {
+  accesoRutaDto: AccesoRutaDto;
+};
+export type AccesoRutaInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AccesoRutaInsertAsyncApiArg = {
+  accesoRutaDto: AccesoRutaDto;
+};
+export type AccesoRutaUpdateApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AccesoRutaUpdateApiArg = {
+  id: number;
+  accesoRutaDto: AccesoRutaDto;
+};
+export type AccesoRutaUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AccesoRutaUpdateAsyncApiArg = {
+  id: number;
+  accesoRutaDto: AccesoRutaDto;
+};
+export type AccesoRutaDeleteApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AccesoRutaDeleteApiArg = {
+  id: number;
+};
+export type AccesoRutaDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AccesoRutaDeleteAsyncApiArg = {
+  id: number;
+};
+export type AccesoRutaGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfAccesoRutaDto;
+export type AccesoRutaGetAllApiArg = void;
+export type AccesoRutaGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfAccesoRutaDto;
+export type AccesoRutaGetAllAsyncApiArg = void;
+export type AccesoRutaGetByIdApiResponse =
+  /** status 200 OK */ ResponseOfAccesoRutaDto;
+export type AccesoRutaGetByIdApiArg = {
+  id: number;
+};
+export type AccesoRutaGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfAccesoRutaDto;
+export type AccesoRutaGetByIdAsyncApiArg = {
+  id: number;
+};
+export type AccesoRutaGetPagedApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfAccesoRutaDto;
+export type AccesoRutaGetPagedApiArg = {
+  page: number;
+  pageSize: number;
+};
+export type AccesoRutaGetPagedAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfAccesoRutaDto;
+export type AccesoRutaGetPagedAsyncApiArg = {
+  page: number;
+  pageSize: number;
+};
+export type AccesoRutaCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type AccesoRutaCountApiArg = void;
+export type AccesoRutaCountAsyncApiResponse =
+  /** status 200 OK */ ResponseOfint;
+export type AccesoRutaCountAsyncApiArg = void;
+export type RolAccesoRutaInsertApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type RolAccesoRutaInsertApiArg = {
+  rolAccesoRutaDto: RolAccesoRutaDto;
+};
+export type RolAccesoRutaInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type RolAccesoRutaInsertAsyncApiArg = {
+  rolAccesoRutaDto: RolAccesoRutaDto;
+};
+export type RolAccesoRutaUpdateApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type RolAccesoRutaUpdateApiArg = {
+  id: number;
+  rolAccesoRutaDto: RolAccesoRutaDto;
+};
+export type RolAccesoRutaUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type RolAccesoRutaUpdateAsyncApiArg = {
+  id: number;
+  rolAccesoRutaDto: RolAccesoRutaDto;
+};
+export type RolAccesoRutaDeleteApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type RolAccesoRutaDeleteApiArg = {
+  id: number;
+};
+export type RolAccesoRutaDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type RolAccesoRutaDeleteAsyncApiArg = {
+  id: number;
+};
+export type RolAccesoRutaGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfRolAccesoRutaDto;
+export type RolAccesoRutaGetAllApiArg = void;
+export type RolAccesoRutaGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfRolAccesoRutaDto;
+export type RolAccesoRutaGetAllAsyncApiArg = void;
+export type RolAccesoRutaGetByIdApiResponse =
+  /** status 200 OK */ ResponseOfRolAccesoRutaDto;
+export type RolAccesoRutaGetByIdApiArg = {
+  id: number;
+};
+export type RolAccesoRutaGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfRolAccesoRutaDto;
+export type RolAccesoRutaGetByIdAsyncApiArg = {
+  id: number;
+};
+export type RolAccesoRutaGetPagedApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfRolAccesoRutaDto;
+export type RolAccesoRutaGetPagedApiArg = {
+  page: number;
+  pageSize: number;
+};
+export type RolAccesoRutaGetPagedAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfRolAccesoRutaDto;
+export type RolAccesoRutaGetPagedAsyncApiArg = {
+  page: number;
+  pageSize: number;
+};
+export type RolAccesoRutaCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type RolAccesoRutaCountApiArg = void;
+export type RolAccesoRutaCountAsyncApiResponse =
+  /** status 200 OK */ ResponseOfint;
+export type RolAccesoRutaCountAsyncApiArg = void;
 export type Severity = number;
 export type ValidationFailure = {
   propertyName?: string | null;
@@ -6139,9 +6544,22 @@ export type TokenDto = {
   accessToken: string;
   expiresAtUtc: string;
   refreshToken?: string | null;
+};
+export type UserSessionDto = {
+  usuarioId: number;
+  idEmpresa: number;
+  correo: string;
+  nombreCompleto?: string | null;
+  roles: string[];
+  accesos: string[];
+  permsVersion?: string | null;
+};
+export type AuthResponseDto = {
+  token: TokenDto;
+  session: UserSessionDto;
 } | null;
-export type ResponseOfTokenDto = {
-  data?: TokenDto;
+export type ResponseOfAuthResponseDto = {
+  data?: AuthResponseDto;
   isSuccess?: boolean;
   message?: string;
   errors?: ValidationFailure[];
@@ -7255,6 +7673,74 @@ export type ResponsePaginationOfIEnumerableOfFormFieldDto = {
   message?: string;
   errors?: ValidationFailure[];
 };
+export type AccesoRutaDto = {
+  id?: number;
+  nombre?: string;
+  path?: string;
+  descripcion?: string | null;
+};
+export type ResponseOfIEnumerableOfAccesoRutaDto = {
+  data?: AccesoRutaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type AccesoRutaDto2 = {
+  id?: number;
+  nombre?: string;
+  path?: string;
+  descripcion?: string | null;
+} | null;
+export type ResponseOfAccesoRutaDto = {
+  data?: AccesoRutaDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfAccesoRutaDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: AccesoRutaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type RolAccesoRutaDto = {
+  id?: number;
+  idRol?: number;
+  idAccesoRuta?: number;
+};
+export type ResponseOfIEnumerableOfRolAccesoRutaDto = {
+  data?: RolAccesoRutaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type RolAccesoRutaDto2 = {
+  id?: number;
+  idRol?: number;
+  idAccesoRuta?: number;
+} | null;
+export type ResponseOfRolAccesoRutaDto = {
+  data?: RolAccesoRutaDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfRolAccesoRutaDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: RolAccesoRutaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
 export const {
   useCatalogoInsertMutation,
   useCatalogoInsertAsyncMutation,
@@ -7935,4 +8421,48 @@ export const {
   useLazyFormFieldGetFormFieldByFormCatIdQuery,
   useFormFieldGetFormFieldByFormCatIdAsyncAsyncQuery,
   useLazyFormFieldGetFormFieldByFormCatIdAsyncAsyncQuery,
+  useAccesoRutaInsertMutation,
+  useAccesoRutaInsertAsyncMutation,
+  useAccesoRutaUpdateMutation,
+  useAccesoRutaUpdateAsyncMutation,
+  useAccesoRutaDeleteMutation,
+  useAccesoRutaDeleteAsyncMutation,
+  useAccesoRutaGetAllQuery,
+  useLazyAccesoRutaGetAllQuery,
+  useAccesoRutaGetAllAsyncQuery,
+  useLazyAccesoRutaGetAllAsyncQuery,
+  useAccesoRutaGetByIdQuery,
+  useLazyAccesoRutaGetByIdQuery,
+  useAccesoRutaGetByIdAsyncQuery,
+  useLazyAccesoRutaGetByIdAsyncQuery,
+  useAccesoRutaGetPagedQuery,
+  useLazyAccesoRutaGetPagedQuery,
+  useAccesoRutaGetPagedAsyncQuery,
+  useLazyAccesoRutaGetPagedAsyncQuery,
+  useAccesoRutaCountQuery,
+  useLazyAccesoRutaCountQuery,
+  useAccesoRutaCountAsyncQuery,
+  useLazyAccesoRutaCountAsyncQuery,
+  useRolAccesoRutaInsertMutation,
+  useRolAccesoRutaInsertAsyncMutation,
+  useRolAccesoRutaUpdateMutation,
+  useRolAccesoRutaUpdateAsyncMutation,
+  useRolAccesoRutaDeleteMutation,
+  useRolAccesoRutaDeleteAsyncMutation,
+  useRolAccesoRutaGetAllQuery,
+  useLazyRolAccesoRutaGetAllQuery,
+  useRolAccesoRutaGetAllAsyncQuery,
+  useLazyRolAccesoRutaGetAllAsyncQuery,
+  useRolAccesoRutaGetByIdQuery,
+  useLazyRolAccesoRutaGetByIdQuery,
+  useRolAccesoRutaGetByIdAsyncQuery,
+  useLazyRolAccesoRutaGetByIdAsyncQuery,
+  useRolAccesoRutaGetPagedQuery,
+  useLazyRolAccesoRutaGetPagedQuery,
+  useRolAccesoRutaGetPagedAsyncQuery,
+  useLazyRolAccesoRutaGetPagedAsyncQuery,
+  useRolAccesoRutaCountQuery,
+  useLazyRolAccesoRutaCountQuery,
+  useRolAccesoRutaCountAsyncQuery,
+  useLazyRolAccesoRutaCountAsyncQuery,
 } = injectedRtkApi;

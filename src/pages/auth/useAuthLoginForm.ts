@@ -1,4 +1,4 @@
-// src/features/auth/hooks/useAuthLoginForm.ts
+import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import {
   useAuthLoginMutation,
@@ -11,6 +11,9 @@ import type {
   ValidationType,
   SelectOptionApi,
 } from "../../forms/types";
+import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../../app/hooks";
+import { setAuthResponse } from "../../state/authSlice";
 
 export type LoginValues = { username?: string; password?: string };
 
@@ -81,7 +84,9 @@ function toSelectOptions(list?: unknown): SelectOptionApi[] {
 /* ------------------------------------ Hook ------------------------------------ */
 
 export function useAuthLoginForm() {
-  // Si tu query espera { id: number } en lugar de number, cambia a { id: 0 }
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const {
     data: resp,
     isFetching: isFetchingFields,
@@ -147,15 +152,43 @@ export function useAuthLoginForm() {
     async (values: LoginValues) => {
       setServerError(null);
       try {
-        // Tu codegen usa: { loginRequest: { ... } }
-        await authLogin({
+        const apiResp = await authLogin({
           loginRequest: {
             userOrEmail: String(values.username ?? ""),
             password: String(values.password ?? ""),
-            // empresaId?: number | null,
-            // sucursalId?: number | null,
           },
         }).unwrap();
+
+        if (!apiResp?.isSuccess || !apiResp.data) {
+          throw new Error(apiResp?.message || "Error de autenticación.");
+        }
+        const { token, session } = apiResp.data;
+
+        const accesos = Array.isArray(session.accesos) ? session.accesos : [];
+        const firstAllowed = accesos[0] ?? "/";
+
+        dispatch(
+          setAuthResponse({
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken ?? undefined,
+            expiresAt: undefined, // tu back aún no envía ExpiresAtUtc
+            usuarioId: session.usuarioId,
+            idEmpresa: session.idEmpresa,
+            correo: session.correo,
+            nombreCompleto: session.nombreCompleto ?? undefined,
+            roles: session.roles ?? [],
+            accesos,
+            permsVersion: session.permsVersion ?? null,
+          })
+        );
+
+        const roleToPath: Record<string, string> = {
+          Admin: "/admin",
+          Mesero: "/mesero",
+        };
+        const next = firstAllowed || roleToPath[session.roles[0]] || "/";
+        navigate(next, { replace: true });
+
       } catch (e: any) {
         const msg =
           e?.data?.message ||

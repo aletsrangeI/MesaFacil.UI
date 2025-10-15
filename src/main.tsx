@@ -5,14 +5,19 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
-import { hydrateFromStorage } from "./state/authSlice";
+import { hydrateFromStorage, pruneIfExpired } from "./state/authSlice";
+import { BrowserRouter } from "react-router-dom";
+import AppRouter from "./app/routes/AppRouter";
 
 store.dispatch(hydrateFromStorage());
+store.dispatch(pruneIfExpired());
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <BrowserRouter>
+        <AppRouter />
+      </BrowserRouter>
     </Provider>
   </React.StrictMode>
 );
