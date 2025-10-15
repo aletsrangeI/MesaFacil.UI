@@ -1,0 +1,81 @@
+.ui-avatar {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  user-select: none;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.ui-avatar--circle {
+  border-radius: 999px;
+}
+.ui-avatar--rounded {
+  border-radius: var(--radius-lg);
+}
+.ui-avatar--square {
+  border-radius: 6px;
+}
+
+.ui-avatar--ring {
+  box-shadow:
+    0 0 0 3px rgba(214, 69, 69, 0.25),
+    var(--shadow-sm);
+}
+
+.ui-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ui-avatar__initials {
+  font-size: 0.8rem;
+  letter-spacing: 0.4px;
+}
+
+/* Status dot */
+.ui-avatar__dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: var(--color-text-muted);
+}
+.ui-avatar--status-online .ui-avatar__dot {
+  background: #22c55e;
+}
+.ui-avatar--status-busy .ui-avatar__dot {
+  background: #ef4444;
+}
+.ui-avatar--status-away .ui-avatar__dot {
+  background: #f59e0b;
+}
+.ui-avatar--status-offline .ui-avatar__dot {
+  background: var(--color-text-muted);
+}
+
+/* Overlay slot (ej: icono de cámara) */
+.ui-avatar__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0);
+  color: #fff;
+  opacity: 0;
+  transition:
+    opacity 160ms ease,
+    background 160ms ease;
+}
+.ui-avatar:hover .ui-avatar__overlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.18);
+}

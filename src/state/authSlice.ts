@@ -21,10 +21,44 @@ const STORAGE_KEY = "mf_auth";
 /** Normaliza los nombres de roles a una taxonomía única en el FE */
 function normalizeRoles(input?: string[]): string[] {
   if (!Array.isArray(input)) return [];
+
+  // Mapa de alias → canónico
   const map: Record<string, string> = {
-    "Administrador": "Admin",
+    // Admin / Manager
+    "administrador": "admin",
+    "admin": "admin",
+    "gerente": "manager",
+    "manager": "manager",
+
+    // Caja / Cajero
+    "cajero": "cashier",
+    "cashier": "cashier",
+
+    // Mesero
+    "mesero": "waiter",
+    "waiter": "waiter",
+
+    // Cocina
+    "cocina": "kitchen",
+    "kitchen": "kitchen",
+    "cook": "kitchen",
+
+    // Delivery
+    "repartidor": "delivery",
+    "delivery": "delivery",
   };
-  return Array.from(new Set(input.map(r => map[r] ?? r).filter(Boolean)));
+
+  const out = new Set<string>();
+  for (const raw of input) {
+    const key = String(raw ?? "").trim().toLowerCase();
+    if (!key) continue;
+    const canon = map[key];
+    if (canon) out.add(canon);
+  }
+
+  // si el backend no envía roles o ninguno matchea, no forzamos "guest" aquí
+  // dejamos [] y los selectores/guards decidirán el fallback si lo requieren
+  return Array.from(out);
 }
 
 function loadFromStorage(): Partial<AuthState> {
@@ -228,3 +262,8 @@ export const selectCanAccess = (path: string) => (s: { auth: AuthState }) => {
   const target = norm(path);
   return list.some(a => norm(a) === target);
 };
+
+export const selectRolesCanon = (s: { auth: AuthState }) => s.auth.roles; // ya canónicos
+
+export const selectRolesOrGuest = (s: { auth: AuthState }) =>
+  (s.auth.roles && s.auth.roles.length > 0) ? s.auth.roles : (["guest"]);

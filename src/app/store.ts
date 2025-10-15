@@ -5,8 +5,6 @@ import { emptySplitApi } from "../services/baseApi";
 import authReducer from "../state/authSlice";
 import authListener from "../state/auth.listeners";
 
-// ⬇️ Importa el archivo generado ÚNICO para que se ejecuten los injectEndpoints
-//    (side-effect import: no hace falta usar nada del export)
 import "../services/generated/api";
 
 export const store = configureStore({

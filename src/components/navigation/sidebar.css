@@ -1,0 +1,227 @@
+/* Sidebar — estilo alineado al UI Kit
+   - Flat, micro-sombra, bordes amplios
+   - Acentos terracota y badges secundarios
+*/
+
+:root {
+  --sidebar-w: 272px;
+  --sidebar-w-collapsed: 80px;
+  --topbar-h: 56px;
+}
+
+/* Contenedor */
+.mf-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: var(--sidebar-w);
+  background: var(--color-bg);
+  border-right: 1px solid var(--color-border);
+  transition: width 160ms ease;
+}
+.mf-sidebar.is-collapsed {
+  width: var(--sidebar-w-collapsed);
+}
+.mf-sidebar.is-compact .mf-nav__link {
+  padding: 8px 10px;
+}
+
+/* Brand */
+.mf-sidebar__brand {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  /* micro-sombra leve para separar del menú */
+  box-shadow: var(--shadow-sm);
+  z-index: 1;
+}
+
+.mf-brand__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  display: grid;
+  place-items: center;
+  background: rgba(214, 69, 69, 0.08); /* primario suave */
+  color: var(--color-primary);
+}
+.mf-brand__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.mf-brand__textwrap {
+  min-width: 0;
+}
+.mf-brand__title {
+  font-family: var(--font-h2, inherit);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--color-text);
+  text-align: center;
+}
+.mf-brand__subtitle {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.mf-iconbtn {
+  height: 36px;
+  min-width: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  cursor: pointer;
+}
+.mf-iconbtn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+.mf-sidebar__collapse {
+  justify-self: end;
+}
+.mf-chevron {
+  font-size: 18px;
+}
+
+/* Navegación */
+.mf-sidebar__nav {
+  padding: var(--space-2);
+  overflow: auto;
+}
+
+.mf-nav__section {
+  margin: var(--space-2) 0;
+}
+.mf-nav__section-label {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0 var(--space-2);
+  margin: 10px 10px;
+}
+
+.mf-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.mf-nav__link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 8px 24px 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px 12px;
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  text-decoration: none;
+  border: 1px solid transparent;
+  outline: none;
+  line-height: 1.2;
+  background: transparent;
+}
+.mf-nav__link:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.mf-nav__link:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(214, 69, 69, 0.25),
+    var(--shadow-sm);
+}
+
+/* Barra izquierda que se acentúa en activo */
+.mf-nav__rail {
+  width: 8px;
+  height: 20px;
+  border-radius: 4px;
+  background: transparent;
+  justify-self: center;
+}
+
+/* Activo */
+.mf-nav__link.is-active {
+  background: rgba(214, 69, 69, 0.08);
+  border-color: rgba(214, 69, 69, 0.22);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+.mf-nav__link.is-active .mf-nav__rail {
+  background: var(--color-primary);
+}
+
+/* Icono (igual patrón que Button) */
+.mf-nav__icon {
+  width: var(--icon-md, 20px);
+  height: var(--icon-md, 20px);
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: currentColor;
+}
+
+/* Label + Badge */
+.mf-nav__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mf-nav__badge {
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-secondary);
+  color: #3b2d06; /* contraste cálido para secundario */
+  box-shadow: var(--shadow-sm);
+}
+
+/* Footer */
+.mf-sidebar__footer {
+  padding: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Colapsado: centrado por ícono, ocultar textos/badges */
+.mf-sidebar.is-collapsed .mf-nav__link {
+  grid-template-columns: 8px 24px;
+  justify-content: center;
+  padding: 12px 8px;
+}
+.mf-sidebar.is-collapsed .mf-nav__label,
+.mf-sidebar.is-collapsed .mf-nav__badge,
+.mf-sidebar.is-collapsed .mf-brand__textwrap {
+  display: none;
+}
+
+/* Scrollbar sutil (opcional) */
+.mf-sidebar__nav::-webkit-scrollbar {
+  width: 8px;
+}
+.mf-sidebar__nav::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+}
+
+/* Responsive: forzar colapsado en pantallas chicas */
+@media (max-width: 920px) {
+  .mf-sidebar {
+    width: var(--sidebar-w-collapsed);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .mf-sidebar {
+    transition: none;
+  }
+}
