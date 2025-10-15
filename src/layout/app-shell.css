@@ -1,0 +1,61 @@
+/* App Shell — estructura general usando tus tokens */
+
+:root {
+  --sidebar-w: 272px;
+  --sidebar-w-collapsed: 80px;
+  --topbar-h: 56px;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+}
+
+.app-shell.is-collapsed {
+  grid-template-columns: var(--sidebar-w-collapsed) 1fr;
+}
+
+.app-shell__side {
+  min-height: 100%;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.app-shell__main {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
+/* Topbar (placeholder hasta que creemos el componente real) */
+.app-shell__topbar {
+  height: var(--topbar-h);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.app-shell__topbar-placeholder {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Contenido principal */
+.app-shell__content {
+  padding: var(--space-6);
+  min-width: 0;
+}
+
+/* Responsive: fuerza colapsado en pantallas chicas */
+@media (max-width: 920px) {
+  .app-shell {
+    grid-template-columns: var(--sidebar-w-collapsed) 1fr;
+  }
+}

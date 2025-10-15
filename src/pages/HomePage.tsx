@@ -86,9 +86,9 @@ export default function HomePage() {
           size="sm"
         />
         <div style={{ display: "flex", gap: 12 }}>
-          <Button onClick={onSave}>Guardar cambios</Button>
-          <Button variant="secondary">Vista previa</Button>
-          <Button variant="link">Más opciones</Button>
+          <Button variant="primary" size="lg">primary</Button>
+          <Button variant="secondary" size="md">secondary</Button>
+          <Button variant="ghost" size="sm">ghost</Button>
         </div>
 
         <Select

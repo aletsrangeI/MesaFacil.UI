@@ -1,8 +1,7 @@
-import { Button } from "./components/ui/button";
-import HomePage from "./pages/HomePage";
+import RegistroUsuario from "./pages/auth/RegistroUsuario";
 
 export default function App() {
   return (
-    <HomePage />
+    <RegistroUsuario />
   );
 }
