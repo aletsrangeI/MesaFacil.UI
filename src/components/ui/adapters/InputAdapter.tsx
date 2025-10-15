@@ -3,37 +3,6 @@ import type { FieldComponents, FieldProps } from "../../../forms/FieldRenderer";
 import Icon from "../icons/Icon";
 import type { ApiFormField } from "../../../forms/types";
 
-/**
- * Regla: no pasamos `label` ni `errorText` al <Input/> para
- * evitar duplicados, porque el FormGenerator ya los pinta
- * con FieldWrapper (label) y ErrorText (mensaje).
- *
- * Si más adelante prefieres que el <Input/> muestre SU
- * propio label/errorText internos, te paso una variante opcional.
- *
- *
- */
-
-function buildPrefix(field?: ApiFormField) {
-  if (!field) return undefined;
-  if (field.prefixIconName) return <Icon name={field.prefixIconName as any} />;
-  if (field.prefixText) return <span aria-hidden>{field.prefixText}</span>;
-  return undefined;
-}
-
-function buildSuffix(field?: ApiFormField) {
-  if (!field) return undefined;
-  if (field.suffixIconName) return <Icon name={field.suffixIconName as any} />;
-  if (field.suffixText) return <span aria-hidden>{field.suffixText}</span>;
-  return undefined;
-}
-
-function buildLeftIcon(field?: ApiFormField) {
-  return field?.leftIconName ? (
-    <Icon name={field.leftIconName as any} />
-  ) : undefined;
-}
-
 // Text
 const TextInputAdapter: FieldComponents["TextInput"] = (
   p: FieldProps & { __field?: ApiFormField }

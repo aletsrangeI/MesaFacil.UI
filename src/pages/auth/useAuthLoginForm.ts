@@ -11,7 +11,6 @@ import type {
   ValidationType,
   SelectOptionApi,
 } from "../../forms/types";
-import { useDispatch } from "react-redux";
 import { useAppDispatch } from "../../app/hooks";
 import { setAuthResponse } from "../../state/authSlice";
 
