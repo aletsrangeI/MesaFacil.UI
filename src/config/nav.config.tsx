@@ -42,7 +42,6 @@ export type BadgeContext = {
   [k: string]: unknown;
 };
 
-/** === Definición base (fuente de verdad) — sin filtrado === */
 export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
   {
     key: "operacion",
@@ -109,313 +108,17 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
     ],
   },
   {
-    key: "cobro",
-    label: "Cobro",
-    sortOrder: 20,
+    key: "admin",
+    label: "Administrador",
+    sortOrder: 999,
     items: [
-      {
-        key: "cuentas",
-        label: "Cuentas",
-        path: "/cobro/cuentas",
-        icon: <Icon name="Receipt" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager", "cashier"],
-      },
-      {
-        key: "pagos",
-        label: "Pagos",
-        path: "/cobro/pagos",
-        icon: <Icon name="CreditCard" />,
-        sortOrder: 20,
-        allowedRoles: ["admin", "manager", "cashier"],
-      },
-      {
-        key: "desc",
-        label: "Descuentos",
-        path: "/cobro/descuentos",
-        icon: <Icon name="BadgePercent" />,
-        sortOrder: 30,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "caja",
-    label: "Caja",
-    sortOrder: 30,
-    items: [
-      {
-        key: "turnos",
-        label: "Turnos",
-        path: "/caja/turnos",
-        icon: <Icon name="CalendarClock" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager", "cashier"],
-      },
-      {
-        key: "movimientos",
-        label: "Movimientos",
-        path: "/caja/movimientos",
-        icon: <Icon name="ArrowUpDown" />,
-        sortOrder: 20,
-        allowedRoles: ["admin", "manager", "cashier"],
-      },
-      {
-        key: "cortes",
-        label: "Cortes de Caja",
-        path: "/caja/cortes",
-        icon: <Icon name="FileSpreadsheet" />,
-        sortOrder: 30,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "menu",
-    label: "Menú",
-    sortOrder: 40,
-    items: [
-      {
-        key: "menues",
-        label: "Menús",
-        path: "/menu/menues",
-        icon: <Icon name="ListChecks" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "categorias",
-        label: "Categorías",
-        path: "/menu/categorias",
-        icon: <Icon name="Folders" />,
-        sortOrder: 20,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "productos",
-        label: "Productos",
-        path: "/menu/productos",
-        icon: <Icon name="Salad" />,
-        sortOrder: 30,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "variantes",
-        label: "Variantes",
-        path: "/menu/variantes",
-        icon: <Icon name="Rows2" />,
-        sortOrder: 40,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "precios",
-        label: "Precios",
-        path: "/menu/precios",
-        icon: <Icon name="CircleDollarSign" />,
-        sortOrder: 50,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "mods",
-        label: "Modificadores",
-        path: "/menu/modificadores",
-        icon: <Icon name="SlidersHorizontal" />,
-        sortOrder: 60,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "clientes",
-    label: "Clientes",
-    sortOrder: 50,
-    items: [
-      {
-        key: "clientes",
-        label: "Clientes",
-        path: "/clientes",
-        icon: <Icon name="BookUser" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager", "cashier", "waiter"],
-      },
-    ],
-  },
-  {
-    key: "reportes",
-    label: "Reportes",
-    sortOrder: 60,
-    items: [
-      {
-        key: "ventas",
-        label: "Ventas",
-        path: "/reportes/ventas",
-        icon: <Icon name="BarChart3" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "productos",
-        label: "Productos",
-        path: "/reportes/productos",
-        icon: <Icon name="PieChart" />,
-        sortOrder: 20,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "pedidos",
-        label: "Pedidos",
-        path: "/reportes/pedidos",
-        icon: <Icon name="LineChart" />,
-        sortOrder: 30,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "caja",
-        label: "Caja",
-        path: "/reportes/caja",
-        icon: <Icon name="Table2" />,
-        sortOrder: 40,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "kds",
-        label: "KDS",
-        path: "/reportes/kds",
-        icon: <Icon name="Timer" />,
-        sortOrder: 50,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "gestion",
-    label: "Gestión",
-    sortOrder: 70,
-    items: [
-      {
-        key: "empresa",
-        label: "Empresa",
-        path: "/gestion/empresa",
-        icon: <Icon name="Landmark" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "sucursales",
-        label: "Sucursales",
-        path: "/gestion/sucursales",
-        icon: <Icon name="Store" />,
-        sortOrder: 20,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "areas",
-        label: "Áreas",
-        path: "/gestion/areas",
-        icon: <Icon name="LayoutList" />,
-        sortOrder: 30,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "mesas",
-        label: "Mesas",
-        path: "/gestion/mesas",
-        icon: <Icon name="Grid" />,
-        sortOrder: 40,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "seguridad",
-    label: "Usuarios y Seguridad",
-    sortOrder: 80,
-    items: [
-      {
-        key: "usuarios",
-        label: "Usuarios",
-        path: "/seguridad/usuarios",
-        icon: <Icon name="Users" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager"],
-      },
       {
         key: "roles",
-        label: "Roles y Permisos",
-        path: "/seguridad/roles",
-        icon: <Icon name="Shield" />,
-        sortOrder: 20,
-        allowedRoles: ["admin"],
-      },
-      {
-        key: "credenciales",
-        label: "Credenciales",
-        path: "/seguridad/credenciales",
-        icon: <Icon name="IdCard" />,
-        sortOrder: 30,
-        allowedRoles: ["admin"],
-      },
-      {
-        key: "turnos",
-        label: "Turnos",
-        path: "/seguridad/turnos",
-        icon: <Icon name="Clock4" />,
-        sortOrder: 40,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "catalogos",
-    label: "Catálogos",
-    sortOrder: 90,
-    items: [
-      {
-        key: "catalogos",
-        label: "Catálogos",
-        path: "/catalogos",
-        icon: <Icon name="BookOpen" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "config",
-    label: "Configuración",
-    sortOrder: 100,
-    items: [
-      {
-        key: "apariencia",
-        label: "Apariencia",
-        path: "/config/apariencia",
-        icon: <Icon name="Paintbrush" />,
+        label: "Roles",
+        path: "/admin/roles",
+        icon: <Icon name="UserStar" />,
         sortOrder: 10,
         allowedRoles: ["admin"],
-      },
-      {
-        key: "integraciones",
-        label: "Integraciones",
-        path: "/config/integraciones",
-        icon: <Icon name="PlugZap" />,
-        sortOrder: 20,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "sistema",
-        label: "Sistema",
-        path: "/config/sistema",
-        icon: <Icon name="ServerCog" />,
-        sortOrder: 30,
-        allowedRoles: ["admin"],
-      },
-      {
-        key: "auditoria",
-        label: "Auditoría",
-        path: "/config/auditoria",
-        icon: <Icon name="ScrollText" />,
-        sortOrder: 40,
-        allowedRoles: ["admin", "manager"],
       },
     ],
   },
@@ -451,17 +154,24 @@ export function filterByRoles(
     .filter((sec) => sec.items.length > 0);
 }
 
+function norm(p: string) {
+  const lower = String(p || "").toLowerCase();
+  // quita slashes finales salvo la raíz
+  return lower !== "/" ? lower.replace(/\/+$/, "") : "/";
+}
+
 /** Filtra por session.accesos (lista de paths permitidos) */
-export function filterByAccesos(
+function filterByAccesos(
   sections: NavSectionConfig[],
   accesos?: string[] | null
 ): NavSectionConfig[] {
   if (!accesos || accesos.length === 0) return sections;
-  const acc = new Set(accesos.map((p) => p.toLowerCase()));
+
+  const acc = new Set((accesos ?? []).map(norm));
   return sections
     .map((sec) => ({
       ...sec,
-      items: sec.items.filter((it) => acc.has(it.path.toLowerCase())),
+      items: sec.items.filter((it) => acc.has(norm(it.path))),
     }))
     .filter((sec) => sec.items.length > 0);
 }

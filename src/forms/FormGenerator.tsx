@@ -12,10 +12,8 @@ export interface FormGeneratorProps {
   components?: Partial<FieldComponents>;
   initialValuesOverride?: Record<string, any>;
   submitLabel?: string;
-
-  // NUEVO:
   formId?: string; // id para <Form>
-  showDefaultSubmit?: boolean; // ocultar/mostrar botón interno
+  showDefaultSubmit?: boolean;
 }
 
 export interface WithFieldMeta {
@@ -29,7 +27,7 @@ export function FormGenerator({
   initialValuesOverride,
   submitLabel = "Guardar",
   formId,
-  showDefaultSubmit = true, // por defecto igual que antes
+  showDefaultSubmit = true,
 }: FormGeneratorProps) {
   const all = normalizeFields(fields);
   const initial = {
@@ -37,7 +35,6 @@ export function FormGenerator({
     ...(initialValuesOverride ?? {}),
   };
   const validationSchema = buildYupSchema(all);
-
   const Cmp: FieldComponents = {
     ...DefaultFieldComponents,
     ...(components ?? {}),
@@ -77,9 +74,10 @@ function DynamicField({
   field: ApiFormField;
   Cmp: FieldComponents;
 }) {
-  const [formikField, meta] = useField<string>(field.name);
+  // Para inputs tipo texto/select/fecha mantenemos string
+  const [formikField, meta, helpers] = useField<string>(field.name);
   const hasError = meta.touched && !!meta.error;
-  const errorId = hasError ? `${field.name}-error` : undefined;
+  const errorId = hasError ? `${field.name}-error` : undefined; // ✅ corregido
 
   const commonProps = {
     name: field.name,
@@ -89,36 +87,60 @@ function DynamicField({
     onBlur: formikField.onBlur,
     "aria-invalid": hasError || undefined,
     "aria-describedby": errorId,
-
-    // Si ya añadiste errorText en FieldProps, pásalo:
     errorText: hasError ? String(meta.error) : undefined,
   } as const;
 
   let control: React.ReactNode = null;
+
   switch (field.type) {
-    case "text":
-      control = <Cmp.TextInput {...commonProps} __field={field} />; // 👈
-      break;
-    case "password":
-      control = <Cmp.PasswordInput {...commonProps} __field={field} />; // 👈
-      break;
-    case "date":
-      control = <Cmp.DateInput {...commonProps} __field={field} />; // 👈
-      break;
-    case "select":
-      control = (
-        <Cmp.SelectInput
-          {...commonProps}
-          options={(field.options ?? []).map((o) => ({
-            value: String(o.id),
-            label: o.nombre,
-          }))}
-          __field={field} // ya lo tienes
-        />
+    case "checkbox": {
+      const isChecked =
+        typeof formikField.value === "boolean"
+          ? formikField.value
+          : String(
+              formikField.value ?? field.value ?? "false"
+            ).toLowerCase() === "true";
+
+      // 👇 FieldWrapper SIN label (así evitas texto duplicado)
+      return (
+        <Cmp.FieldWrapper name={field.name} label={undefined} variant="switch">
+          <Cmp.CheckboxInput
+            name={field.name}
+            checked={isChecked}
+            onChange={(e) => helpers.setValue(String(e.target.checked))}
+            onBlur={formikField.onBlur}
+            label={field.label} // <- SOLO aquí va la etiqueta
+            aria-invalid={hasError || undefined}
+            aria-describedby={errorId}
+          />
+          {hasError && <Cmp.ErrorText id={errorId}>{meta.error}</Cmp.ErrorText>}
+        </Cmp.FieldWrapper>
       );
+    }
+
+    case "select": {
+      // Soporta dos formatos comunes: [{id,nombre}] o [{label,value}]
+      const options =
+        (field.options ?? []).map((o: any) => ({
+          value: String(o.value ?? o.id ?? ""),
+          label: String(o.label ?? o.nombre ?? o.value ?? o.id ?? ""),
+        })) ?? [];
+
+      control = <Cmp.SelectInput {...commonProps} options={options} />;
       break;
+    }
+
+    case "password":
+      control = <Cmp.PasswordInput {...commonProps} __field={field} />;
+      break;
+
+    case "date":
+      control = <Cmp.DateInput {...commonProps} __field={field} />;
+      break;
+
+    case "text":
     default:
-      control = <Cmp.TextInput {...commonProps} __field={field} />; // 👈
+      control = <Cmp.TextInput {...commonProps} __field={field} />;
       break;
   }
 
