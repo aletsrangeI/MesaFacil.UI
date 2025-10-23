@@ -96,13 +96,12 @@ function clearStorage() {
     // Ignorar
   }
 }
-
 function isExpired(expiresAt?: string) {
-  if (!expiresAt) return false; // si no hay expiración, no expira en FE
+  if (!expiresAt) return false;                    // si tu backend aún no manda expiración, no forzamos logout
   const exp = Date.parse(expiresAt);
-  if (Number.isNaN(exp)) return false;
-  // Pequeño skew de 10s para evitar carreras
-  return Date.now() + 10_000 >= exp;
+  if (Number.isNaN(exp)) return false;             // valor inválido, tratamos como no expirado
+  const SKEW_MS = 10_000;                          // 10s de margen
+  return Date.now() + SKEW_MS >= exp;
 }
 
 const initialState: AuthState = {
@@ -267,3 +266,6 @@ export const selectRolesCanon = (s: { auth: AuthState }) => s.auth.roles; // ya 
 
 export const selectRolesOrGuest = (s: { auth: AuthState }) =>
   (s.auth.roles && s.auth.roles.length > 0) ? s.auth.roles : (["guest"]);
+
+export const selectIsExpired = (s: { auth: AuthState }) =>
+  isExpired(s.auth.expiresAt);

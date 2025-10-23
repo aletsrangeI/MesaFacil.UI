@@ -30,24 +30,26 @@
 
 /* Brand */
 .mf-sidebar__brand {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* antes: display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-3); padding: var(--space-4); */
+  display: flex; /* más simple para alinear vertical */
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-4);
-  /* micro-sombra leve para separar del menú */
+  height: var(--topbar-h, 56px); /* MISMA altura que Topbar */
+  padding: 0 var(--space-4); /* sin padding vertical para no descentrar */
   box-shadow: var(--shadow-sm);
   z-index: 1;
+  cursor: pointer;
 }
 
 .mf-brand__logo {
-  width: 40px;
-  height: 40px;
+  width: 32px; /* 32 como el del Topbar */
+  height: 32px;
   border-radius: var(--radius-lg);
   display: grid;
   place-items: center;
-  background: rgba(214, 69, 69, 0.08); /* primario suave */
+  background: rgba(214, 69, 69, 0.08);
   color: var(--color-primary);
+  margin: 10px;
 }
 .mf-brand__icon {
   font-size: 18px;
@@ -58,16 +60,18 @@
   min-width: 0;
 }
 .mf-brand__title {
-  font-family: var(--font-h2, inherit);
   font-weight: 700;
   letter-spacing: 0.2px;
   color: var(--color-text);
-  text-align: center;
+  line-height: 1.1;
+  /* quitar centrar para que no “salte” hacia arriba */
+  text-align: left; /* antes: center */
+  font-size: 16px; /* consistente con topbar */
 }
 .mf-brand__subtitle {
   font-size: 12px;
   color: var(--color-text-muted);
-  text-align: center;
+  text-align: left;
 }
 
 .mf-iconbtn {
@@ -84,7 +88,8 @@
   background: rgba(0, 0, 0, 0.03);
 }
 .mf-sidebar__collapse {
-  justify-self: end;
+  margin-left: auto; /* con flex en brand empuja el botón al extremo */
+  margin-right: 10px;
 }
 .mf-chevron {
   font-size: 18px;
@@ -196,10 +201,11 @@
   grid-template-columns: 8px 24px;
   justify-content: center;
   padding: 12px 8px;
+  /* debug */
 }
 .mf-sidebar.is-collapsed .mf-nav__label,
 .mf-sidebar.is-collapsed .mf-nav__badge,
-.mf-sidebar.is-collapsed .mf-brand__textwrap {
+.mf-sidebar.is-collapsed .mf-brand__textwrap, .mf-iconbtn {
   display: none;
 }
 
@@ -224,4 +230,7 @@
   .mf-sidebar {
     transition: none;
   }
+}
+.mf-sidebar.is-collapsed .mf-sidebar__brand {
+  justify-content: center;
 }

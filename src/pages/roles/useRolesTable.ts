@@ -1,0 +1,328 @@
+import { useCallback, useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { mesaFacilFields } from "../../components/ui/adapters";
+import {
+  useFormFieldGetFormFieldByFormCatIdQuery,
+  useRolGetPagedQuery,
+  useRolInsertMutation,
+  useRolUpdateMutation,
+  useRolDeleteMutation,
+  type RolGetPagedApiResponse,
+} from "../../services/generated/api";
+import type { ApiFormField } from "../../forms/types";
+import { useToast } from "../../components/ui/toast/";
+
+/** Fila de la tabla de roles (ajusta al contrato real de tu API) */
+export type RolRow = {
+  id: number;
+  nombre: string;
+  isSystem: boolean;
+  isAssignable: boolean;
+};
+
+type UseRolesTableOptions = {
+  apiPageStartsAt?: 0 | 1;
+  onEditRequested?: (row: RolRow) => void;
+  onCreateRequested?: () => void;
+};
+
+// Utilidad para coercer boolean
+const toBool = (v: unknown): boolean =>
+  typeof v === "boolean" ? v : String(v ?? "false").toLowerCase() === "true";
+
+export function useRolesTable(opts?: UseRolesTableOptions) {
+  const { addToast } = useToast();
+  const apiStartsAt = opts?.apiPageStartsAt ?? 1;
+  // ---------------------------
+  // Estado de tabla (solo page/pageSize; el resto lo da la query)
+  // ---------------------------
+  const [page, setPage] = useState<number>(apiStartsAt);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  // 🔗 Query real de paginación
+  const {
+    data: paged,
+    isLoading: isPageLoading,
+    isFetching: isPageFetching,
+    refetch: refetchPage,
+    error: pageError,
+  } = useRolGetPagedQuery({ page, pageSize });
+
+  const rows: RolRow[] = useMemo(() => {
+    const list = (paged as RolGetPagedApiResponse | undefined)?.data ?? [];
+    return list.map((r: any) => ({
+      id: r.id,
+      nombre: r.nombre,
+      isSystem: Boolean(r.isSystem),
+      isAssignable: Boolean(r.isAssignable),
+    }));
+  }, [paged]);
+
+  const totalCount =
+    (paged as RolGetPagedApiResponse | undefined)?.totalCount ?? 0;
+
+  const error = pageError
+    ? "status" in (pageError as any) && (pageError as any).status
+      ? "Error al cargar roles"
+      : String(pageError)
+    : null;
+
+  const isLoading = isPageLoading && !paged;
+  const isFetching = isPageFetching;
+
+  const refetch = useCallback(() => {
+    refetchPage();
+  }, [refetchPage]);
+  // ---------------------------
+  // Columnas y acciones de fila
+  // ---------------------------
+  const columns: ColumnDef<RolRow, any>[] = useMemo(
+    () => [
+      { accessorKey: "id", header: "ID" },
+      { accessorKey: "nombre", header: "Nombre" },
+      {
+        accessorKey: "isSystem",
+        header: "Sistema",
+        cell: ({ row }) => (row.original.isSystem ? "Sí" : "No"),
+      },
+      {
+        accessorKey: "isAssignable",
+        header: "Asignable",
+        cell: ({ row }) => (row.original.isAssignable ? "Sí" : "No"),
+      },
+    ],
+    []
+  );
+  const openEdit = useCallback((row: RolRow) => {
+    setEditing(row);
+    setEditSaveError(null);
+    setIsEditOpen(true);
+  }, []);
+
+  const closeEdit = useCallback(() => {
+    setIsEditOpen(false);
+    setEditing(null);
+    setEditSaveError(null);
+  }, []);
+
+  const [deleteRol] = useRolDeleteMutation();
+
+  const rowActionFor = useCallback(
+    (row: RolRow) => {
+      const canDelete = !row.isSystem;
+
+      const onEdit = () => openEdit(row);
+
+      const onDelete = async () => {
+        if (!canDelete) return;
+        try {
+          await deleteRol({ id: row.id }).unwrap();
+          addToast({
+            message: "Rol eliminado correctamente.",
+            variant: "success",
+          });
+          closeEdit(); // por si venías del modal
+          refetch();
+        } catch (e: any) {
+          const msg =
+            e?.data?.message ??
+            e?.error ??
+            e?.message ??
+            "No fue posible eliminar el rol.";
+          addToast({ message: msg, variant: "error", duration: 4000 });
+        }
+      };
+
+      return { canDelete, onEdit, onDelete };
+    },
+    [openEdit, deleteRol, refetch, addToast, closeEdit]
+  );
+
+  // ---------------------------
+  // Modal de creación (form dinámico)
+  // ---------------------------
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const formId = "crear-rol-form";
+
+  const openCreate = useCallback(() => {
+    setIsCreateOpen(true);
+    setSaveError(null);
+    opts?.onCreateRequested?.();
+  }, [opts]);
+
+  const closeCreate = useCallback(() => {
+    setIsCreateOpen(false);
+    setSaveError(null);
+  }, []);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editing, setEditing] = useState<RolRow | null>(null);
+  const [editSaveError, setEditSaveError] = useState<string | null>(null);
+  const editFormId = "editar-rol-form";
+
+  const {
+    data: editFormResp,
+    isFetching: isFetchingEditForm,
+    isError: isEditFormError,
+  } = useFormFieldGetFormFieldByFormCatIdQuery(
+    { code: "ROL" },
+    { skip: !isEditOpen }
+  );
+
+  const editFields: ApiFormField[] = useMemo(() => {
+    if (!Array.isArray(editFormResp?.data)) return [];
+    return [...(editFormResp.data as ApiFormField[])].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0)
+    );
+  }, [editFormResp]);
+
+  // valores iniciales a partir del row seleccionado
+  const editInitialValues = useMemo(
+    () =>
+      editing
+        ? {
+            nombre: editing.nombre,
+            isSystem: editing.isSystem,
+            isAssignable: editing.isAssignable,
+          }
+        : {},
+    [editing]
+  );
+
+  const [updateRol, updateState] = useRolUpdateMutation();
+  const isUpdating = updateState.isLoading;
+
+  const handleEditSubmit = useCallback(
+    async (values: Record<string, unknown>) => {
+      if (!editing) return;
+      setEditSaveError(null);
+
+      const dto = {
+        nombre: String(values.nombre ?? "").trim(),
+        isSystem: toBool(values.isSystem),
+        isAssignable: toBool(values.isAssignable),
+      };
+
+      try {
+        await updateRol({ id: editing.id, rolDto: dto }).unwrap();
+        closeEdit();
+        refetch();
+        addToast({
+          message: "Rol actualizado correctamente.",
+          variant: "success",
+        });
+      } catch (e: any) {
+        const msg =
+          e?.data?.message ??
+          e?.error ??
+          e?.message ??
+          "No fue posible actualizar el rol.";
+        setEditSaveError(msg);
+        addToast({ message: msg, variant: "error", duration: 4000 });
+      }
+    },
+    [editing, updateRol, closeEdit, refetch, addToast]
+  );
+
+  // Metadata del formulario directo desde backend, solo ordenado por 'order'
+  // Ajusta "ROL_CREATE" al code real si usas otro.
+  const {
+    data: createFormResp,
+    isFetching: isFetchingCreateForm,
+    isError: isCreateFormError,
+  } = useFormFieldGetFormFieldByFormCatIdQuery(
+    { code: "ROL" },
+    { skip: !isCreateOpen }
+  );
+
+  const createFields: ApiFormField[] = useMemo(() => {
+    if (!Array.isArray(createFormResp?.data)) return [];
+    return [...(createFormResp!.data as ApiFormField[])].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0)
+    );
+  }, [createFormResp]);
+
+  const [createRol, createState] = useRolInsertMutation(); // <- RTK Query mutation
+  const isSaving = createState.isLoading;
+
+  const handleCreateSubmit = useCallback(
+    async (values: Record<string, unknown>) => {
+      setSaveError(null);
+
+      const payload = {
+        nombre: String(values.nombre ?? "").trim(),
+        isSystem: toBool(values.isSystem),
+        isAssignable: toBool(values.isAssignable),
+      };
+
+      try {
+        await createRol({ rolDto: payload }).unwrap();
+        closeCreate();
+        refetch();
+        addToast({ message: "Rol creado correctamente.", variant: "success" });
+      } catch (e: any) {
+        const msg =
+          e?.data?.message ??
+          e?.error ??
+          e?.message ??
+          "No fue posible guardar el rol.";
+        setSaveError(msg);
+        addToast({ message: msg, variant: "error", duration: 4000 });
+      }
+    },
+    [createRol, closeCreate, refetch, addToast]
+  );
+
+  return {
+    // Tabla
+    table: {
+      columns,
+      rows,
+      totalCount,
+      page,
+      pageSize,
+      isLoading,
+      isFetching,
+      error,
+      setPage,
+      setPageSize,
+      refetch,
+      rowActionFor,
+    },
+
+    // Modal crear
+    createModal: {
+      open: isCreateOpen,
+      formId,
+      fields: createFields,
+      isFetching: isFetchingCreateForm,
+      isError: isCreateFormError,
+      isSaving,
+      saveError,
+      openCreate,
+      closeCreate,
+      handleCreateSubmit,
+      components: mesaFacilFields,
+      title: "Nuevo rol",
+      description: "Completa los campos para registrar un rol.",
+    },
+
+    editModal: {
+      open: isEditOpen,
+      formId: editFormId,
+      fields: editFields,
+      initialValues: editInitialValues,
+      isFetching: isFetchingEditForm,
+      isError: isEditFormError,
+      isSaving: isUpdating,
+      saveError: editSaveError,
+      openEdit,
+      closeEdit,
+      handleEditSubmit,
+      components: mesaFacilFields,
+      title: "Editar rol",
+      description: "Modifica los campos y guarda los cambios.",
+    },
+  };
+}

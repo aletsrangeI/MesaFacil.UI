@@ -91,7 +91,7 @@ export function useAuthLoginForm() {
     isFetching: isFetchingFields,
     isError: isFieldsError,
     error: fieldsError,
-  } = useFormFieldGetFormFieldByFormCatIdQuery({ id: 0 });
+  } = useFormFieldGetFormFieldByFormCatIdQuery({ code: "LOGIN" });
 
   const [authLogin, { isLoading: isSubmitting, error }] =
     useAuthLoginMutation();
@@ -170,7 +170,7 @@ export function useAuthLoginForm() {
           setAuthResponse({
             accessToken: token.accessToken,
             refreshToken: token.refreshToken ?? undefined,
-            expiresAt: undefined, // tu back aún no envía ExpiresAtUtc
+            expiresAt: token.expiresAtUtc ?? undefined,
             usuarioId: session.usuarioId,
             idEmpresa: session.idEmpresa,
             correo: session.correo,

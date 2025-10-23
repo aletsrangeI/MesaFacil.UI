@@ -5,7 +5,7 @@ import { Sidebar, type SidebarSection } from "./Sidebar";
 import "./sidebar.css";
 
 // Usa tu wrapper de lucide
-import Icon from "../ui/icons/Icon";
+import Icon from "../../ui/icons/Icon";
 import { useState } from "react";
 
 const SECTIONS: SidebarSection[] = [

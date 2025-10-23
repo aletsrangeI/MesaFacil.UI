@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Select } from "./Select";
 import Icon from "../../ui/icons/Icon";
+import { useArgs } from "storybook/internal/preview-api";
 
 const meta: Meta<typeof Select> = {
   title: "UI/Select",
@@ -47,6 +48,27 @@ export const Default: Story = {
   ),
 };
 
+export const Controlled: Story = {
+  args: { value: "tacos", helperText: "Story controlado" },
+  render: (args) => {
+    const [{ value }, updateArgs] = useArgs();
+    return (
+      <Select
+        {...args}
+        value={value}
+        onChange={(e) => {
+          const v = e.target.value;
+          updateArgs({ value: v }); // Actualiza el arg
+          args.onChange?.(e); // Mantén la acción para el panel de actions
+        }}
+        leftIconName="Utensils"
+      >
+        <Options />
+      </Select>
+    );
+  },
+};
+
 export const ConIconManual: Story = {
   render: (args) => (
     <Select
@@ -69,20 +91,20 @@ export const Error: Story = {
 };
 
 export const Sizes: Story = {
-  render: (args) => (
+  args: { helperText: "" },
+  render: () => (
     <div style={{ display: "grid", gap: 12 }}>
-      <Select {...args} size="sm" leftIconName="Utensils">
+      <Select size="sm" leftIconName="Utensils" defaultValue="tacos">
         <Options />
       </Select>
-      <Select {...args} size="md" leftIconName="Utensils">
+      <Select size="md" leftIconName="Utensils" defaultValue="burgers">
         <Options />
       </Select>
-      <Select {...args} size="lg" leftIconName="Utensils">
+      <Select size="lg" leftIconName="Utensils" defaultValue="bebidas">
         <Options />
       </Select>
     </div>
   ),
-  args: { helperText: "" },
 };
 
 export const Disabled: Story = {

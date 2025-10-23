@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import Icon from "../ui/icons/Icon";
+import Icon from "../../ui/icons/Icon";
 
 export type SidebarItem = {
   key: string;
@@ -58,7 +58,7 @@ export function Sidebar({
       ].join(" ")}
       aria-label="Menú principal"
     >
-      <div className="mf-sidebar__brand">
+      <div onClick={onToggle} className="mf-sidebar__brand">
         <div className="mf-brand__logo">
           {brand?.icon ?? (
             <span className="mf-brand__icon" aria-hidden>

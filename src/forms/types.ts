@@ -7,6 +7,8 @@ export type ValidationType =
   | "date"
   | "minLength";
 
+export type FieldType = "text" | "password" | "select" | "date" | "checkbox";
+
 export interface ValidationRule {
   type: ValidationType;
   value: number;
@@ -20,7 +22,7 @@ export interface SelectOptionApi {
 export type VisualSize = "sm" | "md" | "lg";
 
 export interface ApiFormField {
-  type: "text" | "password" | "select" | "date";
+  type: FieldType;
   name: string;
   placeholder?: string;
   label?: string;

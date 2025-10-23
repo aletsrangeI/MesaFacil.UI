@@ -561,6 +561,10 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Auth"],
       }),
+      authMe: build.query<AuthMeApiResponse, AuthMeApiArg>({
+        query: () => ({ url: `/api/auth/me` }),
+        providesTags: ["Auth"],
+      }),
       cuentaInsert: build.mutation<CuentaInsertApiResponse, CuentaInsertApiArg>(
         {
           query: (queryArg) => ({
@@ -4029,7 +4033,7 @@ const injectedRtkApi = api
         FormFieldGetFormFieldByFormCatIdApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/formfield/GetFormFieldByFormCatId/${queryArg.id}`,
+          url: `/api/formfield/GetFormFieldByFormCatId/${queryArg.code}`,
         }),
         providesTags: ["FormField"],
       }),
@@ -4567,6 +4571,8 @@ export type AuthLoginApiResponse =
 export type AuthLoginApiArg = {
   loginRequest: LoginRequest;
 };
+export type AuthMeApiResponse = /** status 200 OK */ ResponseOfAuthMeDto;
+export type AuthMeApiArg = void;
 export type CuentaInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
 export type CuentaInsertApiArg = {
   cuentaDto: CuentaDto;
@@ -6241,7 +6247,7 @@ export type FormFieldCountAsyncApiArg = void;
 export type FormFieldGetFormFieldByFormCatIdApiResponse =
   /** status 200 OK */ ResponseOfIEnumerableOfFormFieldDto;
 export type FormFieldGetFormFieldByFormCatIdApiArg = {
-  id: number;
+  code: string;
 };
 export type FormFieldGetFormFieldByFormCatIdAsyncAsyncApiResponse =
   /** status 200 OK */ ResponseOfIEnumerableOfFormFieldDto;
@@ -6569,6 +6575,25 @@ export type LoginRequest = {
   password: string;
   empresaId?: number | null;
   sucursalId?: number | null;
+};
+export type AuthMeDto = {
+  usuarioId: number;
+  idEmpresa: number;
+  correo?: string | null;
+  nombre?: string | null;
+  sucursalId?: string | null;
+  turnoAbierto?: boolean;
+  roles: string[];
+  permissions: string[];
+  accesos: string[];
+  permsVersion?: string | null;
+  permissionsChanged?: boolean;
+} | null;
+export type ResponseOfAuthMeDto = {
+  data?: AuthMeDto;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
 };
 export type CuentaDto = {
   id?: number;
@@ -7831,6 +7856,8 @@ export const {
   useClienteCountAsyncQuery,
   useLazyClienteCountAsyncQuery,
   useAuthLoginMutation,
+  useAuthMeQuery,
+  useLazyAuthMeQuery,
   useCuentaInsertMutation,
   useCuentaInsertAsyncMutation,
   useCuentaUpdateMutation,

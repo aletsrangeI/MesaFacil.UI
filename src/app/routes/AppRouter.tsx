@@ -1,15 +1,17 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { PrivateRoute } from "./PrivateRoute";
-import { RoleGuard } from "./RoleGuard";
 import RegistroUsuario from "../../pages/auth/RegistroUsuario";
 import AppLayout from "../../layout/AppLayout";
+import { RolesPage } from "../../pages/roles";
 
 import {
-  selectRolesOrGuest, // devuelve roles canónicos o ["guest"]
-  selectAccesos, // rutas permitidas (o ["/"])
+  selectRolesOrGuest, // roles canónicos o ["guest"]
+  selectAccesos,      // rutas permitidas (o ["/"])
+  selectCanAccess,    // selector parametrizado por path
 } from "../../state/authSlice";
 
+/** Placeholder temporal para cada página */
 function Placeholder({ title }: { title: string }) {
   return (
     <main style={{ padding: 16 }}>
@@ -17,6 +19,18 @@ function Placeholder({ title }: { title: string }) {
       <p>Pendiente…</p>
     </main>
   );
+}
+
+/** Guard que valida acceso por path usando selectCanAccess */
+function RequireAccess({
+  path,
+  children,
+}: {
+  path: string;
+  children: React.ReactNode;
+}) {
+  const can = useSelector(selectCanAccess(path));
+  return can ? <>{children}</> : <Navigate to="/" replace />;
 }
 
 export default function AppRouter() {
@@ -33,266 +47,125 @@ export default function AppRouter() {
         element={
           <PrivateRoute>
             <AppLayout
-              roles={roles as any} // AppLayout construye el menú con nav.config
+              roles={roles as any}
               accesos={accesos}
-              badgesCtx={{ pedidosPendientes: 3 }} // ejemplo; conéctalo a Redux/Query cuando lo tengas
+              badgesCtx={{}}     // conéctalo a Redux/Query cuando tengas contadores
               showTopbar
             />
           </PrivateRoute>
         }
       >
-        {/* Dashboard (index) */}
-        <Route index element={<Placeholder title="Dashboard" />} />
+        {/* Importante: el index redirige a "/" (que está protegido por RequireAccess) */}
+        <Route index element={<Navigate to="/" replace />} />
 
-        {/* Operación */}
-        <Route path="/pedidos" element={<Placeholder title="Pedidos" />} />
-        <Route path="/mesas" element={<Placeholder title="Mesas" />} />
-        <Route path="/delivery" element={<Placeholder title="Delivery" />} />
-        <Route path="/cocina" element={<Placeholder title="Cocina KDS" />} />
+        {/* === Rutas registradas en backend (IsMenu = true) === */}
+        {/* 1) Dashboard → "/" */}
         <Route
-          path="/caja/rapida"
-          element={<Placeholder title="Caja Rápida" />}
-        />
-
-        {/* Cobro */}
-        <Route
-          path="/cobro/cuentas"
-          element={<Placeholder title="Cuentas" />}
-        />
-        <Route path="/cobro/pagos" element={<Placeholder title="Pagos" />} />
-        <Route
-          path="/cobro/descuentos"
+          path="/"
           element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Descuentos" />
-            </RoleGuard>
+            <RequireAccess path="/">
+              <Placeholder title="Dashboard" />
+            </RequireAccess>
           }
         />
 
-        {/* Caja */}
-        <Route path="/caja/turnos" element={<Placeholder title="Turnos" />} />
+        {/* 2) /admin/users (USERS_READ) */}
         <Route
-          path="/caja/movimientos"
-          element={<Placeholder title="Movimientos" />}
-        />
-        <Route
-          path="/caja/cortes"
+          path="/admin/users"
           element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Cortes de Caja" />
-            </RoleGuard>
-          }
-        />
-
-        {/* Menú */}
-        <Route
-          path="/menu/menues"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Menús" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/menu/categorias"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Categorías" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/menu/productos"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Productos" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/menu/variantes"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Variantes" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/menu/precios"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Precios" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/menu/modificadores"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Modificadores" />
-            </RoleGuard>
-          }
-        />
-
-        {/* Clientes */}
-        <Route
-          path="/clientes"
-          element={
-            <RoleGuard allowed={["admin", "manager", "cashier", "waiter"]}>
-              <Placeholder title="Clientes" />
-            </RoleGuard>
-          }
-        />
-
-        {/* Reportes */}
-        <Route
-          path="/reportes/ventas"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Reporte de Ventas" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/reportes/productos"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Reporte de Productos" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/reportes/pedidos"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Reporte de Pedidos" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/reportes/caja"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Reporte de Caja" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/reportes/kds"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Reporte KDS" />
-            </RoleGuard>
-          }
-        />
-
-        {/* Gestión */}
-        <Route
-          path="/gestion/empresa"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Empresa" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/gestion/sucursales"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Sucursales" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/gestion/areas"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Áreas" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/gestion/mesas"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Mesas (Gestión)" />
-            </RoleGuard>
-          }
-        />
-
-        {/* Seguridad */}
-        <Route
-          path="/seguridad/usuarios"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
+            <RequireAccess path="/admin/users">
               <Placeholder title="Usuarios" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/seguridad/roles"
-          element={
-            <RoleGuard allowed={["admin"]}>
-              <Placeholder title="Roles y Permisos" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/seguridad/credenciales"
-          element={
-            <RoleGuard allowed={["admin"]}>
-              <Placeholder title="Credenciales" />
-            </RoleGuard>
-          }
-        />
-        <Route
-          path="/seguridad/turnos"
-          element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Turnos (Seguridad)" />
-            </RoleGuard>
+            </RequireAccess>
           }
         />
 
-        {/* Catálogos / Config */}
+        {/* 4) /admin/roles (ROLES_READ) */}
         <Route
-          path="/catalogos"
+          path="/admin/roles"
           element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Catálogos" />
-            </RoleGuard>
+            <RequireAccess path="/admin/roles">
+              <RolesPage/>
+            </RequireAccess>
           }
         />
+
+        {/* 6) /admin/permissions (ROUTES_ADMIN) */}
         <Route
-          path="/config/apariencia"
+          path="/admin/permissions"
           element={
-            <RoleGuard allowed={["admin"]}>
-              <Placeholder title="Apariencia" />
-            </RoleGuard>
+            <RequireAccess path="/admin/permissions">
+              <Placeholder title="Permisos / Rutas" />
+            </RequireAccess>
           }
         />
+
+        {/* 7) /admin/org (ORG_ADMIN) */}
         <Route
-          path="/config/integraciones"
+          path="/admin/org"
           element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Integraciones" />
-            </RoleGuard>
+            <RequireAccess path="/admin/org">
+              <Placeholder title="Organización" />
+            </RequireAccess>
           }
         />
+
+        {/* 8) /admin/catalog (CATALOG_ADMIN) */}
         <Route
-          path="/config/sistema"
+          path="/admin/catalog"
           element={
-            <RoleGuard allowed={["admin"]}>
-              <Placeholder title="Sistema" />
-            </RoleGuard>
+            <RequireAccess path="/admin/catalog">
+              <Placeholder title="Catálogo" />
+            </RequireAccess>
           }
         />
+
+        {/* 9) /admin/forms (FORMS_ADMIN) */}
         <Route
-          path="/config/auditoria"
+          path="/admin/forms"
           element={
-            <RoleGuard allowed={["admin", "manager"]}>
-              <Placeholder title="Auditoría" />
-            </RoleGuard>
+            <RequireAccess path="/admin/forms">
+              <Placeholder title="Form Builder" />
+            </RequireAccess>
+          }
+        />
+
+        {/* 10) /admin/pricing (PRICING_ADMIN) */}
+        <Route
+          path="/admin/pricing"
+          element={
+            <RequireAccess path="/admin/pricing">
+              <Placeholder title="Precios y Promos" />
+            </RequireAccess>
+          }
+        />
+
+        {/* 11) /admin/inventory (INVENTORY_READ) */}
+        <Route
+          path="/admin/inventory"
+          element={
+            <RequireAccess path="/admin/inventory">
+              <Placeholder title="Inventario" />
+            </RequireAccess>
+          }
+        />
+
+        {/* 13) /admin/devices (DEVICES_ADMIN) */}
+        <Route
+          path="/admin/devices"
+          element={
+            <RequireAccess path="/admin/devices">
+              <Placeholder title="Dispositivos" />
+            </RequireAccess>
+          }
+        />
+
+        {/* 14) /admin/reports (REPORTS_VIEW) */}
+        <Route
+          path="/admin/reports"
+          element={
+            <RequireAccess path="/admin/reports">
+              <Placeholder title="Reportes" />
+            </RequireAccess>
           }
         />
       </Route>
