@@ -9,6 +9,7 @@ import { BrowserRouter } from "react-router-dom";
 import AppRouter from "./app/routes/AppRouter";
 import { useSessionTimers } from "./session/useSessionTimers";
 import { ToastProvider } from "./components/ui/toast";
+import { ConfirmProvider } from "./components/ui/toast/feedback";
 
 store.dispatch(hydrateFromStorage());
 store.dispatch(pruneIfExpired());
@@ -17,9 +18,11 @@ function SessionTimersGate() {
   useSessionTimers();
   return (
     <BrowserRouter>
-      <ToastProvider position="bottom-right" max={4}>
-        <AppRouter />
-      </ToastProvider>
+      <ConfirmProvider>
+        <ToastProvider position="bottom-right" max={4}>
+          <AppRouter />
+        </ToastProvider>
+      </ConfirmProvider>
     </BrowserRouter>
   );
 }

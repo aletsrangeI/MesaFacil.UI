@@ -2,7 +2,12 @@ import React from "react";
 import { cn } from "../../../lib/cn";
 import "./button.css";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "link";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "link"
+  | "confirm";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps

@@ -3,7 +3,7 @@
   --btn-fg: var(--color-text);
   --btn-bd: rgba(0, 0, 0, 0.1);
   --btn-pad-x: 14px;
-  --btn-gap: 8px;
+  --btn-gap: 5px;
 
   /* Alturas por tamaño */
   --btn-h-sm: 32px;
@@ -28,13 +28,19 @@
   line-height: 1;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: transform 0.02s ease, box-shadow 0.2s ease, background 0.2s ease,
-    color 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.02s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .ui-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06), 0 0 0 6px rgba(28, 100, 242, 0.25); /* anillo accesible */
+  box-shadow:
+    0 0 0 3px rgba(0, 0, 0, 0.06),
+    0 0 0 6px rgba(28, 100, 242, 0.25); /* anillo accesible */
 }
 
 .ui-btn:disabled {
@@ -88,6 +94,16 @@
   text-decoration: underline;
 }
 
+.ui-btn--confirm {
+  --btn-bg: #3c8d40;
+  --btn-fg: #fff;
+  --btn-bd: transparent;
+}
+
+.ui-btn--confirm:hover:not(:disabled) {
+  background: #2e6f33;
+}
+
 /* Sizes (solo tipografía + altura) */
 .ui-btn--sm {
   --btn-h: var(--btn-h-sm);
@@ -107,7 +123,7 @@
   display: inline-grid;
   place-items: center;
   width: 1.1em;
-  height: 1.1em;
+  height: 1.5em;
 }
 .ui-btn__icon--left {
   margin-right: calc(var(--btn-gap) - 2px);
@@ -151,6 +167,6 @@
 }
 
 .ui-btn--block {
-  display: flex;      /* sobrescribe inline-flex */
+  display: flex; /* sobrescribe inline-flex */
   width: 100%;
 }

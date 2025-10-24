@@ -4,17 +4,30 @@ import { Button } from "../../components/ui/button";
 import Icon from "../../components/ui/icons/Icon";
 import { Modal } from "../../components/modal/Modal";
 import { FormGenerator } from "../../forms/FormGenerator";
-import { useRolesTable } from "./useRolesTable";
 import DataTableToolbar from "../../components/data-table/DataTableToolbar";
+import { useRolesTable } from "./hooks/useRolesTable";
 
 export const RolesPage = () => {
-  const { table, createModal, editModal } = useRolesTable({
-    apiPageStartsAt: 1,
-  });
+  const {
+    // tabla
+    columns,
+    rows,
+    totalCount,
+    page,
+    pageSize,
+    isLoading,
+    isFetching,
+    onPageChange,
+    onPageSizeChange,
+    refresh,
+    create,
+    edit,
+  } = useRolesTable();
 
   // Cargar datos al montar
   useEffect(() => {
-    table.refetch();
+    // carga inicial una sola vez
+    refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -22,71 +35,53 @@ export const RolesPage = () => {
     <main style={{ padding: 16 }}>
       <DataTableToolbar
         title="Roles"
-        // Si después agregas búsqueda, pasa onSearchChange y searchValue desde el hook
-        onRefresh={table.refetch}
-        isRefreshing={table.isLoading || table.isFetching}
+        onRefresh={refresh}
+        isRefreshing={isLoading || isFetching}
         rightActions={
-          <Button
-            onClick={createModal.openCreate}
-            leftIcon={<Icon name="Plus" />}
-          >
+          <Button onClick={create.openCreate} leftIcon={<Icon name="Plus" />}>
             Nuevo
           </Button>
         }
       />
 
       <DataTable
+        // Si tus columnas ya traen la col de acciones desde useRolesColumns,
+        // no pases rowActions. Mantenemos el header visible si quieres.
         actionsHeader="Acciones"
-        columns={table.columns}
-        data={table.rows}
+        columns={columns}
+        data={rows}
         emptyCta={null}
-        error={table.error}
-        onPageChange={table.setPage}
-        onPageSizeChange={table.setPageSize}
-        page={table.page}
-        pageSize={table.pageSize}
+        error={null}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+        page={page}
+        pageSize={pageSize}
+        // rowActions: lo quitamos para delegar a la columna de acciones del hook
         revealActionsOnHover
-        rowActions={(row) => {
-          const { canDelete, onEdit, onDelete } = table.rowActionFor(row);
-          return (
-            <div style={{ display: "flex", gap: 8 }}>
-              <Button variant="ghost" onClick={onEdit} title="Editar">
-                <Icon name="Pencil" />
-              </Button>
-              <Button
-                variant="ghost"
-                disabled={!canDelete}
-                onClick={onDelete}
-                title={canDelete ? "Eliminar" : "No se puede borrar (Sistema)"}
-              >
-                <Icon name="Trash2" />
-              </Button>
-            </div>
-          );
-        }}
         rowId={(r) => r.id}
         stickyActions
         toolbar={null}
-        totalCount={table.totalCount}
+        totalCount={totalCount}
       />
 
+      {/* Modal Crear */}
       <Modal
-        open={createModal.open}
-        onClose={createModal.closeCreate}
-        title={createModal.title}
-        description={createModal.description}
+        open={create.isOpen}
+        onClose={create.closeCreate}
+        title={create.title}
+        description={create.description}
         size="md"
         closeOnOverlay
         footer={
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <Button variant="ghost" onClick={createModal.closeCreate}>
+            <Button variant="ghost" onClick={create.closeCreate}>
               Cancelar
             </Button>
             <Button
               type="submit"
-              form={createModal.formId}
+              form={create.formId}
               variant="primary"
-              disabled={createModal.isFetching}
+              disabled={create.isFetching || create.isSaving}
               rightIcon={<Icon name="Check" />}
             >
               Guardar
@@ -94,16 +89,16 @@ export const RolesPage = () => {
           </div>
         }
       >
-        {createModal.open && (
+        {create.isOpen && (
           <div style={{ paddingTop: 8 }}>
             <FormGenerator
-              formId={createModal.formId}
+              formId={create.formId}
               showDefaultSubmit={false}
-              fields={createModal.fields}
-              components={createModal.components}
-              onSubmit={createModal.handleCreateSubmit}
+              fields={create.formFields}
+              components={create.components}
+              onSubmit={create.handleCreateSubmit}
             />
-            {createModal.isError && (
+            {create.isError && (
               <div
                 role="alert"
                 style={{
@@ -117,27 +112,42 @@ export const RolesPage = () => {
                 <span>No fue posible cargar el formulario.</span>
               </div>
             )}
+            {create.saveError && (
+              <div
+                role="alert"
+                style={{
+                  marginTop: 12,
+                  display: "flex",
+                  gap: 8,
+                  alignItems: "center",
+                }}
+              >
+                <Icon name="AlertTriangle" />
+                <span>{create.saveError}</span>
+              </div>
+            )}
           </div>
         )}
       </Modal>
 
+      {/* Modal Editar */}
       <Modal
-        open={editModal.open}
-        onClose={editModal.closeEdit}
-        title={editModal.title}
-        description={editModal.description}
+        open={edit.isOpen}
+        onClose={edit.closeEdit}
+        title={edit.title}
+        description={edit.description}
         size="md"
         closeOnOverlay
         footer={
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <Button variant="ghost" onClick={editModal.closeEdit}>
+            <Button variant="ghost" onClick={edit.closeEdit}>
               Cancelar
             </Button>
             <Button
               type="submit"
-              form={editModal.formId}
+              form={edit.formId}
               variant="primary"
-              disabled={editModal.isFetching || editModal.isSaving}
+              disabled={edit.isFetching || edit.isSaving}
               rightIcon={<Icon name="Check" />}
             >
               Guardar cambios
@@ -145,17 +155,17 @@ export const RolesPage = () => {
           </div>
         }
       >
-        {editModal.open && (
+        {edit.isOpen && (
           <div style={{ paddingTop: 8 }}>
             <FormGenerator
-              formId={editModal.formId}
+              formId={edit.formId}
               showDefaultSubmit={false}
-              fields={editModal.fields}
-              components={editModal.components}
-              initialValuesOverride={editModal.initialValues} // 👈 setea valores existentes
-              onSubmit={editModal.handleEditSubmit}
+              fields={edit.formFields}
+              components={edit.components}
+              initialValuesOverride={edit.initialValues}
+              onSubmit={edit.handleEditSubmit}
             />
-            {editModal.isError && (
+            {edit.isError && (
               <div
                 role="alert"
                 style={{
@@ -169,7 +179,7 @@ export const RolesPage = () => {
                 <span>No fue posible cargar el formulario.</span>
               </div>
             )}
-            {editModal.saveError && (
+            {edit.saveError && (
               <div
                 role="alert"
                 style={{
@@ -180,7 +190,7 @@ export const RolesPage = () => {
                 }}
               >
                 <Icon name="AlertTriangle" />
-                <span>{editModal.saveError}</span>
+                <span>{edit.saveError}</span>
               </div>
             )}
           </div>

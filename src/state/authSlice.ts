@@ -1,18 +1,19 @@
 // src/state/authSlice.ts
-import { createSlice } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "../app/store";
 
 /** Estado de autenticación */
 export type AuthState = {
-  accessToken?: string;        // JWT de acceso (Bearer)
-  refreshToken?: string;       // Refresh token
-  expiresAt?: string;          // ISO string (UTC) de expiración del access token (opcional)
+  accessToken?: string; // JWT de acceso (Bearer)
+  refreshToken?: string; // Refresh token
+  expiresAt?: string; // ISO string (UTC) de expiración del access token (opcional)
   usuarioId?: number;
   idEmpresa?: number;
   correo?: string;
   nombreCompleto?: string;
-  roles: string[];             // Normalizados (p.ej., "Admin")
-  accesos?: string[];          // Paths permitidos (p.ej., ["/", "/admin"])
+  roles: string[]; // Normalizados (p.ej., "Admin")
+  accesos?: string[]; // Paths permitidos (p.ej., ["/", "/admin"])
   permsVersion?: string | null;
 };
 
@@ -25,32 +26,34 @@ function normalizeRoles(input?: string[]): string[] {
   // Mapa de alias → canónico
   const map: Record<string, string> = {
     // Admin / Manager
-    "administrador": "admin",
-    "admin": "admin",
-    "gerente": "manager",
-    "manager": "manager",
+    administrador: "admin",
+    admin: "admin",
+    gerente: "manager",
+    manager: "manager",
 
     // Caja / Cajero
-    "cajero": "cashier",
-    "cashier": "cashier",
+    cajero: "cashier",
+    cashier: "cashier",
 
     // Mesero
-    "mesero": "waiter",
-    "waiter": "waiter",
+    mesero: "waiter",
+    waiter: "waiter",
 
     // Cocina
-    "cocina": "kitchen",
-    "kitchen": "kitchen",
-    "cook": "kitchen",
+    cocina: "kitchen",
+    kitchen: "kitchen",
+    cook: "kitchen",
 
     // Delivery
-    "repartidor": "delivery",
-    "delivery": "delivery",
+    repartidor: "delivery",
+    delivery: "delivery",
   };
 
   const out = new Set<string>();
   for (const raw of input) {
-    const key = String(raw ?? "").trim().toLowerCase();
+    const key = String(raw ?? "")
+      .trim()
+      .toLowerCase();
     if (!key) continue;
     const canon = map[key];
     if (canon) out.add(canon);
@@ -97,10 +100,10 @@ function clearStorage() {
   }
 }
 function isExpired(expiresAt?: string) {
-  if (!expiresAt) return false;                    // si tu backend aún no manda expiración, no forzamos logout
+  if (!expiresAt) return false; // si tu backend aún no manda expiración, no forzamos logout
   const exp = Date.parse(expiresAt);
-  if (Number.isNaN(exp)) return false;             // valor inválido, tratamos como no expirado
-  const SKEW_MS = 10_000;                          // 10s de margen
+  if (Number.isNaN(exp)) return false; // valor inválido, tratamos como no expirado
+  const SKEW_MS = 10_000; // 10s de margen
   return Date.now() + SKEW_MS >= exp;
 }
 
@@ -119,11 +122,14 @@ const authSlice = createSlice({
       action: PayloadAction<{
         accessToken: string;
         refreshToken?: string | null;
-        expiresAt?: string;            // ahora opcional
+        expiresAt?: string; // ahora opcional
       }>
     ) {
       state.accessToken = action.payload.accessToken;
-      if (action.payload.refreshToken !== undefined && action.payload.refreshToken !== null) {
+      if (
+        action.payload.refreshToken !== undefined &&
+        action.payload.refreshToken !== null
+      ) {
         state.refreshToken = action.payload.refreshToken;
       }
       if (action.payload.expiresAt !== undefined) {
@@ -151,7 +157,9 @@ const authSlice = createSlice({
       state.nombreCompleto = action.payload.nombreCompleto;
 
       state.roles = normalizeRoles(action.payload.roles);
-      const accesos = Array.isArray(action.payload.accesos) ? action.payload.accesos : [];
+      const accesos = Array.isArray(action.payload.accesos)
+        ? action.payload.accesos
+        : [];
       // garantiza '/' siempre presente y sin duplicados
       state.accesos = Array.from(new Set(["/", ...accesos]));
       state.permsVersion = action.payload.permsVersion ?? null;
@@ -179,7 +187,10 @@ const authSlice = createSlice({
       }>
     ) {
       state.accessToken = action.payload.accessToken;
-      if (action.payload.refreshToken !== undefined && action.payload.refreshToken !== null) {
+      if (
+        action.payload.refreshToken !== undefined &&
+        action.payload.refreshToken !== null
+      ) {
         state.refreshToken = action.payload.refreshToken;
       }
       if (action.payload.expiresAt !== undefined) {
@@ -192,7 +203,9 @@ const authSlice = createSlice({
       state.nombreCompleto = action.payload.nombreCompleto;
 
       state.roles = normalizeRoles(action.payload.roles);
-      const accesos = Array.isArray(action.payload.accesos) ? action.payload.accesos : [];
+      const accesos = Array.isArray(action.payload.accesos)
+        ? action.payload.accesos
+        : [];
       state.accesos = Array.from(new Set(["/", ...accesos]));
       state.permsVersion = action.payload.permsVersion ?? null;
 
@@ -236,7 +249,8 @@ export default authSlice.reducer;
 /** Selectores de conveniencia */
 export const selectAuth = (s: { auth: AuthState }) => s.auth;
 export const selectAccessToken = (s: { auth: AuthState }) => s.auth.accessToken;
-export const selectRefreshToken = (s: { auth: AuthState }) => s.auth.refreshToken;
+export const selectRefreshToken = (s: { auth: AuthState }) =>
+  s.auth.refreshToken;
 export const selectIsAuthenticated = (s: { auth: AuthState }) =>
   Boolean(s.auth.accessToken) && !isExpired(s.auth.expiresAt);
 
@@ -251,21 +265,27 @@ export const selectUserProfile = (s: { auth: AuthState }) => ({
 export const selectHasRole = (role: string) => (s: { auth: AuthState }) =>
   s.auth.roles?.includes(role) ?? false;
 
-export const selectAccesos = (s: { auth: AuthState }) => s.auth.accesos ?? ["/"];
+export const selectAccesos = (s: { auth: AuthState }) =>
+  s.auth.accesos ?? ["/"];
 
 /** Dado un path, indica si el usuario tiene acceso según la lista de accesos */
 export const selectCanAccess = (path: string) => (s: { auth: AuthState }) => {
   const list = s.auth.accesos ?? ["/"];
   // normaliza trailing slash
-  const norm = (p: string) => (p.endsWith("/") && p.length > 1 ? p.slice(0, -1) : p);
+  const norm = (p: string) =>
+    p.endsWith("/") && p.length > 1 ? p.slice(0, -1) : p;
   const target = norm(path);
-  return list.some(a => norm(a) === target);
+  return list.some((a) => norm(a) === target);
 };
 
 export const selectRolesCanon = (s: { auth: AuthState }) => s.auth.roles; // ya canónicos
 
-export const selectRolesOrGuest = (s: { auth: AuthState }) =>
-  (s.auth.roles && s.auth.roles.length > 0) ? s.auth.roles : (["guest"]);
+const selectAuthRoles = (state: RootState) => state.auth.roles;
+const GUEST_ROLES = Object.freeze(["guest"] as const);
+
+export const selectRolesOrGuest = createSelector([selectAuthRoles], (roles) =>
+  roles && roles.length ? roles : (GUEST_ROLES as unknown as string[])
+);
 
 export const selectIsExpired = (s: { auth: AuthState }) =>
   isExpired(s.auth.expiresAt);
