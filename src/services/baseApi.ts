@@ -10,10 +10,13 @@ import type { RootState } from "../app/store";
 import { logout, setTokens } from "../state/authSlice";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: '', 
-  prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth?.accessToken;
-    if (token) headers.set("authorization", `Bearer ${token}`);
+  baseUrl: "",
+  prepareHeaders: (headers) => {
+    const raw = localStorage.getItem("mf_auth");
+    if (raw) {
+      const { accessToken } = JSON.parse(raw);
+      if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+    }
     return headers;
   },
   credentials: "include", // si NO usas cookies, puedes quitarlo

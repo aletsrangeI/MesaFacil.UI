@@ -1,6 +1,6 @@
 import { emptySplitApi as api } from "../baseApi";
 const injectedRtkApi = api.injectEndpoints({
-  endpoints: (build) => ({}),
+  endpoints: () => ({}),
   overrideExisting: false,
 });
 export { injectedRtkApi as enhancedApi };

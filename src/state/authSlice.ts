@@ -6,14 +6,19 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 export type AuthState = {
   accessToken?: string;        // JWT de acceso (Bearer)
   refreshToken?: string;       // Refresh token
-  expiresAt?: string;          // ISO string (UTC) de expiración del access token (opcional)
+  expiresAt?: string;          // ISO string (UTC) de expiración
   usuarioId?: number;
   idEmpresa?: number;
   correo?: string;
   nombreCompleto?: string;
-  roles: string[];             // Normalizados (p.ej., "Admin")
-  accesos?: string[];          // Paths permitidos (p.ej., ["/", "/admin"])
+  roles: string[];             // Canonizados
+  accesos?: string[];          // Paths permitidos
   permsVersion?: string | null;
+
+  // NUEVO: permisos por key (RBAC fino)
+  permissions: string[];
+  // NUEVO: flag opcional que devuelve /auth/me
+  permissionsChanged?: boolean;
 };
 
 const STORAGE_KEY = "mf_auth";
@@ -21,33 +26,21 @@ const STORAGE_KEY = "mf_auth";
 /** Normaliza los nombres de roles a una taxonomía única en el FE */
 function normalizeRoles(input?: string[]): string[] {
   if (!Array.isArray(input)) return [];
-
-  // Mapa de alias → canónico
   const map: Record<string, string> = {
-    // Admin / Manager
     "administrador": "admin",
     "admin": "admin",
     "gerente": "manager",
     "manager": "manager",
-
-    // Caja / Cajero
     "cajero": "cashier",
     "cashier": "cashier",
-
-    // Mesero
     "mesero": "waiter",
     "waiter": "waiter",
-
-    // Cocina
     "cocina": "kitchen",
     "kitchen": "kitchen",
     "cook": "kitchen",
-
-    // Delivery
     "repartidor": "delivery",
     "delivery": "delivery",
   };
-
   const out = new Set<string>();
   for (const raw of input) {
     const key = String(raw ?? "").trim().toLowerCase();
@@ -55,10 +48,11 @@ function normalizeRoles(input?: string[]): string[] {
     const canon = map[key];
     if (canon) out.add(canon);
   }
-
-  // si el backend no envía roles o ninguno matchea, no forzamos "guest" aquí
-  // dejamos [] y los selectores/guards decidirán el fallback si lo requieren
   return Array.from(out);
+}
+
+function uniq<T>(arr: T[] = []): T[] {
+  return Array.from(new Set(arr));
 }
 
 function loadFromStorage(): Partial<AuthState> {
@@ -67,12 +61,9 @@ function loadFromStorage(): Partial<AuthState> {
     if (!raw) return {};
     const parsed = JSON.parse(raw) as AuthState;
     if (parsed && typeof parsed === "object") {
-      // saneo mínimo
       parsed.roles = normalizeRoles(parsed.roles ?? []);
-      if (Array.isArray(parsed.accesos)) {
-        // garantiza "/" por tu regla de negocio
-        parsed.accesos = Array.from(new Set(["/", ...parsed.accesos]));
-      }
+      parsed.accesos = uniq(["/", ...(parsed.accesos ?? [])]);
+      parsed.permissions = uniq(parsed.permissions ?? []);
       return parsed;
     }
     return {};
@@ -84,29 +75,25 @@ function loadFromStorage(): Partial<AuthState> {
 function saveToStorage(state: AuthState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // Ignorar errores de almacenamiento (modo incógnito, quota, etc.)
-  }
+  } catch {}
 }
 
 function clearStorage() {
   try {
     localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // Ignorar
-  }
+  } catch {}
 }
 
 function isExpired(expiresAt?: string) {
-  if (!expiresAt) return false; // si no hay expiración, no expira en FE
+  if (!expiresAt) return false;
   const exp = Date.parse(expiresAt);
   if (Number.isNaN(exp)) return false;
-  // Pequeño skew de 10s para evitar carreras
-  return Date.now() + 10_000 >= exp;
+  return Date.now() + 10_000 >= exp; // skew 10s
 }
 
 const initialState: AuthState = {
   roles: [],
+  permissions: [],          // NUEVO
   ...loadFromStorage(),
 };
 
@@ -120,7 +107,7 @@ const authSlice = createSlice({
       action: PayloadAction<{
         accessToken: string;
         refreshToken?: string | null;
-        expiresAt?: string;            // ahora opcional
+        expiresAt?: string;
       }>
     ) {
       state.accessToken = action.payload.accessToken;
@@ -133,7 +120,7 @@ const authSlice = createSlice({
       saveToStorage(state);
     },
 
-    /** Establece la sesión de usuario (perfil, roles, accesos) */
+    /** Establece la sesión de usuario (perfil, roles, accesos) desde /auth/login */
     setSession(
       state,
       action: PayloadAction<{
@@ -150,19 +137,14 @@ const authSlice = createSlice({
       state.idEmpresa = action.payload.idEmpresa;
       state.correo = action.payload.correo;
       state.nombreCompleto = action.payload.nombreCompleto;
-
       state.roles = normalizeRoles(action.payload.roles);
-      const accesos = Array.isArray(action.payload.accesos) ? action.payload.accesos : [];
-      // garantiza '/' siempre presente y sin duplicados
-      state.accesos = Array.from(new Set(["/", ...accesos]));
+      state.accesos = uniq(["/", ...(action.payload.accesos ?? [])]);
       state.permsVersion = action.payload.permsVersion ?? null;
-
       saveToStorage(state);
     },
 
     /**
-     * Mezcla tokens + sesión en una sola acción (útil si /auth/login ya devuelve todo)
-     * Nota: refreshToken y expiresAt ahora son opcionales porque el back puede no enviarlos.
+     * Mezcla tokens + sesión en una sola acción (si /auth/login ya devuelve todo)
      */
     setAuthResponse(
       state,
@@ -191,34 +173,91 @@ const authSlice = createSlice({
       state.idEmpresa = action.payload.idEmpresa;
       state.correo = action.payload.correo;
       state.nombreCompleto = action.payload.nombreCompleto;
-
       state.roles = normalizeRoles(action.payload.roles);
-      const accesos = Array.isArray(action.payload.accesos) ? action.payload.accesos : [];
-      state.accesos = Array.from(new Set(["/", ...accesos]));
+      state.accesos = uniq(["/", ...(action.payload.accesos ?? [])]);
       state.permsVersion = action.payload.permsVersion ?? null;
 
+      // no establecemos permissions aquí porque /login no los trae (los trae /me)
       saveToStorage(state);
     },
 
     /** Hidrata desde localStorage (llámalo al bootstrap de la app) */
     hydrateFromStorage(state) {
       const persisted = loadFromStorage();
-      Object.assign(state, { roles: [], ...persisted });
+      Object.assign(state, { roles: [], permissions: [], ...persisted });
     },
 
-    /** Limpia toda la sesión local (útil tras /auth/logout o 401 sin refresh) */
+    /** Limpia toda la sesión local */
     logout() {
       clearStorage();
-      return { roles: [] } as AuthState;
+      return { roles: [], permissions: [] } as AuthState;
     },
 
-    /** Verifica expiración y, si pasó, limpia accessToken (mantiene refresh para reauth) */
+    /** Verifica expiración y limpia accessToken si expiró */
     pruneIfExpired(state) {
       if (isExpired(state.expiresAt)) {
         state.accessToken = undefined;
         state.expiresAt = undefined;
         saveToStorage(state);
       }
+    },
+
+    // ============ NUEVO: integrar respuesta de /api/auth/me ============
+
+    /**
+     * Aplica la respuesta de /api/auth/me
+     * - No toca accessToken/refreshToken (solo estado de sesión)
+     */
+    setFromAuthMe(
+      state,
+      action: PayloadAction<{
+        usuarioId: number;
+        idEmpresa: number;
+        correo?: string;
+        nombre?: string | null;
+        sucursalId?: string | null;         // por si lo quieres guardar luego
+        turnoAbierto?: boolean;             // idem
+        roles: string[];
+        permissions: string[];
+        accesos: string[];
+        permsVersion?: string | null;
+        permissionsChanged?: boolean;
+      }>
+    ) {
+      state.usuarioId = action.payload.usuarioId;
+      state.idEmpresa = action.payload.idEmpresa;
+      state.correo = action.payload.correo;
+      state.nombreCompleto = action.payload.nombre ?? state.nombreCompleto;
+
+      state.roles = normalizeRoles(action.payload.roles);
+      state.permissions = uniq(action.payload.permissions);
+      state.accesos = uniq(["/", ...(action.payload.accesos ?? [])]);
+
+      state.permsVersion = action.payload.permsVersion ?? state.permsVersion ?? null;
+      state.permissionsChanged = action.payload.permissionsChanged ?? false;
+
+      saveToStorage(state);
+    },
+
+    /**
+     * Actualiza solo los permisos (por ejemplo, tras reasignación sin relogueo)
+     */
+    setPermissions(
+      state,
+      action: PayloadAction<{
+        permissions: string[];
+        accesos?: string[];
+        permsVersion?: string | null;
+      }>
+    ) {
+      state.permissions = uniq(action.payload.permissions);
+      if (action.payload.accesos) {
+        state.accesos = uniq(["/", ...action.payload.accesos]);
+      }
+      if (action.payload.permsVersion !== undefined) {
+        state.permsVersion = action.payload.permsVersion;
+      }
+      saveToStorage(state);
     },
   },
 });
@@ -230,6 +269,8 @@ export const {
   hydrateFromStorage,
   logout,
   pruneIfExpired,
+  setFromAuthMe,         // NUEVO
+  setPermissions,        // NUEVO
 } = authSlice.actions;
 
 export default authSlice.reducer;
@@ -249,21 +290,26 @@ export const selectUserProfile = (s: { auth: AuthState }) => ({
   roles: s.auth.roles,
 });
 
-export const selectHasRole = (role: string) => (s: { auth: AuthState }) =>
-  s.auth.roles?.includes(role) ?? false;
+export const selectRolesCanon = (s: { auth: AuthState }) => s.auth.roles;
+export const selectRolesOrGuest = (s: { auth: AuthState }) =>
+  (s.auth.roles && s.auth.roles.length > 0) ? s.auth.roles : ["guest"];
 
 export const selectAccesos = (s: { auth: AuthState }) => s.auth.accesos ?? ["/"];
-
-/** Dado un path, indica si el usuario tiene acceso según la lista de accesos */
 export const selectCanAccess = (path: string) => (s: { auth: AuthState }) => {
   const list = s.auth.accesos ?? ["/"];
-  // normaliza trailing slash
   const norm = (p: string) => (p.endsWith("/") && p.length > 1 ? p.slice(0, -1) : p);
   const target = norm(path);
   return list.some(a => norm(a) === target);
 };
 
-export const selectRolesCanon = (s: { auth: AuthState }) => s.auth.roles; // ya canónicos
+// ======= NUEVO: selectores de permisos finos (RBAC por Key) =======
+export const selectPermissions = (s: { auth: AuthState }) => s.auth.permissions ?? [];
 
-export const selectRolesOrGuest = (s: { auth: AuthState }) =>
-  (s.auth.roles && s.auth.roles.length > 0) ? s.auth.roles : (["guest"]);
+export const selectHasPermission = (perm: string) => (s: { auth: AuthState }) =>
+  (s.auth.permissions ?? []).includes(perm);
+
+export const selectHasEveryPermission = (perms: string[]) => (s: { auth: AuthState }) =>
+  perms.every(p => (s.auth.permissions ?? []).includes(p));
+
+export const selectHasSomePermission = (perms: string[]) => (s: { auth: AuthState }) =>
+  perms.some(p => (s.auth.permissions ?? []).includes(p));

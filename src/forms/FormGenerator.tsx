@@ -1,7 +1,7 @@
 // src/forms/FormGenerator.tsx
 import React from "react";
 import { Formik, Form, useField } from "formik";
-import type { ApiFormField } from "./types";
+import type { ApiFormField, SelectOptionApi } from "./types";
 import { normalizeFields, buildInitialValues } from "./normalize";
 import { buildYupSchema } from "./schema";
 import { DefaultFieldComponents, type FieldComponents } from "./FieldRenderer";
@@ -16,6 +16,9 @@ export interface FormGeneratorProps {
   // NUEVO:
   formId?: string; // id para <Form>
   showDefaultSubmit?: boolean; // ocultar/mostrar botón interno
+  
+  // NEW: Dynamic options dictionary
+  dataSources?: Record<string, SelectOptionApi[]>;
 }
 
 export interface WithFieldMeta {
@@ -30,6 +33,7 @@ export function FormGenerator({
   submitLabel = "Guardar",
   formId,
   showDefaultSubmit = true, // por defecto igual que antes
+  dataSources,
 }: FormGeneratorProps) {
   const all = normalizeFields(fields);
   const initial = {
@@ -52,7 +56,7 @@ export function FormGenerator({
       {({ isSubmitting }) => (
         <Form id={formId} noValidate className="ui-form">
           {all.map((f) => (
-            <DynamicField key={f.name} field={f} Cmp={Cmp} />
+            <DynamicField key={f.name} field={f} Cmp={Cmp} dataSources={dataSources} />
           ))}
 
           {showDefaultSubmit && (
@@ -73,9 +77,11 @@ export function FormGenerator({
 function DynamicField({
   field,
   Cmp,
+  dataSources,
 }: {
   field: ApiFormField;
   Cmp: FieldComponents;
+  dataSources?: Record<string, SelectOptionApi[]>;
 }) {
   const [formikField, meta] = useField<string>(field.name);
   const hasError = meta.touched && !!meta.error;
@@ -105,11 +111,15 @@ function DynamicField({
     case "date":
       control = <Cmp.DateInput {...commonProps} __field={field} />; // 👈
       break;
-    case "select":
+    case "select": {
+      const rawOptions = (field.dataSource && dataSources && dataSources[field.dataSource])
+        ? dataSources[field.dataSource]
+        : (field.options ?? []);
+
       control = (
         <Cmp.SelectInput
           {...commonProps}
-          options={(field.options ?? []).map((o) => ({
+          options={rawOptions.map((o) => ({
             value: String(o.id),
             label: o.nombre,
           }))}
@@ -117,6 +127,7 @@ function DynamicField({
         />
       );
       break;
+    }
     default:
       control = <Cmp.TextInput {...commonProps} __field={field} />; // 👈
       break;

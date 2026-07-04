@@ -4,6 +4,7 @@ import Container from "../../components/ui/layout/Container";
 import { Button } from "../../components/ui/button";
 import Icon from "../../components/ui/icons/Icon";
 import { useAuthLoginForm } from "./useAuthLoginForm";
+import { FORM_CATEGORY_IDS } from "../../forms/types";
 import "./auth-form.css";
 
 export default function RegistroUsuario() {
@@ -14,7 +15,7 @@ export default function RegistroUsuario() {
     error,
     serverError,
     handleSubmit,
-  } = useAuthLoginForm();
+  } = useAuthLoginForm(FORM_CATEGORY_IDS.REGISTRO_USUARIO);
 
   return (
     <Container as="main" maxWidth="sm" className="auth-wrapper">

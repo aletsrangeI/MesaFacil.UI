@@ -8,15 +8,20 @@ import { hydrateFromStorage, pruneIfExpired } from "./state/authSlice";
 import { BrowserRouter } from "react-router-dom";
 import AppRouter from "./app/routes/AppRouter";
 
+import { ToastProvider } from "./components/ui/toast/Toast";
+
 store.dispatch(hydrateFromStorage());
 store.dispatch(pruneIfExpired());
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
-        <AppRouter />
-      </BrowserRouter>
+      <ToastProvider position="bottom-right">
+        <BrowserRouter>
+          <AppRouter />
+        </BrowserRouter>
+      </ToastProvider>
     </Provider>
   </React.StrictMode>
 );
+

@@ -14,25 +14,6 @@ import type { ApiFormField } from "../../../forms/types";
  *
  */
 
-function buildPrefix(field?: ApiFormField) {
-  if (!field) return undefined;
-  if (field.prefixIconName) return <Icon name={field.prefixIconName as any} />;
-  if (field.prefixText) return <span aria-hidden>{field.prefixText}</span>;
-  return undefined;
-}
-
-function buildSuffix(field?: ApiFormField) {
-  if (!field) return undefined;
-  if (field.suffixIconName) return <Icon name={field.suffixIconName as any} />;
-  if (field.suffixText) return <span aria-hidden>{field.suffixText}</span>;
-  return undefined;
-}
-
-function buildLeftIcon(field?: ApiFormField) {
-  return field?.leftIconName ? (
-    <Icon name={field.leftIconName as any} />
-  ) : undefined;
-}
 
 // Text
 const TextInputAdapter: FieldComponents["TextInput"] = (

@@ -7,6 +7,14 @@ export type ValidationType =
   | "date"
   | "minLength";
 
+export const FORM_CATEGORY_IDS = {
+  LOGIN: 0,
+  REGISTRO_USUARIO: 1,
+  GESTION_USUARIOS: 2,
+} as const;
+
+export type FormCategoryId = typeof FORM_CATEGORY_IDS[keyof typeof FORM_CATEGORY_IDS];
+
 export interface ValidationRule {
   type: ValidationType;
   value: number;
@@ -29,6 +37,7 @@ export interface ApiFormField {
   options?: SelectOptionApi[];
   catalogoId?: number | null;
   order?: number;
+  dataSource?: string | null;
 
   // NUEVOS (presentación / a11y / UX)
   ariaLabel?: string;

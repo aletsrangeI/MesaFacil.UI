@@ -10,12 +10,8 @@ const SelectInputAdapter: FieldComponents["SelectInput"] = (
   }
 ) => {
   const { options, __field, ...p } = props;
-  const hasError = Boolean(p["aria-invalid"]);
 
-  // Preferencias: visualLabel > label > placeholder
-  const visualLabel = __field?.visualLabel ?? __field?.label;
   const aria = __field?.ariaLabel ?? __field?.placeholder ?? p.name;
-  const helper = !hasError ? __field?.helperText : undefined;
 
   return (
     <Select
@@ -43,13 +39,7 @@ const SelectInputAdapter: FieldComponents["SelectInput"] = (
   );
 };
 
-// Wrapper que NO duplica label (el Select ya pinta su label)
-const FieldWrapper: FieldComponents["FieldWrapper"] = ({ children }) => (
-  <div className="ui-field">{children}</div>
-);
 
-// Si prefieres que el error solo se pinte dentro del Select:
-const ErrorText: FieldComponents["ErrorText"] = () => null;
 
 export const SelectAdapter: Partial<FieldComponents> = {
   SelectInput: SelectInputAdapter,

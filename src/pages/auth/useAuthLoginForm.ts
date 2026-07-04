@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   useAuthLoginMutation,
   useFormFieldGetFormFieldByFormCatIdQuery,
+  useLazyAuthMeQuery,
 } from "../../services/generated/api";
 
 import type {
@@ -10,10 +11,11 @@ import type {
   ValidationRule,
   ValidationType,
   SelectOptionApi,
+  FormCategoryId,
 } from "../../forms/types";
-import { useDispatch } from "react-redux";
+import { FORM_CATEGORY_IDS } from "../../forms/types";
 import { useAppDispatch } from "../../app/hooks";
-import { setAuthResponse } from "../../state/authSlice";
+import { setAuthResponse, setFromAuthMe } from "../../state/authSlice";
 
 export type LoginValues = { username?: string; password?: string };
 
@@ -45,62 +47,39 @@ function asValidationType(t: unknown): ValidationType {
   return (VALIDATION_TYPES.includes(v) ? v : "required") as ValidationType;
 }
 
-// Asegura que value sea number según tu contrato de UI
 function coerceValidationValue(type: ValidationType, raw: unknown): number {
   if (type === "minLength") return Number(raw ?? 0) || 0;
   return Number(raw ?? 1) || 1;
 }
 
-type BackendOption = {
-  id?: string | number;
-  nombre?: string;
-  label?: string;
-  value?: string | number;
-  text?: string;
-};
-
+type BackendOption = { id?: string | number; nombre?: string; label?: string; value?: string | number; text?: string; };
 function toSelectOptions(list?: unknown): SelectOptionApi[] {
   if (!Array.isArray(list)) return [];
   return (list as BackendOption[]).map((o) => {
-    const label = String(
-      o.label ?? o.nombre ?? o.text ?? o.value ?? o.id ?? ""
-    );
+    const label = String(o.label ?? o.nombre ?? o.text ?? o.value ?? o.id ?? "");
     const value = (o.value ?? o.id ?? label) as string | number;
-
-    // Devolvemos un objeto que satisface ambos mundos:
-    // - Si tu SelectOptionApi es {label,value} compila (tiene esas props)
-    // - Si es {id,nombre} también (tiene id/nombre)
-    const bothShapes = {
-      id: value,
-      nombre: label,
-      label,
-      value,
-    };
-
-    return bothShapes as unknown as SelectOptionApi;
+    return { id: value, nombre: label, label, value } as unknown as SelectOptionApi;
   });
 }
 
 /* ------------------------------------ Hook ------------------------------------ */
 
-export function useAuthLoginForm() {
+export function useAuthLoginForm(formCatId: FormCategoryId = FORM_CATEGORY_IDS.LOGIN) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const {
-    data: resp,
-    isFetching: isFetchingFields,
-    isError: isFieldsError,
-    error: fieldsError,
-  } = useFormFieldGetFormFieldByFormCatIdQuery({ id: 0 });
+  // Form schema (categoría formCatId)
+  const { data: resp, isFetching: isFetchingFields, isError: isFieldsError, error: fieldsError } =
+    useFormFieldGetFormFieldByFormCatIdQuery({ id: formCatId });
 
-  const [authLogin, { isLoading: isSubmitting, error }] =
-    useAuthLoginMutation();
+  // Mutación de login y consulta lazy de /auth/me
+  const [authLogin, { isLoading: isSubmitting, error }] = useAuthLoginMutation();
+  const [triggerMe] = useLazyAuthMeQuery();
+
   const [serverError, setServerError] = useState<string | null>(null);
 
   const formId = "registro-usuario-form";
 
-  // resp puede venir como { data: FormField[] } (según tu ejemplo)
   type BackendField = {
     id?: number | string;
     type?: string;
@@ -118,7 +97,6 @@ export function useAuthLoginForm() {
       ? ((resp as any).data as BackendField[])
       : [];
 
-    // dedupe por id|name por si el backend manda duplicados
     const uniq = new Map<string, BackendField>();
     for (const f of list) {
       const key = `${f.id ?? ""}|${f.name ?? ""}`;
@@ -135,23 +113,28 @@ export function useAuthLoginForm() {
         validations: Array.isArray(dto.validations)
           ? dto.validations.map<ValidationRule>((v) => {
               const type = asValidationType(v?.type);
-              return {
-                type,
-                value: coerceValidationValue(type, v?.value),
-              };
+              return { type, value: coerceValidationValue(type, v?.value) };
             })
-          : [], // <- siempre array, nunca undefined
-        options: toSelectOptions(dto.options), // <- compatible con ambos shapes
+          : [],
+        options: toSelectOptions(dto.options),
         catalogoId: null,
         order: dto.order ?? 0,
       }))
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }, [resp]);
 
+  // elige la primera ruta “real” (ignora /perm/*) o "/" por fallback
+  const pickNextPath = (accesos?: string[]) => {
+    const list = Array.isArray(accesos) ? accesos : [];
+    const real = list.find((p) => p && !p.startsWith("/perm/"));
+    return real || "/";
+  };
+
   const handleSubmit = useCallback(
     async (values: LoginValues) => {
       setServerError(null);
       try {
+        // 1) LOGIN
         const apiResp = await authLogin({
           loginRequest: {
             userOrEmail: String(values.username ?? ""),
@@ -162,43 +145,62 @@ export function useAuthLoginForm() {
         if (!apiResp?.isSuccess || !apiResp.data) {
           throw new Error(apiResp?.message || "Error de autenticación.");
         }
+
         const { token, session } = apiResp.data;
 
-        const accesos = Array.isArray(session.accesos) ? session.accesos : [];
-        const firstAllowed = accesos[0] ?? "/";
-
+        // 2) Guardar tokens + sesión base (roles/accesos del login)
         dispatch(
           setAuthResponse({
             accessToken: token.accessToken,
             refreshToken: token.refreshToken ?? undefined,
-            expiresAt: undefined, // tu back aún no envía ExpiresAtUtc
+            // si tu back ya envía expiresAtUtc, úsalo (en tu ejemplo sí viene)
+            expiresAt: token.expiresAtUtc ?? undefined,
             usuarioId: session.usuarioId,
             idEmpresa: session.idEmpresa,
             correo: session.correo,
             nombreCompleto: session.nombreCompleto ?? undefined,
             roles: session.roles ?? [],
-            accesos,
+            accesos: session.accesos ?? [],
             permsVersion: session.permsVersion ?? null,
           })
         );
 
-        const roleToPath: Record<string, string> = {
-          Admin: "/admin",
-          Mesero: "/mesero",
-        };
-        const next = firstAllowed || roleToPath[session.roles[0]] || "/";
-        navigate(next, { replace: true });
+        // 3) /auth/me para permisos finos y accesos actualizados (idempotente)
+        try {
+          const me = await triggerMe().unwrap();
+          const d = me?.data;
+          if (d) {
+            dispatch(
+              setFromAuthMe({
+                usuarioId: d.usuarioId,
+                idEmpresa: d.idEmpresa,
+                correo: d.correo ?? "",
+                nombre: d.nombre,
+                roles: d.roles,
+                permissions: d.permissions ?? [],
+                accesos: d.accesos ?? [],
+                permsVersion: d.permsVersion ?? null,
+                permissionsChanged: Boolean(d.permissionsChanged),
+              })
+            );
+          }
+        } catch {
+          // si falla /me no bloqueamos el acceso; ya tienes roles/accesos del login
+        }
 
+        // 4) Redirección
+        const next = pickNextPath(session.accesos);
+        navigate(next, { replace: true });
       } catch (e: any) {
         const msg =
           e?.data?.message ||
           e?.data?.title ||
           e?.error ||
-          "No fue posible procesar la autenticación.";
+          (e?.message ?? "No fue posible procesar la autenticación.");
         setServerError(msg);
       }
     },
-    [authLogin]
+    [authLogin, triggerMe, dispatch, navigate]
   );
 
   const isLoading = isSubmitting || isFetchingFields;

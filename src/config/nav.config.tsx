@@ -334,7 +334,7 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
       {
         key: "usuarios",
         label: "Usuarios",
-        path: "/seguridad/usuarios",
+        path: "/admin/users",
         icon: <Icon name="Users" />,
         sortOrder: 10,
         allowedRoles: ["admin", "manager"],
