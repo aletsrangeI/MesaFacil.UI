@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   useAuthLoginWithPinMutation,
   useLazyAuthMeQuery,
+  useUsuarioGetAllQuery,
+  type UsuarioDto,
 } from "../../services/generated/api";
 import { useAppDispatch } from "../../app/hooks";
 import { setAuthResponse, setFromAuthMe } from "../../state/authSlice";
@@ -11,28 +13,67 @@ export function useAuthLoginPin() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  // Query para traer la cuadrícula de empleados activos
+  const { data: usersResp, isLoading: isLoadingUsers, isError: isUsersError } = useUsuarioGetAllQuery();
   const [authLoginWithPin, { isLoading: isSubmitting }] = useAuthLoginWithPinMutation();
   const [triggerMe] = useLazyAuthMeQuery();
 
-  const [userOrEmail, setUserOrEmail] = useState("");
+  const usuarios = usersResp?.data || [];
+
+  // Estados de selección de usuario e ingreso de PIN
+  const [selectedUser, setSelectedUser] = useState<UsuarioDto | null>(null);
   const [pin, setPin] = useState("");
   const [serverError, setServerError] = useState<string | null>(null);
 
+  // Estados de seguridad (Rate Limiting en Frontend)
+  const [attempts, setAttempts] = useState(0);
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+
+  // Manejo del contador de bloqueo de 30 segundos
+  useEffect(() => {
+    if (!blockedUntil) return;
+
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, Math.round((blockedUntil - Date.now()) / 1000));
+      setSecondsLeft(remaining);
+
+      if (remaining <= 0) {
+        setBlockedUntil(null);
+        setAttempts(0);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [blockedUntil]);
+
+  const selectUser = useCallback((user: UsuarioDto | null) => {
+    setSelectedUser(user);
+    setPin("");
+    setServerError(null);
+    // Al cambiar de usuario, limpiamos los intentos específicos de la sesión anterior
+    setAttempts(0);
+    setBlockedUntil(null);
+  }, []);
+
   const appendPinDigit = useCallback((digit: string) => {
+    if (blockedUntil) return;
     setServerError(null);
     setPin((prev) => {
-      if (prev.length >= 8) return prev;
+      if (prev.length >= 6) return prev; // Límite de 6 dígitos según la guía
       return prev + digit;
     });
-  }, []);
+  }, [blockedUntil]);
 
   const removePinDigit = useCallback(() => {
+    if (blockedUntil) return;
     setPin((prev) => prev.slice(0, -1));
-  }, []);
+  }, [blockedUntil]);
 
   const clearPin = useCallback(() => {
+    if (blockedUntil) return;
     setPin("");
-  }, []);
+  }, [blockedUntil]);
 
   const pickNextPath = (accesos?: string[]) => {
     const list = Array.isArray(accesos) ? accesos : [];
@@ -41,12 +82,12 @@ export function useAuthLoginPin() {
   };
 
   const handleLogin = useCallback(async () => {
+    if (blockedUntil) return;
     setServerError(null);
-    const email = userOrEmail.trim();
     const cleanPin = pin.trim();
 
-    if (!email) {
-      setServerError("El correo electrónico o usuario es requerido.");
+    if (!selectedUser?.id) {
+      setServerError("Selecciona un usuario de la lista.");
       return;
     }
     if (!cleanPin) {
@@ -57,8 +98,9 @@ export function useAuthLoginPin() {
     try {
       const apiResp = await authLoginWithPin({
         pinLoginRequest: {
-          userOrEmail: email,
+          usuarioId: selectedUser.id,
           pin: cleanPin,
+          userOrEmail: null,
         },
       }).unwrap();
 
@@ -82,6 +124,10 @@ export function useAuthLoginPin() {
           permsVersion: session.permsVersion ?? null,
         })
       );
+
+      // Limpiar intentos al tener éxito
+      setAttempts(0);
+      setBlockedUntil(null);
 
       try {
         const me = await triggerMe().unwrap();
@@ -113,17 +159,32 @@ export function useAuthLoginPin() {
         apiError?.data?.message ||
         apiError?.data?.title ||
         apiError?.error ||
-        (apiError?.message ?? "No fue posible procesar la autenticación por PIN.");
-      setServerError(msg);
+        (apiError?.message ?? "PIN incorrecto.");
+
+      // Incrementar intentos fallidos
+      const nextAttempts = attempts + 1;
+      setAttempts(nextAttempts);
+
+      if (nextAttempts >= 3) {
+        const lockDuration = Date.now() + 30000; // Bloqueo de 30 segundos
+        setBlockedUntil(lockDuration);
+        setSecondsLeft(30);
+        setServerError("PIN incorrecto. Has excedido los intentos. Teclado bloqueado por 30 segundos.");
+      } else {
+        setServerError(`${msg} Intentos restantes: ${3 - nextAttempts}`);
+      }
+
       setPin("");
     }
-  }, [userOrEmail, pin, authLoginWithPin, triggerMe, dispatch, navigate]);
+  }, [selectedUser, pin, attempts, blockedUntil, authLoginWithPin, triggerMe, dispatch, navigate]);
 
   return {
-    userOrEmail,
-    setUserOrEmail,
+    usuarios,
+    isLoadingUsers,
+    isUsersError,
+    selectedUser,
+    selectUser,
     pin,
-    setPin,
     serverError,
     setServerError,
     appendPinDigit,
@@ -131,5 +192,7 @@ export function useAuthLoginPin() {
     clearPin,
     handleLogin,
     isLoading: isSubmitting,
+    isBlocked: !!blockedUntil,
+    secondsLeft,
   };
 }

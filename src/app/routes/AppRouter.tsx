@@ -3,9 +3,10 @@ import { useSelector } from "react-redux";
 import { PrivateRoute } from "./PrivateRoute";
 import RegistroUsuario from "../../pages/auth/RegistroUsuario";
 import LoginPin from "../../pages/auth/LoginPin";
-import UsuariosPage from "../../pages/seguridad/UsuariosPage";
+import UsuariosPage from "../../pages/seguridad/usuarios";
 import AppLayout from "../../layout/AppLayout";
 import { RolesPage } from "../../pages/roles";
+import FormulariosPage from "../../pages/formularios";
 import {
   selectRolesOrGuest,
   selectAccesos,
@@ -344,7 +345,7 @@ export default function AppRouter() {
           path="/admin/forms"
           element={
             <RequireAccess path="/admin/forms">
-              <Placeholder title="Form Builder" />
+              <FormulariosPage />
             </RequireAccess>
           }
         />

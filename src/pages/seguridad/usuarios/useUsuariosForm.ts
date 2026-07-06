@@ -1,13 +1,13 @@
 import { useMemo } from "react";
-import { useFormFieldGetFormFieldByFormCatIdQuery } from "../../services/generated/api";
+import { useFormFieldGetFormFieldByFormCatIdQuery } from "../../../services/generated/api";
 import type {
   ApiFormField,
   ValidationRule,
   ValidationType,
   SelectOptionApi,
   FormCategoryId,
-} from "../../forms/types";
-import { FORM_CATEGORY_IDS } from "../../forms/types";
+} from "../../../forms/types";
+import { FORM_CATEGORY_IDS } from "../../../forms/types";
 
 /* -------------------- Helpers (normalización mínima y segura) -------------------- */
 
