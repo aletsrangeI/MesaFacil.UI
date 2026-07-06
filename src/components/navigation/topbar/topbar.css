@@ -1,0 +1,123 @@
+/* Topbar alineado al UI Kit de MesaFácil:
+   - Full width, sin “card”
+   - Micro-sombra sutil, borde inferior
+   - Acentos en --color-primary (#D64545)
+*/
+
+.mf-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--topbar-h, 56px);
+  padding: 0 var(--space-4, 16px);
+  background: var(--color-bg, #fff);
+  border-bottom: 1px solid var(--color-border, rgba(0,0,0,0.08));
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.06));
+}
+
+/* Lado izquierdo */
+.mf-topbar__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4, 16px);
+  min-width: 0; /* evita desbordes si hay título largo */
+}
+
+/* Brand compacto */
+.mf-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+.mf-brand__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-lg, 12px);
+  display: grid;
+  place-items: center;
+  color: var(--color-primary, #d64545);
+  background: rgba(214, 69, 69, 0.08);
+}
+.mf-brand__text {
+  display: grid;
+  line-height: 1.1;
+}
+.mf-brand__title {
+  color: var(--color-text, #111);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.mf-brand__subtitle {
+  font-size: 12px;
+  color: var(--color-text-muted, #666);
+}
+
+/* Título de pantalla */
+.mf-topbar__title {
+  font: 600 16px/1.1 var(--font-body, system-ui, sans-serif);
+  color: var(--color-text, #111);
+  white-space: nowrap;
+}
+
+/* Buscador */
+.mf-topbar__search {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border, rgba(0,0,0,0.1));
+  border-radius: var(--radius-md, 10px);
+  padding: 4px 8px;
+  background: #fff;
+}
+.mf-topbar__search-icon {
+  font-size: 16px;
+  color: var(--color-text-muted, #666);
+  margin-right: 6px;
+}
+.mf-topbar__search-input {
+  border: 0;
+  outline: 0;
+  font-size: 0.9rem;
+  background: transparent;
+  color: var(--color-text);
+  width: 220px;
+}
+
+/* Lado derecho */
+.mf-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4, 16px);
+}
+
+.mf-topbar__user {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: right;
+}
+.mf-topbar__name { font-weight: 600; color: var(--color-text); }
+.mf-topbar__email { font-size: 12px; color: var(--color-text-muted); }
+
+.mf-topbar__logout {
+  height: 36px;
+  width: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.mf-topbar__logout:hover {
+  background: rgba(214, 69, 69, 0.08);
+}
+
+/* Responsive */
+@media (max-width: 920px) {
+  .mf-topbar__search-input { width: 140px; }
+  .mf-topbar__email { display: none; }
+}

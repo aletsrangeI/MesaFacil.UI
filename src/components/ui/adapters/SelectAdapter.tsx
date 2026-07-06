@@ -23,7 +23,7 @@ const SelectInputAdapter: FieldComponents["SelectInput"] = (
       aria-label={aria}
       aria-invalid={p["aria-invalid"]}
       aria-describedby={p["aria-describedby"]}
-      // Props visuales desde backend:
+      // Props visuales desde backend:Toast.stories
       size={__field?.size ?? "md"}
       leftIconName={__field?.leftIconName as any}
       iconStrokeWidth={__field?.iconStrokeWidth ?? 2}

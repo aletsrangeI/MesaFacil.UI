@@ -83,12 +83,12 @@ function clearStorage() {
     localStorage.removeItem(STORAGE_KEY);
   } catch {}
 }
-
 function isExpired(expiresAt?: string) {
-  if (!expiresAt) return false;
+  if (!expiresAt) return false;                    // si tu backend aún no manda expiración, no forzamos logout
   const exp = Date.parse(expiresAt);
-  if (Number.isNaN(exp)) return false;
-  return Date.now() + 10_000 >= exp; // skew 10s
+  if (Number.isNaN(exp)) return false;             // valor inválido, tratamos como no expirado
+  const SKEW_MS = 10_000;                          // 10s de margen
+  return Date.now() + SKEW_MS >= exp;
 }
 
 const initialState: AuthState = {
@@ -313,3 +313,6 @@ export const selectHasEveryPermission = (perms: string[]) => (s: { auth: AuthSta
 
 export const selectHasSomePermission = (perms: string[]) => (s: { auth: AuthState }) =>
   perms.some(p => (s.auth.permissions ?? []).includes(p));
+
+export const selectIsExpired = (s: { auth: AuthState }) =>
+  isExpired(s.auth.expiresAt);

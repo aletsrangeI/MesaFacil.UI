@@ -42,7 +42,6 @@ export type BadgeContext = {
   [k: string]: unknown;
 };
 
-/** === Definición base (fuente de verdad) — sin filtrado === */
 export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
   {
     key: "operacion",
@@ -109,9 +108,9 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
     ],
   },
   {
-    key: "cobro",
-    label: "Cobro",
-    sortOrder: 20,
+    key: "admin",
+    label: "Administrador",
+    sortOrder: 999,
     items: [
       {
         key: "cuentas",
@@ -341,81 +340,11 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
       },
       {
         key: "roles",
-        label: "Roles y Permisos",
-        path: "/seguridad/roles",
-        icon: <Icon name="Shield" />,
-        sortOrder: 20,
-        allowedRoles: ["admin"],
-      },
-      {
-        key: "credenciales",
-        label: "Credenciales",
-        path: "/seguridad/credenciales",
-        icon: <Icon name="IdCard" />,
-        sortOrder: 30,
-        allowedRoles: ["admin"],
-      },
-      {
-        key: "turnos",
-        label: "Turnos",
-        path: "/seguridad/turnos",
-        icon: <Icon name="Clock4" />,
-        sortOrder: 40,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "catalogos",
-    label: "Catálogos",
-    sortOrder: 90,
-    items: [
-      {
-        key: "catalogos",
-        label: "Catálogos",
-        path: "/catalogos",
-        icon: <Icon name="BookOpen" />,
-        sortOrder: 10,
-        allowedRoles: ["admin", "manager"],
-      },
-    ],
-  },
-  {
-    key: "config",
-    label: "Configuración",
-    sortOrder: 100,
-    items: [
-      {
-        key: "apariencia",
-        label: "Apariencia",
-        path: "/config/apariencia",
-        icon: <Icon name="Paintbrush" />,
+        label: "Roles",
+        path: "/admin/roles",
+        icon: <Icon name="UserStar" />,
         sortOrder: 10,
         allowedRoles: ["admin"],
-      },
-      {
-        key: "integraciones",
-        label: "Integraciones",
-        path: "/config/integraciones",
-        icon: <Icon name="PlugZap" />,
-        sortOrder: 20,
-        allowedRoles: ["admin", "manager"],
-      },
-      {
-        key: "sistema",
-        label: "Sistema",
-        path: "/config/sistema",
-        icon: <Icon name="ServerCog" />,
-        sortOrder: 30,
-        allowedRoles: ["admin"],
-      },
-      {
-        key: "auditoria",
-        label: "Auditoría",
-        path: "/config/auditoria",
-        icon: <Icon name="ScrollText" />,
-        sortOrder: 40,
-        allowedRoles: ["admin", "manager"],
       },
     ],
   },
@@ -451,17 +380,24 @@ export function filterByRoles(
     .filter((sec) => sec.items.length > 0);
 }
 
+function norm(p: string) {
+  const lower = String(p || "").toLowerCase();
+  // quita slashes finales salvo la raíz
+  return lower !== "/" ? lower.replace(/\/+$/, "") : "/";
+}
+
 /** Filtra por session.accesos (lista de paths permitidos) */
-export function filterByAccesos(
+function filterByAccesos(
   sections: NavSectionConfig[],
   accesos?: string[] | null
 ): NavSectionConfig[] {
   if (!accesos || accesos.length === 0) return sections;
-  const acc = new Set(accesos.map((p) => p.toLowerCase()));
+
+  const acc = new Set((accesos ?? []).map(norm));
   return sections
     .map((sec) => ({
       ...sec,
-      items: sec.items.filter((it) => acc.has(it.path.toLowerCase())),
+      items: sec.items.filter((it) => acc.has(norm(it.path))),
     }))
     .filter((sec) => sec.items.length > 0);
 }

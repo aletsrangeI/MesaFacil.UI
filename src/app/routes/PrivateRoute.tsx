@@ -1,9 +1,11 @@
 import { Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
-import { useAppSelector } from "../hooks";
-import { selectIsAuthenticated } from "../../state/authSlice";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated, selectIsExpired } from "../../state/authSlice";
 
 export function PrivateRoute({ children }: { children: ReactNode }) {
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  const isAuth = useSelector(selectIsAuthenticated);
+  const expired = useSelector(selectIsExpired); // tu selector nuevo
+  if (!isAuth || expired) return <Navigate to="/login" replace />;
+  return <>{children}</>;
 }

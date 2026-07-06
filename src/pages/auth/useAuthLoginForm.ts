@@ -68,9 +68,18 @@ export function useAuthLoginForm(formCatId: FormCategoryId = FORM_CATEGORY_IDS.L
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  // Form schema (categoría formCatId)
+  const formCode =
+    typeof formCatId === "string"
+      ? formCatId
+      : formCatId === 1
+      ? "REGISTRO_USUARIO"
+      : formCatId === 2
+      ? "GESTION_USUARIOS"
+      : "LOGIN";
+
+  // Form schema (categoría formCode)
   const { data: resp, isFetching: isFetchingFields, isError: isFieldsError, error: fieldsError } =
-    useFormFieldGetFormFieldByFormCatIdQuery({ id: formCatId });
+    useFormFieldGetFormFieldByFormCatIdQuery({ code: formCode });
 
   // Mutación de login y consulta lazy de /auth/me
   const [authLogin, { isLoading: isSubmitting, error }] = useAuthLoginMutation();
@@ -153,7 +162,6 @@ export function useAuthLoginForm(formCatId: FormCategoryId = FORM_CATEGORY_IDS.L
           setAuthResponse({
             accessToken: token.accessToken,
             refreshToken: token.refreshToken ?? undefined,
-            // si tu back ya envía expiresAtUtc, úsalo (en tu ejemplo sí viene)
             expiresAt: token.expiresAtUtc ?? undefined,
             usuarioId: session.usuarioId,
             idEmpresa: session.idEmpresa,

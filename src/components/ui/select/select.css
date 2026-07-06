@@ -32,7 +32,10 @@
   border-radius: var(--radius-md, 12px);
   padding: var(--pad-y) var(--pad-x);
   box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 
   /* Target mínimo accesible ≈ 44px */
   min-height: 44px;
@@ -96,8 +99,8 @@
 }
 .ui-select__field:has(.ui-select__control:focus-visible) {
   border-color: var(--color-primary, #d64545);
-  box-shadow: 0 0 0 3px
-      color-mix(in srgb, var(--color-primary, #d64545) 24%, transparent),
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-primary, #d64545) 24%, transparent),
     var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
 }
 
@@ -138,4 +141,8 @@
   .ui-select__field {
     transition: none;
   }
+}
+.ui-select__chevron,
+.ui-select__icon {
+  pointer-events: none;
 }

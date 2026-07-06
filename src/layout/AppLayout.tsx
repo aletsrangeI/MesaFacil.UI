@@ -1,6 +1,9 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { Sidebar, type SidebarSection } from "../components/navigation/Sidebar";
+import {
+  Sidebar,
+  type SidebarSection,
+} from "../components/navigation/sidebar/Sidebar";
 import {
   buildNavSections,
   type CanonicalRole,
@@ -12,8 +15,9 @@ import { logout } from "../state/authSlice";
 import Icon from "../components/ui/icons/Icon";
 
 import "../styles/tokens.css"; // asegúrate que esté cargado globalmente
-import "../components/navigation/sidebar.css"; // estilos del Sidebar
+import "../components/navigation/sidebar/sidebar.css"; // estilos del Sidebar
 import "./app-shell.css"; // estilos del layout (abajo)
+import Topbar from "../components/navigation/topbar/Topbar";
 
 export type AppLayoutProps = {
   /** Roles canónicos del usuario logueado (p.ej. ["admin"]) */
@@ -92,15 +96,8 @@ export default function AppLayout({
       </aside>
 
       <div className="app-shell__main">
-        {showTopbar && (
-          <header className="app-shell__topbar">
-            {/* Si aún no tienes un Topbar, este slot te permite inyectar uno temporal */}
-            {topbar ?? (
-              <div className="app-shell__topbar-placeholder">Topbar</div>
-            )}
-          </header>
-        )}
-
+        {showTopbar &&
+          (topbar ?? <Topbar showBrand={false} subtitle="Backoffice" />)}
         <main className="app-shell__content">
           <Outlet />
         </main>

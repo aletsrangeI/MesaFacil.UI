@@ -1,4 +1,4 @@
-/* App Shell — estructura general usando tus tokens */
+/* App Shell — layout base coherente con Sidebar y Topbar */
 
 :root {
   --sidebar-w: 272px;
@@ -6,54 +6,51 @@
   --topbar-h: 56px;
 }
 
+/* Contenedor raíz: 2 columnas (sidebar | main) ocupando toda la vista */
 .app-shell {
-  min-height: 100vh;
-  background: var(--color-bg);
-  color: var(--color-text);
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100dvh; /* usa viewport dinámico para móviles */
+  background: var(--color-app-bg, #fafafa);
+  color: var(--color-text, #111);
 }
 
+/* Colapsado: solo toca el ancho de la primera columna */
 .app-shell.is-collapsed {
   grid-template-columns: var(--sidebar-w-collapsed) 1fr;
 }
 
+/* Columna izquierda (Sidebar) — sin sombras/bordes extra (ya están en sidebar.css) */
 .app-shell__side {
-  min-height: 100%;
-  border-right: 1px solid var(--color-border);
-  background: var(--color-bg);
+  position: sticky; /* Sidebar se queda fijo al hacer scroll */
+  top: 0;
+  align-self: start;
+  height: 100dvh;
+  background: var(--color-bg, #fff);
+  /* NO poner overflow aquí: el propio .mf-sidebar maneja el scroll del nav */
 }
 
+/* Columna derecha (Main) — define el rail de Topbar + Contenido */
 .app-shell__main {
   display: grid;
-  grid-template-rows: auto 1fr;
-  min-width: 0;
+  grid-template-rows: auto 1fr; /* fila 1: topbar, fila 2: contenido */
+  min-width: 0;  /* evita overflow horizontal por títulos largos */
+  min-height: 100dvh;
+  background: var(--color-app-bg, #fafafa);
 }
 
-/* Topbar (placeholder hasta que creemos el componente real) */
-.app-shell__topbar {
-  height: var(--topbar-h);
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  padding: 0 var(--space-4);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.app-shell__topbar-placeholder {
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
+/* IMPORTANTE: El Topbar ya es <header class="mf-topbar"> con border y sombra.
+   No uses un wrapper con estilos adicionales para evitar "doble borde/sombra". */
 
-/* Contenido principal */
+/* Área de contenido: este es el que hace scroll */
 .app-shell__content {
-  padding: var(--space-6);
+  overflow: auto;
   min-width: 0;
+  padding: var(--space-6, 24px);
+  /* no le pongas fondo blanco aquí: deja ver el app-bg salvo que una vista lo requiera */
 }
 
-/* Responsive: fuerza colapsado en pantallas chicas */
+/* Responsive — forzar colapsado en pantallas chicas */
 @media (max-width: 920px) {
   .app-shell {
     grid-template-columns: var(--sidebar-w-collapsed) 1fr;

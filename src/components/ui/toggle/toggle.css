@@ -52,3 +52,24 @@
 .ui-toggle__label {
   color: var(--color-text, #1f1f1f);
 }
+/* separaciones base del wrapper */
+.ui-field {
+  margin: 12px 0; /* separa todos los campos */
+}
+
+/* switches un poco más compactos, pero con separación entre sí */
+.ui-field--switch {
+  margin: 10px 0;
+}
+
+/* cuando hay switches consecutivos, añade extra separación vertical */
+.ui-field--switch + .ui-field--switch {
+  margin-top: 12px;
+}
+
+/* estructura del toggle (si no la tienes) */
+.ui-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

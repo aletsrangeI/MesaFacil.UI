@@ -2,18 +2,7 @@ import { Input } from "../input";
 import type { FieldComponents, FieldProps } from "../../../forms/FieldRenderer";
 import Icon from "../icons/Icon";
 import type { ApiFormField } from "../../../forms/types";
-
-/**
- * Regla: no pasamos `label` ni `errorText` al <Input/> para
- * evitar duplicados, porque el FormGenerator ya los pinta
- * con FieldWrapper (label) y ErrorText (mensaje).
- *
- * Si más adelante prefieres que el <Input/> muestre SU
- * propio label/errorText internos, te paso una variante opcional.
- *
- *
- */
-
+import { Toggle } from "../toggle";
 
 // Text
 const TextInputAdapter: FieldComponents["TextInput"] = (
@@ -91,13 +80,38 @@ const DateInputAdapter: FieldComponents["DateInput"] = (p: FieldProps) => {
   );
 };
 
+const CheckboxInputAdapter: FieldComponents["CheckboxInput"] = (p) => {
+  // p.checked, p.onChange, p.onBlur, p.name ya vienen del FormGenerator
+  return (
+    <Toggle
+      id={p.name}
+      checked={p.checked}
+      onChange={p.onChange}
+      onBlur={p.onBlur as any}
+      aria-invalid={p["aria-invalid"]}
+      aria-describedby={p["aria-describedby"]}
+      label={p.label}
+    />
+  );
+};
+
 // Wrapper y ErrorText: dejamos los que ya usa tu CSS (coinciden con tu Input.css)
 const FieldWrapper: FieldComponents["FieldWrapper"] = ({
   children,
   label,
   name,
+  className,
+  variant,
 }) => (
-  <div className="ui-field">
+  <div
+    className={[
+      "ui-field",
+      variant ? `ui-field--${variant}` : "",
+      className ?? "",
+    ]
+      .join(" ")
+      .trim()}
+  >
     {label && (
       <label htmlFor={name} className="ui-label">
         {label}
@@ -117,7 +131,7 @@ export const InputAdapter: Partial<FieldComponents> = {
   TextInput: TextInputAdapter,
   PasswordInput: PasswordInputAdapter,
   DateInput: DateInputAdapter,
+  CheckboxInput: CheckboxInputAdapter,
   FieldWrapper,
   ErrorText,
-  // Tip: puedes dejar SelectInput sin implementar y el FormGenerator usará el <select> por defecto.
 };
