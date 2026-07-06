@@ -86,3 +86,96 @@
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* PIN Feedback & Indicators */
+.pin-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-block: 8px;
+}
+
+.pin-feedback__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.pin-feedback__indicators {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.pin-feedback__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-hover);
+  background: transparent;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pin-feedback__dot.is-filled {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(214, 69, 69, 0.4);
+}
+
+/* Numeric Keypad */
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.pin-keypad__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  background: #fcfcfc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.pin-keypad__btn:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: var(--color-border-hover);
+  transform: translateY(-1px);
+}
+
+.pin-keypad__btn:active:not(:disabled) {
+  transform: scale(0.95);
+  background: #ebebeb;
+}
+
+.pin-keypad__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pin-keypad__btn--danger {
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 5%, #ffffff);
+}
+.pin-keypad__btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 10%, #ffffff);
+}
+
+.pin-keypad__btn--back {
+  color: var(--color-muted);
+}
+

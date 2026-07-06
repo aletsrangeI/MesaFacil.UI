@@ -260,3 +260,25 @@
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   background: #fcfcfc;
 }
+
+/* Estilos de espaciado para campos del FormGenerator (SDUI) */
+.ui-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px; /* Espacio entre el campo actual y el de arriba */
+}
+
+.ui-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Espacio entre el label del campo y su input */
+}
+
+.ui-label {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+

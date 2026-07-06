@@ -21,6 +21,17 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Auth"],
       }),
+      authLoginWithPin: build.mutation<
+        AuthLoginWithPinApiResponse,
+        AuthLoginWithPinApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Auth/login-pin`,
+          method: "POST",
+          body: queryArg.pinLoginRequest,
+        }),
+        invalidatesTags: ["Auth"],
+      }),
       authMe: build.query<AuthMeApiResponse, AuthMeApiArg>({
         query: () => ({ url: `/api/Auth/me` }),
         providesTags: ["Auth"],
@@ -767,6 +778,11 @@ export type AuthLoginApiResponse =
 export type AuthLoginApiArg = {
   loginRequest: LoginRequest;
 };
+export type AuthLoginWithPinApiResponse =
+  /** status 200 OK */ ResponseOfAuthResponseDto;
+export type AuthLoginWithPinApiArg = {
+  pinLoginRequest: PinLoginRequest;
+};
 export type AuthMeApiResponse = /** status 200 OK */ ResponseOfAuthMeDto;
 export type AuthMeApiArg = void;
 export type CatCredencialInsertApiResponse = unknown;
@@ -1142,6 +1158,12 @@ export type LoginRequest = {
   empresaId?: number | null;
   sucursalId?: number | null;
 };
+export type PinLoginRequest = {
+  userOrEmail: string;
+  pin: string;
+  empresaId?: number | null;
+  sucursalId?: number | null;
+};
 export type AuthMeDto = {
   usuarioId: number;
   idEmpresa: number;
@@ -1311,10 +1333,13 @@ export type ResponsePaginationOfIEnumerableOfRolDto = {
 export type UsuarioDto = {
   id?: number;
   idEmpresa?: number;
+  nombreEmpresa?: string | null;
   nombreCompleto?: string | null;
   correo?: string | null;
   password?: string | null;
+  pin?: string | null;
   idRol?: number | null;
+  nombreRol?: string | null;
 };
 export type ResponseOfIEnumerableOfUsuarioDto = {
   data?: UsuarioDto[] | null;
@@ -1325,10 +1350,13 @@ export type ResponseOfIEnumerableOfUsuarioDto = {
 export type UsuarioDto2 = {
   id?: number;
   idEmpresa?: number;
+  nombreEmpresa?: string | null;
   nombreCompleto?: string | null;
   correo?: string | null;
   password?: string | null;
+  pin?: string | null;
   idRol?: number | null;
+  nombreRol?: string | null;
 } | null;
 export type ResponseOfUsuarioDto = {
   data?: UsuarioDto2;
@@ -1373,6 +1401,7 @@ export type ResponseOfstring = {
 };
 export const {
   useAuthLoginMutation,
+  useAuthLoginWithPinMutation,
   useAuthMeQuery,
   useLazyAuthMeQuery,
   useCatCredencialInsertMutation,

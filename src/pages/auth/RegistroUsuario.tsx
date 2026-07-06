@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { FormGenerator } from "../../forms/FormGenerator";
 import { mesaFacilFields } from "../../components/ui/adapters";
 import Container from "../../components/ui/layout/Container";
@@ -8,6 +9,7 @@ import { FORM_CATEGORY_IDS } from "../../forms/types";
 import "./auth-form.css";
 
 export default function RegistroUsuario() {
+  const navigate = useNavigate();
   const {
     formId,
     fields,
@@ -63,6 +65,15 @@ export default function RegistroUsuario() {
               disabled={isLoading}
             >
               {isLoading ? "Ingresando..." : "Entrar"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate("/login-pin")}
+              disabled={isLoading}
+              leftIcon={<Icon name="Key" />}
+            >
+              Acceso rápido con PIN
             </Button>
           </div>
         </div>

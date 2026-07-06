@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { PrivateRoute } from "./PrivateRoute";
 import { PermissionGuard } from "./PermissionGuard"; // <-- usa permisos finos
 import RegistroUsuario from "../../pages/auth/RegistroUsuario";
+import LoginPin from "../../pages/auth/LoginPin";
 import UsuariosPage from "../../pages/seguridad/UsuariosPage";
 import AppLayout from "../../layout/AppLayout";
 import {
@@ -29,6 +30,7 @@ export default function AppRouter() {
     <Routes>
       {/* Público */}
       <Route path="/login" element={<RegistroUsuario />} />
+      <Route path="/login-pin" element={<LoginPin />} />
 
       {/* Privado */}
       <Route

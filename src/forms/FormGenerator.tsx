@@ -52,6 +52,7 @@ export function FormGenerator({
       initialValues={initial}
       validationSchema={validationSchema}
       onSubmit={onSubmit}
+      enableReinitialize
     >
       {({ isSubmitting }) => (
         <Form id={formId} noValidate className="ui-form">
