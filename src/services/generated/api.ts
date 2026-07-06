@@ -4,6 +4,7 @@ export const addTagTypes = [
   "CatCredencial",
   "Empresa",
   "FormField",
+  "Formulario",
   "Rol",
   "Usuario",
 ] as const;
@@ -453,6 +454,142 @@ const injectedRtkApi = api
           url: `/api/FormField/GetFormFieldByFormCatIdAsync/${queryArg.id}`,
         }),
         providesTags: ["FormField"],
+      }),
+      formularioInsert: build.mutation<
+        FormularioInsertApiResponse,
+        FormularioInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/Insert`,
+          method: "POST",
+          body: queryArg.formularioDto,
+        }),
+        invalidatesTags: ["Formulario"],
+      }),
+      formularioUpdate: build.mutation<
+        FormularioUpdateApiResponse,
+        FormularioUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/Update/${queryArg.id}`,
+          method: "PUT",
+          body: queryArg.formularioDto,
+        }),
+        invalidatesTags: ["Formulario"],
+      }),
+      formularioDelete: build.mutation<
+        FormularioDeleteApiResponse,
+        FormularioDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Formulario"],
+      }),
+      formularioGetById: build.query<
+        FormularioGetByIdApiResponse,
+        FormularioGetByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/GetById/${queryArg.id}`,
+        }),
+        providesTags: ["Formulario"],
+      }),
+      formularioGetAll: build.query<
+        FormularioGetAllApiResponse,
+        FormularioGetAllApiArg
+      >({
+        query: () => ({ url: `/api/Formulario/GetAll` }),
+        providesTags: ["Formulario"],
+      }),
+      formularioGetPaged: build.query<
+        FormularioGetPagedApiResponse,
+        FormularioGetPagedApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/GetPaged`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Formulario"],
+      }),
+      formularioCount: build.query<
+        FormularioCountApiResponse,
+        FormularioCountApiArg
+      >({
+        query: () => ({ url: `/api/Formulario/Count` }),
+        providesTags: ["Formulario"],
+      }),
+      formularioInsertAsync: build.mutation<
+        FormularioInsertAsyncApiResponse,
+        FormularioInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/InsertAsync`,
+          method: "POST",
+          body: queryArg.formularioDto,
+        }),
+        invalidatesTags: ["Formulario"],
+      }),
+      formularioUpdateAsync: build.mutation<
+        FormularioUpdateAsyncApiResponse,
+        FormularioUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/UpdateAsync/${queryArg.id}`,
+          method: "PUT",
+          body: queryArg.formularioDto,
+        }),
+        invalidatesTags: ["Formulario"],
+      }),
+      formularioDeleteAsync: build.mutation<
+        FormularioDeleteAsyncApiResponse,
+        FormularioDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Formulario"],
+      }),
+      formularioGetByIdAsync: build.query<
+        FormularioGetByIdAsyncApiResponse,
+        FormularioGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["Formulario"],
+      }),
+      formularioGetAllAsync: build.query<
+        FormularioGetAllAsyncApiResponse,
+        FormularioGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Formulario/GetAllAsync` }),
+        providesTags: ["Formulario"],
+      }),
+      formularioGetPagedAsync: build.query<
+        FormularioGetPagedAsyncApiResponse,
+        FormularioGetPagedAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Formulario/GetPagedAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Formulario"],
+      }),
+      formularioCountAsync: build.query<
+        FormularioCountAsyncApiResponse,
+        FormularioCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Formulario/CountAsync` }),
+        providesTags: ["Formulario"],
       }),
       rolInsert: build.mutation<RolInsertApiResponse, RolInsertApiArg>({
         query: (queryArg) => ({
@@ -965,6 +1102,71 @@ export type FormFieldGetFormFieldByFormCatIdAsyncAsyncApiResponse =
 export type FormFieldGetFormFieldByFormCatIdAsyncAsyncApiArg = {
   id: number;
 };
+export type FormularioInsertApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type FormularioInsertApiArg = {
+  formularioDto: FormularioDto;
+};
+export type FormularioUpdateApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type FormularioUpdateApiArg = {
+  id: number;
+  formularioDto: FormularioDto;
+};
+export type FormularioDeleteApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type FormularioDeleteApiArg = {
+  id: number;
+};
+export type FormularioGetByIdApiResponse =
+  /** status 200 OK */ ResponseOfFormularioDto;
+export type FormularioGetByIdApiArg = {
+  id: number;
+};
+export type FormularioGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfFormularioDto;
+export type FormularioGetAllApiArg = void;
+export type FormularioGetPagedApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfFormularioDto;
+export type FormularioGetPagedApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type FormularioCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type FormularioCountApiArg = void;
+export type FormularioInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type FormularioInsertAsyncApiArg = {
+  formularioDto: FormularioDto;
+};
+export type FormularioUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type FormularioUpdateAsyncApiArg = {
+  id: number;
+  formularioDto: FormularioDto;
+};
+export type FormularioDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type FormularioDeleteAsyncApiArg = {
+  id: number;
+};
+export type FormularioGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfFormularioDto;
+export type FormularioGetByIdAsyncApiArg = {
+  id: number;
+};
+export type FormularioGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfFormularioDto;
+export type FormularioGetAllAsyncApiArg = void;
+export type FormularioGetPagedAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfFormularioDto;
+export type FormularioGetPagedAsyncApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type FormularioCountAsyncApiResponse =
+  /** status 200 OK */ ResponseOfint;
+export type FormularioCountAsyncApiArg = void;
 export type RolInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
 export type RolInsertApiArg = {
   rolDto: RolDto;
@@ -1159,8 +1361,9 @@ export type LoginRequest = {
   sucursalId?: number | null;
 };
 export type PinLoginRequest = {
-  userOrEmail: string;
+  userOrEmail: string | null;
   pin: string;
+  usuarioId?: number | null;
   empresaId?: number | null;
   sucursalId?: number | null;
 };
@@ -1289,6 +1492,43 @@ export type ResponsePaginationOfIEnumerableOfFormFieldDto = {
   hasPreviousPage?: boolean;
   hasNextPage?: boolean;
   data?: FormFieldDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type FormularioDto = {
+  id?: number;
+  codigo?: string;
+  nombre?: string;
+  descripcion?: string | null;
+  campos?: FormFieldDto[];
+};
+export type FormularioDto2 = {
+  id?: number;
+  codigo?: string;
+  nombre?: string;
+  descripcion?: string | null;
+  campos?: FormFieldDto[];
+} | null;
+export type ResponseOfFormularioDto = {
+  data?: FormularioDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponseOfIEnumerableOfFormularioDto = {
+  data?: FormularioDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfFormularioDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: FormularioDto[] | null;
   isSuccess?: boolean;
   message?: string;
   errors?: ValidationFailure[];
@@ -1476,6 +1716,28 @@ export const {
   useLazyFormFieldCountAsyncQuery,
   useFormFieldGetFormFieldByFormCatIdAsyncAsyncQuery,
   useLazyFormFieldGetFormFieldByFormCatIdAsyncAsyncQuery,
+  useFormularioInsertMutation,
+  useFormularioUpdateMutation,
+  useFormularioDeleteMutation,
+  useFormularioGetByIdQuery,
+  useLazyFormularioGetByIdQuery,
+  useFormularioGetAllQuery,
+  useLazyFormularioGetAllQuery,
+  useFormularioGetPagedQuery,
+  useLazyFormularioGetPagedQuery,
+  useFormularioCountQuery,
+  useLazyFormularioCountQuery,
+  useFormularioInsertAsyncMutation,
+  useFormularioUpdateAsyncMutation,
+  useFormularioDeleteAsyncMutation,
+  useFormularioGetByIdAsyncQuery,
+  useLazyFormularioGetByIdAsyncQuery,
+  useFormularioGetAllAsyncQuery,
+  useLazyFormularioGetAllAsyncQuery,
+  useFormularioGetPagedAsyncQuery,
+  useLazyFormularioGetPagedAsyncQuery,
+  useFormularioCountAsyncQuery,
+  useLazyFormularioCountAsyncQuery,
   useRolInsertMutation,
   useRolGetAllQuery,
   useLazyRolGetAllQuery,

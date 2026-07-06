@@ -7,8 +7,8 @@ import {
   useRolGetAllQuery,
   useEmpresaGetAllQuery,
   type UsuarioDto,
-} from "../../services/generated/api";
-import { useToast } from "../../components/ui/toast/Toast";
+} from "../../../services/generated/api";
+import { useToast } from "../../../components/ui/toast/Toast";
 import { useUsuariosForm } from "./useUsuariosForm";
 
 export function useUsuarios() {

@@ -90,3 +90,11 @@ src/
     npm run api:gen
     ```
     No modifiques el archivo autogenerado manualmente.
+
+### 📌 Convención de Nombres y Estructura de Páginas
+*   **Agrupación en Carpetas con `index.tsx`:** Toda nueva vista o página compleja debe estructurarse dentro de su propia subcarpeta en `src/pages/` conteniendo un archivo principal `index.tsx`. Por ejemplo, `src/pages/roles/index.tsx` y `src/pages/seguridad/usuarios/index.tsx`.
+*   Esto permite empaquetar de forma coherente el componente de la página junto a sus hooks personalizados (ej: `useUsuarios.ts`), estilos (ej: `usuarios.css`), y subcomponentes en un mismo módulo lógico.
+
+### 📌 Tablas de Datos
+*   **Uso de TanStack Table:** Para renderizar tablas interactivas, ordenables, paginadas o con búsqueda en el proyecto, se debe utilizar obligatoriamente **TanStack Table** (`@tanstack/react-table`). Esto asegura la consistencia en el manejo del estado de la tabla, rendimiento y accesibilidad.
+
