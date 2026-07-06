@@ -39,6 +39,8 @@ const SelectInputAdapter: FieldComponents["SelectInput"] = (
   );
 };
 
+
+
 export const SelectAdapter: Partial<FieldComponents> = {
   SelectInput: SelectInputAdapter,
 };

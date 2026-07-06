@@ -561,6 +561,17 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Auth"],
       }),
+      authLoginWithPin: build.mutation<
+        AuthLoginWithPinApiResponse,
+        AuthLoginWithPinApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Auth/login-pin`,
+          method: "POST",
+          body: queryArg.pinLoginRequest,
+        }),
+        invalidatesTags: ["Auth"],
+      }),
       authMe: build.query<AuthMeApiResponse, AuthMeApiArg>({
         query: () => ({ url: `/api/auth/me` }),
         providesTags: ["Auth"],
@@ -4571,6 +4582,11 @@ export type AuthLoginApiResponse =
 export type AuthLoginApiArg = {
   loginRequest: LoginRequest;
 };
+export type AuthLoginWithPinApiResponse =
+  /** status 200 OK */ ResponseOfAuthResponseDto;
+export type AuthLoginWithPinApiArg = {
+  pinLoginRequest: PinLoginRequest;
+};
 export type AuthMeApiResponse = /** status 200 OK */ ResponseOfAuthMeDto;
 export type AuthMeApiArg = void;
 export type CuentaInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
@@ -6576,6 +6592,12 @@ export type LoginRequest = {
   empresaId?: number | null;
   sucursalId?: number | null;
 };
+export type PinLoginRequest = {
+  userOrEmail: string;
+  pin: string;
+  empresaId?: number | null;
+  sucursalId?: number | null;
+};
 export type AuthMeDto = {
   usuarioId: number;
   idEmpresa: number;
@@ -7856,6 +7878,7 @@ export const {
   useClienteCountAsyncQuery,
   useLazyClienteCountAsyncQuery,
   useAuthLoginMutation,
+  useAuthLoginWithPinMutation,
   useAuthMeQuery,
   useLazyAuthMeQuery,
   useCuentaInsertMutation,

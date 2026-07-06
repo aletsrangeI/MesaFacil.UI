@@ -28,6 +28,9 @@ function applyRule(
       // Para inputs <input type="date" />, validamos formato simple YYYY-MM-DD
       base = base.matches(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida (YYYY-MM-DD)");
       break;
+    case "minLength":
+      base = base.min(rule.value, `Mínimo ${rule.value} caracteres`);
+      break;
     case "confirmPassword": {
       // Busca el campo 'password' definido en el payload
       const pwdField =

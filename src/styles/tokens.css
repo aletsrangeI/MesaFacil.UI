@@ -1,15 +1,48 @@
 :root {
---color-primary: #D64545; /* terracota */
---color-primary-600: #b93c3c;
---color-secondary: #E2A72E; /* mostaza */
---color-text: #1f1f1f;
---color-muted: #6b7280;
---color-bg: #f5f5f5;
---radius: 12px;
---shadow-sm: 0 4px 12px rgba(0,0,0,.06);
---focus: 0 0 0 3px rgba(214,69,69,.25);
+  /* Paleta Cromática */
+  --color-primary: #D64545; /* terracota */
+  --color-primary-600: #b93c3c;
+  --color-secondary: #E2A72E; /* mostaza (anteriormente E2A72E o E9B949 de moodboard) */
+  --color-success: #3C8D40; /* éxito */
+  --color-text: #1F1F1F;
+  --color-text-muted: #6B7280;
+  --color-muted: #6b7280;
+  --color-border: rgba(0,0,0,0.08); /* borde sutil */
+  --color-border-hover: rgba(0,0,0,0.18);
+  --color-bg: #F9F9F9; /* Fondo base */
+  --color-sidebar-bg: #FFFFFF; /* Fondo del Sidebar */
 
+  /* Tipografías */
+  --font-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-h1: "Fredoka", "Baloo 2", var(--font-sans);
+  --font-h2: "Fredoka", "Baloo 2", var(--font-sans);
+  --font-body: var(--font-sans);
+  --font-caption: var(--font-sans);
 
-/* Tipografías base */
---font-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  /* Spacings */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius: 12px;
+  --radius-lg: 20px;
+
+  /* Sombras */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.1);
+
+  /* Foco */
+  --focus: 0 0 0 3px rgba(214, 69, 69, 0.2);
+
+  /* Iconos */
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
 }

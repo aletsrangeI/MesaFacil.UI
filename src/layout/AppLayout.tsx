@@ -10,6 +10,9 @@ import {
   type BadgeContext,
   type NavSectionConfig,
 } from "../config/nav.config";
+import { useAppDispatch } from "../app/hooks";
+import { logout } from "../state/authSlice";
+import Icon from "../components/ui/icons/Icon";
 
 import "../styles/tokens.css"; // asegúrate que esté cargado globalmente
 import "../components/navigation/sidebar/sidebar.css"; // estilos del Sidebar
@@ -54,6 +57,11 @@ export default function AppLayout({
   density = "comfortable",
 }: AppLayoutProps) {
   const [collapsed, setCollapsed] = React.useState(false);
+  const dispatch = useAppDispatch();
+
+  const handleLogout = React.useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
 
   const navSections = React.useMemo(
     () => buildNavSections({ roles, accesos, badgesCtx }),
@@ -75,12 +83,14 @@ export default function AppLayout({
           density={density}
           brand={{ text: "MesaFácil", subtext: "" }}
           footer={
-            <a
-              href="#"
-              style={{ textDecoration: "none", color: "var(--color-text)" }}
+            <button
+              onClick={handleLogout}
+              className="mf-sidebar__logout-btn"
+              title="Cerrar sesión"
             >
-              Salir
-            </a>
+              <Icon name="LogOut" size={18} />
+              {!collapsed && <span>Cerrar sesión</span>}
+            </button>
           }
         />
       </aside>
