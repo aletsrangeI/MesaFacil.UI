@@ -4044,7 +4044,9 @@ const injectedRtkApi = api
         FormFieldGetFormFieldByFormCatIdApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/formfield/GetFormFieldByFormCatId/${queryArg.code}`,
+          url: queryArg.id !== undefined
+            ? `/api/FormField/GetFormFieldByFormCatId/${queryArg.id}`
+            : `/api/formfield/GetFormFieldByFormCatId/${queryArg.code}`,
         }),
         providesTags: ["FormField"],
       }),
@@ -6263,7 +6265,8 @@ export type FormFieldCountAsyncApiArg = void;
 export type FormFieldGetFormFieldByFormCatIdApiResponse =
   /** status 200 OK */ ResponseOfIEnumerableOfFormFieldDto;
 export type FormFieldGetFormFieldByFormCatIdApiArg = {
-  code: string;
+  id?: number;
+  code?: string;
 };
 export type FormFieldGetFormFieldByFormCatIdAsyncAsyncApiResponse =
   /** status 200 OK */ ResponseOfIEnumerableOfFormFieldDto;
