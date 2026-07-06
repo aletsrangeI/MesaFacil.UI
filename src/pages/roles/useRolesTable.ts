@@ -3,11 +3,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { mesaFacilFields } from "../../components/ui/adapters";
 import {
   useFormFieldGetFormFieldByFormCatIdQuery,
-  useRolGetPagedQuery,
+  useRolGetAllWithPaginationQuery,
   useRolInsertMutation,
   useRolUpdateMutation,
   useRolDeleteMutation,
-  type RolGetPagedApiResponse,
+  type RolGetAllWithPaginationApiResponse,
 } from "../../services/generated/api";
 import type { ApiFormField } from "../../forms/types";
 import { useToast } from "../../components/ui/toast/";
@@ -46,10 +46,10 @@ export function useRolesTable(opts?: UseRolesTableOptions) {
     isFetching: isPageFetching,
     refetch: refetchPage,
     error: pageError,
-  } = useRolGetPagedQuery({ page, pageSize });
+  } = useRolGetAllWithPaginationQuery({ page, pageSize });
 
   const rows: RolRow[] = useMemo(() => {
-    const list = (paged as RolGetPagedApiResponse | undefined)?.data ?? [];
+    const list = (paged as RolGetAllWithPaginationApiResponse | undefined)?.data ?? [];
     return list.map((r: any) => ({
       id: r.id,
       nombre: r.nombre,
@@ -59,7 +59,7 @@ export function useRolesTable(opts?: UseRolesTableOptions) {
   }, [paged]);
 
   const totalCount =
-    (paged as RolGetPagedApiResponse | undefined)?.totalCount ?? 0;
+    (paged as RolGetAllWithPaginationApiResponse | undefined)?.totalCount ?? 0;
 
   const error = pageError
     ? "status" in (pageError as any) && (pageError as any).status
@@ -166,7 +166,7 @@ export function useRolesTable(opts?: UseRolesTableOptions) {
     isFetching: isFetchingEditForm,
     isError: isEditFormError,
   } = useFormFieldGetFormFieldByFormCatIdQuery(
-    { code: "ROL" },
+    { id: 3 },
     { skip: !isEditOpen }
   );
 
@@ -199,13 +199,14 @@ export function useRolesTable(opts?: UseRolesTableOptions) {
       setEditSaveError(null);
 
       const dto = {
+        id: editing.id,
         nombre: String(values.nombre ?? "").trim(),
         isSystem: toBool(values.isSystem),
         isAssignable: toBool(values.isAssignable),
       };
 
       try {
-        await updateRol({ id: editing.id, rolDto: dto }).unwrap();
+        await updateRol({ rolDto: dto }).unwrap();
         closeEdit();
         refetch();
         addToast({
@@ -232,7 +233,7 @@ export function useRolesTable(opts?: UseRolesTableOptions) {
     isFetching: isFetchingCreateForm,
     isError: isCreateFormError,
   } = useFormFieldGetFormFieldByFormCatIdQuery(
-    { code: "ROL" },
+    { id: 3 },
     { skip: !isCreateOpen }
   );
 

@@ -68,18 +68,9 @@ export function useAuthLoginForm(formCatId: FormCategoryId = FORM_CATEGORY_IDS.L
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const formCode =
-    typeof formCatId === "string"
-      ? formCatId
-      : formCatId === 1
-      ? "REGISTRO_USUARIO"
-      : formCatId === 2
-      ? "GESTION_USUARIOS"
-      : "LOGIN";
-
-  // Form schema (categoría formCode)
+  // Form schema (categoría formCatId)
   const { data: resp, isFetching: isFetchingFields, isError: isFieldsError, error: fieldsError } =
-    useFormFieldGetFormFieldByFormCatIdQuery({ code: formCode });
+    useFormFieldGetFormFieldByFormCatIdQuery({ id: formCatId });
 
   // Mutación de login y consulta lazy de /auth/me
   const [authLogin, { isLoading: isSubmitting, error }] = useAuthLoginMutation();
