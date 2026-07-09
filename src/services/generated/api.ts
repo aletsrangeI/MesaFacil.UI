@@ -1,6 +1,7 @@
 import { emptySplitApi as api } from "../baseApi";
 export const addTagTypes = [
   "Auth",
+  "Catalogos",
   "CatCredencial",
   "Empresa",
   "FormField",
@@ -36,6 +37,150 @@ const injectedRtkApi = api
       authMe: build.query<AuthMeApiResponse, AuthMeApiArg>({
         query: () => ({ url: `/api/Auth/me` }),
         providesTags: ["Auth"],
+      }),
+      catalogosGetAll: build.query<
+        CatalogosGetAllApiResponse,
+        CatalogosGetAllApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/GetAll`,
+        }),
+        providesTags: ["Catalogos"],
+      }),
+      catalogosGetById: build.query<
+        CatalogosGetByIdApiResponse,
+        CatalogosGetByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/GetById/${queryArg.id}`,
+        }),
+        providesTags: ["Catalogos"],
+      }),
+      catalogosInsert: build.mutation<
+        CatalogosInsertApiResponse,
+        CatalogosInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/Insert`,
+          method: "POST",
+          body: queryArg.genericCatalogDto,
+        }),
+        invalidatesTags: ["Catalogos"],
+      }),
+      catalogosUpdate: build.mutation<
+        CatalogosUpdateApiResponse,
+        CatalogosUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/Update`,
+          method: "PUT",
+          body: queryArg.genericCatalogDto,
+        }),
+        invalidatesTags: ["Catalogos"],
+      }),
+      catalogosDelete: build.mutation<
+        CatalogosDeleteApiResponse,
+        CatalogosDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Catalogos"],
+      }),
+      catalogosGetAllWithPagination: build.query<
+        CatalogosGetAllWithPaginationApiResponse,
+        CatalogosGetAllWithPaginationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/GetAllWithPagination`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Catalogos"],
+      }),
+      catalogosCount: build.query<
+        CatalogosCountApiResponse,
+        CatalogosCountApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/Count`,
+        }),
+        providesTags: ["Catalogos"],
+      }),
+      catalogosGetAllAsync: build.query<
+        CatalogosGetAllAsyncApiResponse,
+        CatalogosGetAllAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/GetAllAsync`,
+        }),
+        providesTags: ["Catalogos"],
+      }),
+      catalogosGetByIdAsync: build.query<
+        CatalogosGetByIdAsyncApiResponse,
+        CatalogosGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["Catalogos"],
+      }),
+      catalogosInsertAsync: build.mutation<
+        CatalogosInsertAsyncApiResponse,
+        CatalogosInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/InsertAsync`,
+          method: "POST",
+          body: queryArg.genericCatalogDto,
+        }),
+        invalidatesTags: ["Catalogos"],
+      }),
+      catalogosUpdateAsync: build.mutation<
+        CatalogosUpdateAsyncApiResponse,
+        CatalogosUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/UpdateAsync`,
+          method: "PUT",
+          body: queryArg.genericCatalogDto,
+        }),
+        invalidatesTags: ["Catalogos"],
+      }),
+      catalogosDeleteAsync: build.mutation<
+        CatalogosDeleteAsyncApiResponse,
+        CatalogosDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Catalogos"],
+      }),
+      catalogosGetAllWithPaginationAsync: build.query<
+        CatalogosGetAllWithPaginationAsyncApiResponse,
+        CatalogosGetAllWithPaginationAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/GetAllWithPaginationAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Catalogos"],
+      }),
+      catalogosCountAsync: build.query<
+        CatalogosCountAsyncApiResponse,
+        CatalogosCountAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/catalogos/${queryArg.catalog}/CountAsync`,
+        }),
+        providesTags: ["Catalogos"],
       }),
       catCredencialInsert: build.mutation<
         CatCredencialInsertApiResponse,
@@ -922,6 +1067,74 @@ export type AuthLoginWithPinApiArg = {
 };
 export type AuthMeApiResponse = /** status 200 OK */ ResponseOfAuthMeDto;
 export type AuthMeApiArg = void;
+export type CatalogosGetAllApiResponse = unknown;
+export type CatalogosGetAllApiArg = {
+  catalog: string;
+};
+export type CatalogosGetByIdApiResponse = unknown;
+export type CatalogosGetByIdApiArg = {
+  catalog: string;
+  id: number;
+};
+export type CatalogosInsertApiResponse = unknown;
+export type CatalogosInsertApiArg = {
+  catalog: string;
+  genericCatalogDto: GenericCatalogDto;
+};
+export type CatalogosUpdateApiResponse = unknown;
+export type CatalogosUpdateApiArg = {
+  catalog: string;
+  genericCatalogDto: GenericCatalogDto;
+};
+export type CatalogosDeleteApiResponse = unknown;
+export type CatalogosDeleteApiArg = {
+  catalog: string;
+  id: number;
+};
+export type CatalogosGetAllWithPaginationApiResponse = unknown;
+export type CatalogosGetAllWithPaginationApiArg = {
+  catalog: string;
+  page?: number;
+  pageSize?: number;
+};
+export type CatalogosCountApiResponse = unknown;
+export type CatalogosCountApiArg = {
+  catalog: string;
+};
+export type CatalogosGetAllAsyncApiResponse = unknown;
+export type CatalogosGetAllAsyncApiArg = {
+  catalog: string;
+};
+export type CatalogosGetByIdAsyncApiResponse = unknown;
+export type CatalogosGetByIdAsyncApiArg = {
+  catalog: string;
+  id: number;
+};
+export type CatalogosInsertAsyncApiResponse = unknown;
+export type CatalogosInsertAsyncApiArg = {
+  catalog: string;
+  genericCatalogDto: GenericCatalogDto;
+};
+export type CatalogosUpdateAsyncApiResponse = unknown;
+export type CatalogosUpdateAsyncApiArg = {
+  catalog: string;
+  genericCatalogDto: GenericCatalogDto;
+};
+export type CatalogosDeleteAsyncApiResponse = unknown;
+export type CatalogosDeleteAsyncApiArg = {
+  catalog: string;
+  id: number;
+};
+export type CatalogosGetAllWithPaginationAsyncApiResponse = unknown;
+export type CatalogosGetAllWithPaginationAsyncApiArg = {
+  catalog: string;
+  page?: number;
+  pageSize?: number;
+};
+export type CatalogosCountAsyncApiResponse = unknown;
+export type CatalogosCountAsyncApiArg = {
+  catalog: string;
+};
 export type CatCredencialInsertApiResponse = unknown;
 export type CatCredencialInsertApiArg = {
   catCredencialDto: CatCredencialDto;
@@ -1386,6 +1599,15 @@ export type ResponseOfAuthMeDto = {
   message?: string;
   errors?: ValidationFailure[];
 };
+export type GenericCatalogDto = {
+  id?: number;
+  descripcion?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  createdBy?: string | null;
+  updatedAt?: string | null;
+  updatedBy?: string | null;
+};
 export type CatCredencialDto = {
   id?: number;
   descripcion?: string;
@@ -1646,6 +1868,28 @@ export const {
   useAuthLoginWithPinMutation,
   useAuthMeQuery,
   useLazyAuthMeQuery,
+  useCatalogosGetAllQuery,
+  useLazyCatalogosGetAllQuery,
+  useCatalogosGetByIdQuery,
+  useLazyCatalogosGetByIdQuery,
+  useCatalogosInsertMutation,
+  useCatalogosUpdateMutation,
+  useCatalogosDeleteMutation,
+  useCatalogosGetAllWithPaginationQuery,
+  useLazyCatalogosGetAllWithPaginationQuery,
+  useCatalogosCountQuery,
+  useLazyCatalogosCountQuery,
+  useCatalogosGetAllAsyncQuery,
+  useLazyCatalogosGetAllAsyncQuery,
+  useCatalogosGetByIdAsyncQuery,
+  useLazyCatalogosGetByIdAsyncQuery,
+  useCatalogosInsertAsyncMutation,
+  useCatalogosUpdateAsyncMutation,
+  useCatalogosDeleteAsyncMutation,
+  useCatalogosGetAllWithPaginationAsyncQuery,
+  useLazyCatalogosGetAllWithPaginationAsyncQuery,
+  useCatalogosCountAsyncQuery,
+  useLazyCatalogosCountAsyncQuery,
   useCatCredencialInsertMutation,
   useCatCredencialGetAllQuery,
   useLazyCatCredencialGetAllQuery,

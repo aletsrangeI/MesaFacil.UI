@@ -86,6 +86,8 @@ const SECTIONS: SidebarSection[] = [
   {
     key: "config",
     label: "Configuración",
+    collapsible: true,
+    icon: <Icon name="Settings" />,
     items: [
       {
         key: "usuarios",

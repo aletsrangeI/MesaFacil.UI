@@ -1,5 +1,5 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import Icon from "../../ui/icons/Icon";
 
 export type SidebarItem = {
@@ -16,6 +16,12 @@ export type SidebarSection = {
   key: string;
   label: string;
   items: SidebarItem[];
+  /** Si es true, el encabezado de la sección actúa como acordeón colapsable. */
+  collapsible?: boolean;
+  /** Estado inicial del acordeón (solo aplica si collapsible=true). Default: false (cerrado). */
+  defaultOpen?: boolean;
+  /** Icono descriptivo para la sección. */
+  icon?: React.ReactNode;
 };
 
 export type SidebarProps = {
@@ -35,6 +41,108 @@ function renderIcon(icon?: React.ReactNode) {
     <span className="mf-nav__icon" aria-hidden>
       {icon}
     </span>
+  );
+}
+
+/** Sección con soporte de acordeón colapsable */
+function NavSection({
+  section,
+  sidebarCollapsed,
+}: {
+  section: SidebarSection;
+  sidebarCollapsed: boolean;
+}) {
+  const location = useLocation();
+
+  // Si algún item de la sección está activo, la abrimos por defecto
+  const hasActiveChild = section.items.some((it) =>
+    location.pathname.startsWith(it.to === "/" ? "/" : it.to)
+  );
+
+  const [open, setOpen] = useState(
+    section.defaultOpen ?? hasActiveChild ?? false
+  );
+
+  // Cuando el sidebar está colapsado mostramos todos los items sin acordeón
+  const isCollapsible = section.collapsible && !sidebarCollapsed;
+  const isOpen = !isCollapsible || open;
+
+  return (
+    <div
+      className={[
+        "mf-nav__section",
+        isCollapsible ? "is-collapsible" : "",
+        isCollapsible && open ? "is-open" : "",
+        hasActiveChild ? "has-active" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {/* Encabezado de sección */}
+      {!sidebarCollapsed && (
+        isCollapsible ? (
+          <button
+            type="button"
+            className="mf-nav__section-toggle"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+          >
+            <span className="mf-nav__section-toggle-content">
+              {section.icon && (
+                <span className="mf-nav__section-icon" aria-hidden>
+                  {section.icon}
+                </span>
+              )}
+              <span className="mf-nav__section-toggle-label">{section.label}</span>
+            </span>
+            <span
+              className="mf-nav__section-chevron"
+              aria-hidden
+            >
+              <Icon name="ChevronDown" />
+            </span>
+          </button>
+        ) : (
+          <div className="mf-nav__section-label">
+            {section.icon && (
+              <span className="mf-nav__section-icon mf-nav__section-icon--static" aria-hidden>
+                {section.icon}
+              </span>
+            )}
+            {section.label}
+          </div>
+        )
+      )}
+
+      {/* Lista de items con animación de acordeón */}
+      <div className="mf-nav__section-body">
+        <ul className="mf-nav__list" aria-hidden={isCollapsible && !open}>
+          {isOpen &&
+            section.items.map((it) => (
+              <li key={it.key}>
+                <NavLink
+                  to={it.to}
+                  className={({ isActive }) =>
+                    "mf-nav__link" + (isActive ? " is-active" : "")
+                  }
+                >
+                  {/* Barra izquierda (activo) */}
+                  <span className="mf-nav__rail" aria-hidden />
+                  {renderIcon(it.icon)}
+                  {!sidebarCollapsed && (
+                    <span className="mf-nav__label">{it.label}</span>
+                  )}
+                  {!sidebarCollapsed && it.badge ? (
+                    <span className="mf-nav__badge" aria-hidden>
+                      {it.badge}
+                    </span>
+                  ) : null}
+                </NavLink>
+              </li>
+            ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
@@ -89,35 +197,11 @@ export function Sidebar({
 
       <nav className="mf-sidebar__nav" role="navigation">
         {sections.map((sec) => (
-          <div key={sec.key} className="mf-nav__section">
-            {!collapsed && (
-              <div className="mf-nav__section-label">{sec.label}</div>
-            )}
-            <ul className="mf-nav__list">
-              {sec.items.map((it) => (
-                <li key={it.key}>
-                  <NavLink
-                    to={it.to}
-                    className={({ isActive }) =>
-                      "mf-nav__link" + (isActive ? " is-active" : "")
-                    }
-                  >
-                    {/* Barra izquierda (activo) */}
-                    <span className="mf-nav__rail" aria-hidden />
-                    {renderIcon(it.icon)}
-                    {!collapsed && (
-                      <span className="mf-nav__label">{it.label}</span>
-                    )}
-                    {!collapsed && it.badge ? (
-                      <span className="mf-nav__badge" aria-hidden>
-                        {it.badge}
-                      </span>
-                    ) : null}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <NavSection
+            key={sec.key}
+            section={sec}
+            sidebarCollapsed={collapsed}
+          />
         ))}
       </nav>
 

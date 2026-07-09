@@ -38,6 +38,9 @@ function toSidebarSections(src: NavSectionConfig[]): SidebarSection[] {
   return src.map((sec) => ({
     key: sec.key,
     label: sec.label,
+    collapsible: sec.collapsible,
+    defaultOpen: sec.defaultOpen,
+    icon: sec.icon,
     items: sec.items.map((it) => ({
       key: it.key,
       to: it.path, // <-- mapea path -> to

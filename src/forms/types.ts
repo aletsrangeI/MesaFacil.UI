@@ -5,12 +5,14 @@ export type ValidationType =
   | "confirmPassword"
   | "phone"
   | "date"
-  | "minLength";
+  | "minLength"
+  | "maxLength";
 
 export const FORM_CATEGORY_IDS = {
   LOGIN: 0,
   REGISTRO_USUARIO: 1,
   GESTION_USUARIOS: 2,
+  CATALOGO_GENERICO: 8,
 } as const;
 
 export type FormCategoryId = typeof FORM_CATEGORY_IDS[keyof typeof FORM_CATEGORY_IDS];

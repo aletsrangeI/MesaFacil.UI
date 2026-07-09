@@ -7,6 +7,7 @@ import UsuariosPage from "../../pages/seguridad/usuarios";
 import AppLayout from "../../layout/AppLayout";
 import { RolesPage } from "../../pages/roles";
 import FormulariosPage from "../../pages/formularios";
+import CatalogoPage from "../../pages/catalogos";
 import {
   selectRolesOrGuest,
   selectAccesos,
@@ -333,11 +334,16 @@ export default function AppRouter() {
             </RequireAccess>
           }
         />
+        {/* Catálogos genéricos — redirect de la URL legacy y ruta parametrizada */}
         <Route
           path="/admin/catalog"
+          element={<Navigate to="/admin/catalogos/credenciales" replace />}
+        />
+        <Route
+          path="/admin/catalogos/:catalog"
           element={
             <RequireAccess path="/admin/catalog">
-              <Placeholder title="Catálogo" />
+              <CatalogoPage />
             </RequireAccess>
           }
         />

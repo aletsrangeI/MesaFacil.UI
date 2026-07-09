@@ -145,7 +145,7 @@ export const RolesPage = () => {
               type="submit"
               form={createModal.formId}
               variant="primary"
-              disabled={createModal.isFetching}
+              disabled={createModal.isFetching || createModal.fields.length === 0}
             >
               Guardar
             </Button>
@@ -203,7 +203,7 @@ export const RolesPage = () => {
               type="submit"
               form={editModal.formId}
               variant="primary"
-              disabled={editModal.isFetching || editModal.isSaving}
+              disabled={editModal.isFetching || editModal.isSaving || editModal.fields.length === 0}
             >
               Guardar cambios
             </Button>
