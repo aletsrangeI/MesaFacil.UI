@@ -30,6 +30,7 @@ function asValidationType(t: unknown): ValidationType {
 }
 
 function coerceValidationValue(type: ValidationType, raw: unknown): number {
+  if (type === "minLength" || type === "maxLength") return Number(raw ?? 0) || 0;
   return Number(raw ?? 1) || 1;
 }
 
