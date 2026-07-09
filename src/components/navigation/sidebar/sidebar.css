@@ -133,6 +133,158 @@
   transition: opacity 0.2s ease;
 }
 
+/* ── Botón de toggle para secciones colapsables ── */
+.mf-nav__section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px var(--space-3);
+  margin-bottom: var(--space-1);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background 0.2s ease, color 0.2s ease;
+  outline: none;
+}
+
+.mf-nav__section-toggle:hover {
+  background: rgba(214, 69, 69, 0.04);
+}
+
+.mf-nav__section-toggle:focus-visible {
+  box-shadow: var(--focus);
+}
+
+.mf-nav__section-toggle-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.mf-nav__section-toggle-label {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Iconos de las secciones (colapsables o estáticas) */
+.mf-nav__section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+  transition: color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mf-nav__section-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.25px;
+}
+
+/* Hover en botón toggle resalta su icono */
+.mf-nav__section-toggle:hover .mf-nav__section-icon {
+  color: var(--color-primary);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.mf-nav__section-toggle:hover .mf-nav__section-toggle-label {
+  color: var(--color-primary);
+}
+
+/* Icono de chevron del toggle */
+.mf-nav__section-chevron {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mf-nav__section-chevron svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.5px;
+}
+
+/* Chevron apunta arriba cuando está abierto */
+.mf-nav__section.is-open .mf-nav__section-chevron {
+  transform: rotate(-180deg);
+}
+
+/* La sección que tiene un hijo activo muestra el label con más prominencia */
+.mf-nav__section.has-active .mf-nav__section-toggle-label {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.mf-nav__section.has-active .mf-nav__section-icon,
+.mf-nav__section.has-active .mf-nav__section-chevron {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+/* Estilo estático para etiquetas con icono no colapsables */
+.mf-nav__section-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px var(--space-3);
+  margin-bottom: var(--space-2);
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+}
+
+.mf-nav__section-icon--static svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2px;
+}
+
+/* Contenedor del cuerpo de la sección */
+.mf-nav__section-body {
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sangrado y línea guía vertical premium para elementos anidados en el sidebar expandido */
+.mf-sidebar:not(.is-collapsed) .mf-nav__section.is-collapsible .mf-nav__list {
+  padding-left: var(--space-3);
+  margin-left: calc(var(--space-3) + 8px);
+  border-left: 1.5px solid rgba(0, 0, 0, 0.06);
+  transition: border-color 0.2s ease;
+}
+
+/* La línea guía brilla cuando la sección contiene el elemento activo */
+.mf-sidebar:not(.is-collapsed) .mf-nav__section.is-collapsible.has-active .mf-nav__list {
+  border-left-color: rgba(214, 69, 69, 0.2);
+}
+
+/* Items ocultos cuando la sección colapsable está cerrada */
+.mf-nav__section.is-collapsible:not(.is-open) .mf-nav__section-body {
+  display: none;
+}
+
 .mf-sidebar.is-collapsed .mf-nav__section-label {
   opacity: 0;
   pointer-events: none;

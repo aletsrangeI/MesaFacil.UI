@@ -31,6 +31,9 @@ function applyRule(
     case "minLength":
       base = base.min(rule.value, `Mínimo ${rule.value} caracteres`);
       break;
+    case "maxLength":
+      base = base.max(rule.value, `Máximo ${rule.value} caracteres`);
+      break;
     case "confirmPassword": {
       // Busca el campo 'password' definido en el payload
       const pwdField =

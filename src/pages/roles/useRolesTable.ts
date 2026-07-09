@@ -12,7 +12,6 @@ import {
 import type { ApiFormField } from "../../forms/types";
 import { useToast } from "../../components/ui/toast/";
 
-/** Fila de la tabla de roles (ajusta al contrato real de tu API) */
 export type RolRow = {
   id: number;
   nombre: string;
@@ -29,6 +28,20 @@ type UseRolesTableOptions = {
 // Utilidad para coercer boolean
 const toBool = (v: unknown): boolean =>
   typeof v === "boolean" ? v : String(v ?? "false").toLowerCase() === "true";
+
+// Helper para leer propiedades del objeto de forma insensible a mayúsculas/minúsculas y variaciones de idioma
+const getVal = (obj: Record<string, unknown>, key: string): any => {
+  const normalizedKey = key.toLowerCase();
+  const foundKey = Object.keys(obj).find((k) => {
+    const normK = k.toLowerCase();
+    return (
+      normK === normalizedKey ||
+      (normalizedKey === "issystem" && (normK === "sistema" || normK === "system")) ||
+      (normalizedKey === "isassignable" && (normK === "asignable" || normK === "assignable"))
+    );
+  });
+  return foundKey ? obj[foundKey] : undefined;
+};
 
 export function useRolesTable(opts?: UseRolesTableOptions) {
   const { addToast } = useToast();
@@ -178,31 +191,59 @@ export function useRolesTable(opts?: UseRolesTableOptions) {
   }, [editFormResp]);
 
   // valores iniciales a partir del row seleccionado
-  const editInitialValues = useMemo(
-    () =>
-      editing
-        ? {
-            nombre: editing.nombre,
-            isSystem: editing.isSystem,
-            isAssignable: editing.isAssignable,
-          }
-        : {},
-    [editing]
-  );
+  const editInitialValues = useMemo(() => {
+    if (!editing) return {};
+    const vals: Record<string, any> = {};
+
+    const nameField = editFields.find((f) => f.name.toLowerCase() === "nombre");
+    const nameKey = nameField?.name ?? "nombre";
+
+    const systemField = editFields.find(
+      (f) =>
+        f.name.toLowerCase() === "issystem" ||
+        f.name.toLowerCase() === "sistema" ||
+        f.name.toLowerCase() === "system"
+    );
+    const systemKey = systemField?.name ?? "isSystem";
+
+    const assignableField = editFields.find(
+      (f) =>
+        f.name.toLowerCase() === "isassignable" ||
+        f.name.toLowerCase() === "asignable" ||
+        f.name.toLowerCase() === "assignable"
+    );
+    const assignableKey = assignableField?.name ?? "isAssignable";
+
+    vals[nameKey] = editing.nombre;
+    vals[systemKey] = editing.isSystem ? "true" : "false";
+    vals[assignableKey] = editing.isAssignable ? "true" : "false";
+
+    return vals;
+  }, [editing, editFields]);
 
   const [updateRol, updateState] = useRolUpdateMutation();
   const isUpdating = updateState.isLoading;
 
   const handleEditSubmit = useCallback(
     async (values: Record<string, unknown>) => {
+      console.log("Roles Formik Submit Values (Edit):", JSON.stringify(values, null, 2));
       if (!editing) return;
       setEditSaveError(null);
 
+      const nombre = String(getVal(values, "nombre") ?? "").trim();
+
+      if (!nombre) {
+        const msg = "El nombre del rol es obligatorio.";
+        setEditSaveError(msg);
+        addToast({ message: msg, variant: "error" });
+        return;
+      }
+
       const dto = {
         id: editing.id,
-        nombre: String(values.nombre ?? "").trim(),
-        isSystem: toBool(values.isSystem),
-        isAssignable: toBool(values.isAssignable),
+        nombre,
+        isSystem: toBool(getVal(values, "issystem")),
+        isAssignable: toBool(getVal(values, "isassignable")),
       };
 
       try {
@@ -249,12 +290,22 @@ export function useRolesTable(opts?: UseRolesTableOptions) {
 
   const handleCreateSubmit = useCallback(
     async (values: Record<string, unknown>) => {
+      console.log("Roles Formik Submit Values (Create):", JSON.stringify(values, null, 2));
       setSaveError(null);
 
+      const nombre = String(getVal(values, "nombre") ?? "").trim();
+
+      if (!nombre) {
+        const msg = "El nombre del rol es obligatorio.";
+        setSaveError(msg);
+        addToast({ message: msg, variant: "error" });
+        return;
+      }
+
       const payload = {
-        nombre: String(values.nombre ?? "").trim(),
-        isSystem: toBool(values.isSystem),
-        isAssignable: toBool(values.isAssignable),
+        nombre,
+        isSystem: toBool(getVal(values, "issystem")),
+        isAssignable: toBool(getVal(values, "isassignable")),
       };
 
       try {

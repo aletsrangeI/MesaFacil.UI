@@ -16,6 +16,10 @@ export type NavItemConfig = {
   key: string;
   label: string;
   path: string; // debe coincidir con react-router
+  /** Path alternativo para validar contra la lista de accesos del backend.
+   *  Útil cuando varios sub-items comparten un mismo acceso (ej. catálogos).
+   *  Si se omite, se usa `path`. */
+  acceso?: string;
   icon: React.ReactNode; // <Icon name="..."/>
   sortOrder?: number;
   /** visibilidad por rol (si se omite => visible para todos) */
@@ -32,6 +36,9 @@ export type NavSectionConfig = {
   label: string;
   items: NavItemConfig[];
   sortOrder?: number;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+  icon?: React.ReactNode;
 };
 
 /** Contexto que puedes pasar desde Redux/Query para pintar badges dinámicos */
@@ -326,9 +333,137 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
     ],
   },
   {
+    key: "catalogos",
+    label: "Catálogos",
+    sortOrder: 75,
+    collapsible: true,
+    icon: <Icon name="Library" />,
+    items: [
+      {
+        key: "cat-credenciales",
+        label: "Credenciales",
+        path: "/admin/catalogos/credenciales",
+        acceso: "/admin/catalog",
+        icon: <Icon name="KeyRound" />,
+        sortOrder: 10,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-estaciones-cocina",
+        label: "Estaciones de Cocina",
+        path: "/admin/catalogos/estaciones-cocina",
+        acceso: "/admin/catalog",
+        icon: <Icon name="ChefHat" />,
+        sortOrder: 20,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-estados-cuenta",
+        label: "Estados de Cuenta",
+        path: "/admin/catalogos/estados-cuenta",
+        acceso: "/admin/catalog",
+        icon: <Icon name="Receipt" />,
+        sortOrder: 30,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-estados-item-kds",
+        label: "Estados Ítem KDS",
+        path: "/admin/catalogos/estados-item-kds",
+        acceso: "/admin/catalog",
+        icon: <Icon name="MonitorCheck" />,
+        sortOrder: 40,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-estados-mesa",
+        label: "Estados de Mesa",
+        path: "/admin/catalogos/estados-mesa",
+        acceso: "/admin/catalog",
+        icon: <Icon name="Utensils" />,
+        sortOrder: 50,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-estados-pedido",
+        label: "Estados de Pedido",
+        path: "/admin/catalogos/estados-pedido",
+        acceso: "/admin/catalog",
+        icon: <Icon name="ClipboardList" />,
+        sortOrder: 60,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-estados-pedido-detalle",
+        label: "Estados Pedido Detalle",
+        path: "/admin/catalogos/estados-pedido-detalle",
+        acceso: "/admin/catalog",
+        icon: <Icon name="ListOrdered" />,
+        sortOrder: 70,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-estados-ticket-cocina",
+        label: "Estados Ticket Cocina",
+        path: "/admin/catalogos/estados-ticket-cocina",
+        acceso: "/admin/catalog",
+        icon: <Icon name="TicketCheck" />,
+        sortOrder: 80,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-impuestos",
+        label: "Impuestos",
+        path: "/admin/catalogos/impuestos",
+        acceso: "/admin/catalog",
+        icon: <Icon name="Percent" />,
+        sortOrder: 90,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-metodos-pago",
+        label: "Métodos de Pago",
+        path: "/admin/catalogos/metodos-pago",
+        acceso: "/admin/catalog",
+        icon: <Icon name="CreditCard" />,
+        sortOrder: 100,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-monedas",
+        label: "Monedas",
+        path: "/admin/catalogos/monedas",
+        acceso: "/admin/catalog",
+        icon: <Icon name="Coins" />,
+        sortOrder: 110,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-tipos-descuento",
+        label: "Tipos de Descuento",
+        path: "/admin/catalogos/tipos-descuento",
+        acceso: "/admin/catalog",
+        icon: <Icon name="BadgePercent" />,
+        sortOrder: 120,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-tipos-pedido",
+        label: "Tipos de Pedido",
+        path: "/admin/catalogos/tipos-pedido",
+        acceso: "/admin/catalog",
+        icon: <Icon name="ClipboardPen" />,
+        sortOrder: 130,
+        allowedRoles: ["admin", "manager"],
+      },
+    ],
+  },
+  {
     key: "seguridad",
     label: "Usuarios y Seguridad",
     sortOrder: 80,
+    collapsible: true,
+    icon: <Icon name="Shield" />,
     items: [
       {
         key: "usuarios",
@@ -405,7 +540,8 @@ function filterByAccesos(
   return sections
     .map((sec) => ({
       ...sec,
-      items: sec.items.filter((it) => acc.has(norm(it.path))),
+      // Usa `acceso` si está definido, si no usa `path` para validar contra accesos
+      items: sec.items.filter((it) => acc.has(norm(it.acceso ?? it.path))),
     }))
     .filter((sec) => sec.items.length > 0);
 }
