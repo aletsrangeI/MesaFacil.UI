@@ -13,6 +13,12 @@ import {
   selectAccesos,
   selectCanAccess,
 } from "../../state/authSlice";
+import ProductosPage from "../../pages/productos";
+import CategoriasPage from "../../pages/categorias";
+import MenusPage from "../../pages/menues";
+import VariantesPage from "../../pages/variantes";
+import PreciosPage from "../../pages/precios";
+import ModificadoresPage from "../../pages/modificadores";
 
 /** Guard que valida acceso por path usando selectCanAccess */
 function RequireAccess({
@@ -169,48 +175,48 @@ export default function AppRouter() {
         <Route
           path="/menu/menues"
           element={
-            <RequireAccess path="/menu/menues">
-              <Placeholder title="Menús" />
+            <RequireAccess path="/menu">
+              <MenusPage />
             </RequireAccess>
           }
         />
         <Route
           path="/menu/categorias"
           element={
-            <RequireAccess path="/menu/categorias">
-              <Placeholder title="Categorías" />
+            <RequireAccess path="/menu">
+              <CategoriasPage />
             </RequireAccess>
           }
         />
         <Route
           path="/menu/productos"
           element={
-            <RequireAccess path="/menu/productos">
-              <Placeholder title="Productos" />
+            <RequireAccess path="/menu">
+              <ProductosPage />
             </RequireAccess>
           }
         />
         <Route
           path="/menu/variantes"
           element={
-            <RequireAccess path="/menu/variantes">
-              <Placeholder title="Variantes" />
+            <RequireAccess path="/menu">
+              <VariantesPage />
             </RequireAccess>
           }
         />
         <Route
           path="/menu/precios"
           element={
-            <RequireAccess path="/menu/precios">
-              <Placeholder title="Precios" />
+            <RequireAccess path="/menu">
+              <PreciosPage />
             </RequireAccess>
           }
         />
         <Route
           path="/menu/modificadores"
           element={
-            <RequireAccess path="/menu/modificadores">
-              <Placeholder title="Modificadores" />
+            <RequireAccess path="/menu">
+              <ModificadoresPage />
             </RequireAccess>
           }
         />
