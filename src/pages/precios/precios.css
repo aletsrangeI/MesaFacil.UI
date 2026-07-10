@@ -1,0 +1,152 @@
+/* src/pages/precios/precios.css */
+
+.precios-page {
+  padding: var(--space-6) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.precios-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.precios-page__title-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.precios-page__title {
+  font-family: var(--font-h1);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.precios-page__subtitle {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-text-light, #64748b);
+  margin: 0;
+}
+
+.precios-page__content {
+  background-color: var(--color-sidebar-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+/* Modales Nativos BEM */
+.precios-page__dialog {
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  box-shadow: var(--shadow-xl);
+  max-width: 500px;
+  width: 90vw;
+}
+
+.precios-page__dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.precios-page__form {
+  background-color: var(--color-sidebar-bg);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.precios-page__form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.precios-page__form-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.precios-page__dialog-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text-light, #64748b);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.precios-page__dialog-close:hover {
+  background-color: var(--color-sidebar-hover);
+  color: var(--color-text);
+}
+
+.precios-page__form-body {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.precios-page__form-footer {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  background-color: var(--color-sidebar-bg);
+}
+
+.precios-page__form-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger, #ef4444);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.precios-page__state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  color: var(--color-text-light, #64748b);
+  gap: var(--space-4);
+}
+
+.precios-page__spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
