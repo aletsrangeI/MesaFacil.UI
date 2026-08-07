@@ -17,8 +17,14 @@ import ProductosPage from "../../pages/productos";
 import CategoriasPage from "../../pages/categorias";
 import MenusPage from "../../pages/menues";
 import VariantesPage from "../../pages/variantes";
+import PosPage from "../../pages/operacion/pos";
 import PreciosPage from "../../pages/precios";
 import ModificadoresPage from "../../pages/modificadores";
+import EmpresaPage from "../../pages/gestion/empresa";
+import SucursalesPage from "../../pages/gestion/sucursales";
+import AreasPage from "../../pages/gestion/areas";
+import MesasPage from "../../pages/gestion/mesas";
+import KdsPage from "../../pages/operacion/kds";
 
 /** Guard que valida acceso por path usando selectCanAccess */
 function RequireAccess({
@@ -79,6 +85,22 @@ export default function AppRouter() {
 
         {/* Operación */}
         <Route
+          path="/ventas/pos"
+          element={
+            <RequireAccess path="/ventas/pos">
+              <PosPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/ventas/kds"
+          element={
+            <RequireAccess path="/ventas/kds">
+              <KdsPage />
+            </RequireAccess>
+          }
+        />
+        <Route
           path="/pedidos"
           element={
             <RequireAccess path="/pedidos">
@@ -106,7 +128,7 @@ export default function AppRouter() {
           path="/cocina"
           element={
             <RequireAccess path="/cocina">
-              <Placeholder title="Cocina KDS" />
+              <KdsPage />
             </RequireAccess>
           }
         />
@@ -277,32 +299,32 @@ export default function AppRouter() {
         <Route
           path="/gestion/empresa"
           element={
-            <RequireAccess path="/gestion/empresa">
-              <Placeholder title="Empresa" />
+            <RequireAccess path="/">
+              <EmpresaPage />
             </RequireAccess>
           }
         />
         <Route
           path="/gestion/sucursales"
           element={
-            <RequireAccess path="/gestion/sucursales">
-              <Placeholder title="Sucursales" />
+            <RequireAccess path="/">
+              <SucursalesPage />
             </RequireAccess>
           }
         />
         <Route
           path="/gestion/areas"
           element={
-            <RequireAccess path="/gestion/areas">
-              <Placeholder title="Áreas" />
+            <RequireAccess path="/">
+              <AreasPage />
             </RequireAccess>
           }
         />
         <Route
           path="/gestion/mesas"
           element={
-            <RequireAccess path="/gestion/mesas">
-              <Placeholder title="Mesas (Gestión)" />
+            <RequireAccess path="/">
+              <MesasPage />
             </RequireAccess>
           }
         />

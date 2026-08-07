@@ -4,7 +4,9 @@ import {
   usePreciosInsertMutation,
   usePreciosUpdateMutation,
   usePreciosDeleteMutation,
-  useFormFieldGetFormFieldByFormCatIdQuery
+  useFormFieldGetFormFieldByFormCatIdQuery,
+  useVarianteProductosGetAllQuery,
+  useCatalogosGetAllAsyncQuery
 } from "../../services/generated/api";
 import { type ApiFormField, FORM_CATEGORY_IDS, type SelectOptionApi, type ValidationRule, type ValidationType } from "../../forms/types";
 import { useToast } from "../../components/ui/toast";
@@ -61,6 +63,9 @@ export function usePrecios() {
   const [insertPrecio, { isLoading: isInserting }] = usePreciosInsertMutation();
   const [updatePrecio, { isLoading: isUpdating }] = usePreciosUpdateMutation();
   const [deletePrecio, { isLoading: isDeleting }] = usePreciosDeleteMutation();
+  const { data: variantesData } = useVarianteProductosGetAllQuery();
+  const { data: monedasData } = useCatalogosGetAllAsyncQuery({ catalog: "monedas" });
+  const { data: impuestosData } = useCatalogosGetAllAsyncQuery({ catalog: "impuestos" });
   
   const { data: fieldsResp, isLoading: isLoadingFields, isError: isFieldsError } = useFormFieldGetFormFieldByFormCatIdQuery({ id: FORM_CATEGORY_IDS.PRECIO_CRUD });
   const fields = useMemo(() => normalizeFields(fieldsResp), [fieldsResp]);
@@ -75,12 +80,12 @@ export function usePrecios() {
 
   const precios = useMemo(() => (responseList as any)?.data || [], [responseList]);
 
-  // Mock data sources for selects until their APIs are implemented
+  // Map data sources for selects
   const dataSources = useMemo(() => ({
-    variantes: [{ id: 1, nombre: "Hamburguesa Clásica - Regular" }],
-    monedas: [{ id: 1, nombre: "MXN" }, { id: 2, nombre: "USD" }],
-    impuestos: [{ id: 1, nombre: "IVA 16%" }]
-  }), []);
+    variantes: Array.isArray((variantesData as any)?.data) ? (variantesData as any).data.map((v: any) => ({ id: v.id, nombre: v.nombre })) : [],
+    monedas: Array.isArray((monedasData as any)?.data) ? (monedasData as any).data.map((m: any) => ({ id: m.id, nombre: m.descripcion })) : [],
+    impuestos: Array.isArray((impuestosData as any)?.data) ? (impuestosData as any).data.map((i: any) => ({ id: i.id, nombre: i.descripcion })) : []
+  }), [variantesData, monedasData, impuestosData]);
 
   const openModal = (item?: any) => {
     setFormError(null);
@@ -133,8 +138,24 @@ export function usePrecios() {
 
   const initialValuesOverride = useMemo(() => {
     if (!editingItem) return { activo: "true" };
+    
+    // Convert to strings for HTML inputs, and format dates to YYYY-MM-DD
+    const overrides: any = { ...editingItem };
+    for (const key in overrides) {
+      if (overrides[key] !== null && overrides[key] !== undefined) {
+        if (typeof overrides[key] === "number") overrides[key] = String(overrides[key]);
+      }
+    }
+
+    if (overrides.validoDesde && overrides.validoDesde.includes("T")) {
+      overrides.validoDesde = overrides.validoDesde.split("T")[0];
+    }
+    if (overrides.validoHasta && overrides.validoHasta.includes("T")) {
+      overrides.validoHasta = overrides.validoHasta.split("T")[0];
+    }
+    
     return {
-      ...editingItem,
+      ...overrides,
       activo: editingItem.activo !== false ? "true" : "false",
     };
   }, [editingItem]);

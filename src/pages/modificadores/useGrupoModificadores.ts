@@ -4,7 +4,8 @@ import {
   useGrupoModificadoresInsertMutation,
   useGrupoModificadoresUpdateMutation,
   useGrupoModificadoresDeleteMutation,
-  useFormFieldGetFormFieldByFormCatIdQuery
+  useFormFieldGetFormFieldByFormCatIdQuery,
+  useProductosGetAllQuery
 } from "../../services/generated/api";
 import { type ApiFormField, FORM_CATEGORY_IDS, type SelectOptionApi, type ValidationRule, type ValidationType } from "../../forms/types";
 import { useToast } from "../../components/ui/toast";
@@ -61,6 +62,7 @@ export function useGrupoModificadores() {
   const [insertGrupo, { isLoading: isInserting }] = useGrupoModificadoresInsertMutation();
   const [updateGrupo, { isLoading: isUpdating }] = useGrupoModificadoresUpdateMutation();
   const [deleteGrupo, { isLoading: isDeleting }] = useGrupoModificadoresDeleteMutation();
+  const { data: productosData } = useProductosGetAllQuery();
   
   const { data: fieldsResp, isLoading: isLoadingFields, isError: isFieldsError } = useFormFieldGetFormFieldByFormCatIdQuery({ id: FORM_CATEGORY_IDS.GRUPO_MODIFICADOR_CRUD });
   const fields = useMemo(() => normalizeFields(fieldsResp), [fieldsResp]);
@@ -77,8 +79,8 @@ export function useGrupoModificadores() {
 
   // Mock data sources for selects until their APIs are implemented
   const dataSources = useMemo(() => ({
-    productos: [{ id: 1, nombre: "Hamburguesa Clásica" }]
-  }), []);
+    productos: Array.isArray((productosData as any)?.data) ? (productosData as any).data.map((p: any) => ({ id: p.id, nombre: p.nombre })) : []
+  }), [productosData]);
 
   const openModal = (item?: any) => {
     setFormError(null);

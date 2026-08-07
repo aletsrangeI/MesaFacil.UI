@@ -4,7 +4,10 @@ import {
   useProductosInsertMutation,
   useProductosUpdateMutation,
   useProductosDeleteMutation,
-  useFormFieldGetFormFieldByFormCatIdQuery
+  useFormFieldGetFormFieldByFormCatIdQuery,
+  useMenusGetAllQuery,
+  useCategoriasGetAllQuery,
+  useCatalogosGetAllAsyncQuery
 } from "../../services/generated/api";
 import { type ApiFormField, FORM_CATEGORY_IDS, type SelectOptionApi, type ValidationRule, type ValidationType } from "../../forms/types";
 import { useToast } from "../../components/ui/toast";
@@ -61,6 +64,9 @@ export function useProductos() {
   const [insertProducto, { isLoading: isInserting }] = useProductosInsertMutation();
   const [updateProducto, { isLoading: isUpdating }] = useProductosUpdateMutation();
   const [deleteProducto, { isLoading: isDeleting }] = useProductosDeleteMutation();
+  const { data: menusData } = useMenusGetAllQuery();
+  const { data: categoriasData } = useCategoriasGetAllQuery();
+  const { data: estacionesData } = useCatalogosGetAllAsyncQuery({ catalog: "estaciones-cocina" });
   
   const { data: fieldsResp, isLoading: isLoadingFields, isError: isFieldsError } = useFormFieldGetFormFieldByFormCatIdQuery({ id: FORM_CATEGORY_IDS.PRODUCTO_CRUD });
   const fields = useMemo(() => normalizeFields(fieldsResp), [fieldsResp]);
@@ -75,12 +81,12 @@ export function useProductos() {
 
   const productos = useMemo(() => (responseList as any)?.data || [], [responseList]);
 
-  // Mock data sources for selects until their APIs are implemented
+  // Map data sources for selects
   const dataSources = useMemo(() => ({
-    menus: [{ id: 1, nombre: "Menú Principal" }, { id: 2, nombre: "Menú Desayunos" }],
-    categorias: [{ id: 1, nombre: "Bebidas" }, { id: 2, nombre: "Platos Fuertes" }, { id: 3, nombre: "Postres" }],
-    estaciones: [{ id: 1, nombre: "Barra" }, { id: 2, nombre: "Parrilla" }]
-  }), []);
+    menus: Array.isArray((menusData as any)?.data) ? (menusData as any).data.map((m: any) => ({ id: m.id, nombre: m.nombre })) : [],
+    categorias: Array.isArray((categoriasData as any)?.data) ? (categoriasData as any).data.map((c: any) => ({ id: c.id, nombre: c.nombre })) : [],
+    estaciones: Array.isArray((estacionesData as any)?.data) ? (estacionesData as any).data.map((e: any) => ({ id: e.id, nombre: e.descripcion })) : []
+  }), [menusData, categoriasData, estacionesData]);
 
   const openModal = (item?: any) => {
     setFormError(null);

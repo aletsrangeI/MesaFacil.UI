@@ -91,8 +91,8 @@ export default function ModificadoresPage() {
               actionsHeader="Acciones"
               rowActions={(row: any) => (
                 <div style={{ display: "flex", gap: 8 }}>
-                  <Button variant="ghost" size="sm" iconOnly leftIcon={<Icon name="Edit2" />} onClick={() => gruposHook.openModal(row.original)} />
-                  <Button variant="ghost" size="sm" iconOnly leftIcon={<Icon name="Trash2" />} onClick={() => gruposHook.handleDelete(row.original.id)} disabled={gruposHook.isDeleting} />
+                  <Button variant="ghost" size="sm" iconOnly leftIcon={<Icon name="Edit2" />} onClick={() => gruposHook.openModal(row)} />
+                  <Button variant="ghost" size="sm" iconOnly leftIcon={<Icon name="Trash2" />} onClick={() => gruposHook.handleDelete(row.id)} disabled={gruposHook.isDeleting} />
                 </div>
               )}
             />
@@ -125,8 +125,8 @@ export default function ModificadoresPage() {
               actionsHeader="Acciones"
               rowActions={(row: any) => (
                 <div style={{ display: "flex", gap: 8 }}>
-                  <Button variant="ghost" size="sm" iconOnly leftIcon={<Icon name="Edit2" />} onClick={() => opcionesHook.openModal(row.original)} />
-                  <Button variant="ghost" size="sm" iconOnly leftIcon={<Icon name="Trash2" />} onClick={() => opcionesHook.handleDelete(row.original.id)} disabled={opcionesHook.isDeleting} />
+                  <Button variant="ghost" size="sm" iconOnly leftIcon={<Icon name="Edit2" />} onClick={() => opcionesHook.openModal(row)} />
+                  <Button variant="ghost" size="sm" iconOnly leftIcon={<Icon name="Trash2" />} onClick={() => opcionesHook.handleDelete(row.id)} disabled={opcionesHook.isDeleting} />
                 </div>
               )}
             />

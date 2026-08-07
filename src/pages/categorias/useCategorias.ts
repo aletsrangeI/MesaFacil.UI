@@ -4,7 +4,8 @@ import {
   useCategoriasInsertMutation,
   useCategoriasUpdateMutation,
   useCategoriasDeleteMutation,
-  useFormFieldGetFormFieldByFormCatIdQuery
+  useFormFieldGetFormFieldByFormCatIdQuery,
+  useMenusGetAllQuery
 } from "../../services/generated/api";
 import { type ApiFormField, FORM_CATEGORY_IDS, type SelectOptionApi, type ValidationRule, type ValidationType } from "../../forms/types";
 import { useToast } from "../../components/ui/toast";
@@ -61,6 +62,7 @@ export function useCategorias() {
   const [insertCategoria, { isLoading: isInserting }] = useCategoriasInsertMutation();
   const [updateCategoria, { isLoading: isUpdating }] = useCategoriasUpdateMutation();
   const [deleteCategoria, { isLoading: isDeleting }] = useCategoriasDeleteMutation();
+  const { data: menusData } = useMenusGetAllQuery();
   
   const { data: fieldsResp, isLoading: isLoadingFields, isError: isFieldsError } = useFormFieldGetFormFieldByFormCatIdQuery({ id: FORM_CATEGORY_IDS.CATEGORIA_CRUD });
   const fields = useMemo(() => normalizeFields(fieldsResp), [fieldsResp]);
@@ -77,8 +79,8 @@ export function useCategorias() {
 
   // Mock data sources for selects until their APIs are implemented
   const dataSources = useMemo(() => ({
-    menus: [{ id: 1, nombre: "Menú Principal" }, { id: 2, nombre: "Menú Desayunos" }]
-  }), []);
+    menus: Array.isArray((menusData as any)?.data) ? (menusData as any).data.map((m: any) => ({ id: m.id, nombre: m.nombre })) : []
+  }), [menusData]);
 
   const openModal = (item?: any) => {
     setFormError(null);
