@@ -79,16 +79,16 @@ export default function PreciosPage() {
                 size="sm"
                 iconOnly
                 leftIcon={<Icon name="Edit2" />}
-                onClick={() => openModal(row.original)}
-                aria-label={`Editar precio ${row.original.id}`}
+                onClick={() => openModal(row)}
+                aria-label={`Editar precio ${row.id}`}
               />
               <Button
                 variant="ghost"
                 size="sm"
                 iconOnly
                 leftIcon={<Icon name="Trash2" />}
-                onClick={() => handleDelete(row.original.id)}
-                aria-label={`Eliminar precio ${row.original.id}`}
+                onClick={() => handleDelete(row.id)}
+                aria-label={`Eliminar precio ${row.id}`}
                 disabled={isDeleting}
               />
             </div>

@@ -4,7 +4,8 @@ import {
   useVarianteProductosInsertMutation,
   useVarianteProductosUpdateMutation,
   useVarianteProductosDeleteMutation,
-  useFormFieldGetFormFieldByFormCatIdQuery
+  useFormFieldGetFormFieldByFormCatIdQuery,
+  useProductosGetAllQuery
 } from "../../services/generated/api";
 import { type ApiFormField, FORM_CATEGORY_IDS, type SelectOptionApi, type ValidationRule, type ValidationType } from "../../forms/types";
 import { useToast } from "../../components/ui/toast";
@@ -61,6 +62,7 @@ export function useVariantes() {
   const [insertVariante, { isLoading: isInserting }] = useVarianteProductosInsertMutation();
   const [updateVariante, { isLoading: isUpdating }] = useVarianteProductosUpdateMutation();
   const [deleteVariante, { isLoading: isDeleting }] = useVarianteProductosDeleteMutation();
+  const { data: productosData } = useProductosGetAllQuery();
   
   const { data: fieldsResp, isLoading: isLoadingFields, isError: isFieldsError } = useFormFieldGetFormFieldByFormCatIdQuery({ id: FORM_CATEGORY_IDS.VARIANTE_CRUD });
   const fields = useMemo(() => normalizeFields(fieldsResp), [fieldsResp]);
@@ -77,8 +79,8 @@ export function useVariantes() {
 
   // Mock data sources for selects until their APIs are implemented
   const dataSources = useMemo(() => ({
-    productos: [{ id: 1, nombre: "Hamburguesa Clásica" }, { id: 2, nombre: "Refresco" }]
-  }), []);
+    productos: Array.isArray((productosData as any)?.data) ? (productosData as any).data.map((p: any) => ({ id: p.id, nombre: p.nombre })) : []
+  }), [productosData]);
 
   const openModal = (item?: any) => {
     setFormError(null);
@@ -131,8 +133,16 @@ export function useVariantes() {
 
   const initialValuesOverride = useMemo(() => {
     if (!editingItem) return { activo: "true", esDefault: "false" };
+
+    const overrides: any = { ...editingItem };
+    for (const key in overrides) {
+      if (overrides[key] !== null && overrides[key] !== undefined) {
+        if (typeof overrides[key] === "number") overrides[key] = String(overrides[key]);
+      }
+    }
+
     return {
-      ...editingItem,
+      ...overrides,
       activo: editingItem.activo !== false ? "true" : "false",
       esDefault: editingItem.esDefault === true ? "true" : "false",
     };

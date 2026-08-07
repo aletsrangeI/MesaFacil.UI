@@ -78,16 +78,16 @@ export default function MenusPage() {
                 size="sm"
                 iconOnly
                 leftIcon={<Icon name="Edit2" />}
-                onClick={() => openModal(row.original)}
-                aria-label={`Editar menú ${row.original.nombre}`}
+                onClick={() => openModal(row)}
+                aria-label={`Editar menú ${row.nombre}`}
               />
               <Button
                 variant="ghost"
                 size="sm"
                 iconOnly
                 leftIcon={<Icon name="Trash2" />}
-                onClick={() => handleDelete(row.original.id)}
-                aria-label={`Eliminar menú ${row.original.nombre}`}
+                onClick={() => handleDelete(row.id)}
+                aria-label={`Eliminar menú ${row.nombre}`}
                 disabled={isDeleting}
               />
             </div>

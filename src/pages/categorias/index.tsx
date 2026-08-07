@@ -79,16 +79,16 @@ export default function CategoriasPage() {
                 size="sm"
                 iconOnly
                 leftIcon={<Icon name="Edit2" />}
-                onClick={() => openModal(row.original)}
-                aria-label={`Editar categoría ${row.original.nombre}`}
+                onClick={() => openModal(row)}
+                aria-label={`Editar categoría ${row.nombre}`}
               />
               <Button
                 variant="ghost"
                 size="sm"
                 iconOnly
                 leftIcon={<Icon name="Trash2" />}
-                onClick={() => handleDelete(row.original.id)}
-                aria-label={`Eliminar categoría ${row.original.nombre}`}
+                onClick={() => handleDelete(row.id)}
+                aria-label={`Eliminar categoría ${row.nombre}`}
                 disabled={isDeleting}
               />
             </div>

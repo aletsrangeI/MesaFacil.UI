@@ -1,18 +1,25 @@
 import { emptySplitApi as api } from "../baseApi";
 export const addTagTypes = [
+  "Areas",
   "Auth",
   "Catalogos",
   "CatCredencial",
   "Categorias",
   "Empresa",
+  "EstacionesCocina",
   "FormField",
   "Formulario",
   "GrupoModificadores",
   "Menus",
+  "Mesas",
   "OpcionModificadores",
+  "Pedidos",
   "Precios",
   "Productos",
   "Rol",
+  "Sucursales",
+  "TicketDetalles",
+  "TicketsCocina",
   "Usuario",
   "VarianteProductos",
 ] as const;
@@ -22,6 +29,122 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      areasInsert: build.mutation<AreasInsertApiResponse, AreasInsertApiArg>({
+        query: (queryArg) => ({
+          url: `/api/Areas/Insert`,
+          method: "POST",
+          body: queryArg.areaDto,
+        }),
+        invalidatesTags: ["Areas"],
+      }),
+      areasGetAll: build.query<AreasGetAllApiResponse, AreasGetAllApiArg>({
+        query: () => ({ url: `/api/Areas/GetAll` }),
+        providesTags: ["Areas"],
+      }),
+      areasGetById: build.query<AreasGetByIdApiResponse, AreasGetByIdApiArg>({
+        query: (queryArg) => ({ url: `/api/Areas/GetById/${queryArg.id}` }),
+        providesTags: ["Areas"],
+      }),
+      areasUpdate: build.mutation<AreasUpdateApiResponse, AreasUpdateApiArg>({
+        query: (queryArg) => ({
+          url: `/api/Areas/Update`,
+          method: "PUT",
+          body: queryArg.areaDto,
+        }),
+        invalidatesTags: ["Areas"],
+      }),
+      areasDelete: build.mutation<AreasDeleteApiResponse, AreasDeleteApiArg>({
+        query: (queryArg) => ({
+          url: `/api/Areas/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Areas"],
+      }),
+      areasGetAllWithPagination: build.query<
+        AreasGetAllWithPaginationApiResponse,
+        AreasGetAllWithPaginationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Areas/GetAllWithPagination`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Areas"],
+      }),
+      areasCount: build.query<AreasCountApiResponse, AreasCountApiArg>({
+        query: () => ({ url: `/api/Areas/Count` }),
+        providesTags: ["Areas"],
+      }),
+      areasInsertAsync: build.mutation<
+        AreasInsertAsyncApiResponse,
+        AreasInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Areas/InsertAsync`,
+          method: "POST",
+          body: queryArg.areaDto,
+        }),
+        invalidatesTags: ["Areas"],
+      }),
+      areasGetAllAsync: build.query<
+        AreasGetAllAsyncApiResponse,
+        AreasGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Areas/GetAllAsync` }),
+        providesTags: ["Areas"],
+      }),
+      areasGetByIdAsync: build.query<
+        AreasGetByIdAsyncApiResponse,
+        AreasGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Areas/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["Areas"],
+      }),
+      areasUpdateAsync: build.mutation<
+        AreasUpdateAsyncApiResponse,
+        AreasUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Areas/UpdateAsync`,
+          method: "PUT",
+          body: queryArg.areaDto,
+        }),
+        invalidatesTags: ["Areas"],
+      }),
+      areasDeleteAsync: build.mutation<
+        AreasDeleteAsyncApiResponse,
+        AreasDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Areas/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Areas"],
+      }),
+      areasGetAllWithPaginationAsync: build.query<
+        AreasGetAllWithPaginationAsyncApiResponse,
+        AreasGetAllWithPaginationAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Areas/GetAllWithPaginationAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Areas"],
+      }),
+      areasCountAsync: build.query<
+        AreasCountAsyncApiResponse,
+        AreasCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Areas/CountAsync` }),
+        providesTags: ["Areas"],
+      }),
       authLogin: build.mutation<AuthLoginApiResponse, AuthLoginApiArg>({
         query: (queryArg) => ({
           url: `/api/Auth/login`,
@@ -591,6 +714,142 @@ const injectedRtkApi = api
         query: () => ({ url: `/api/Empresa/CountAsync` }),
         providesTags: ["Empresa"],
       }),
+      estacionesCocinaInsert: build.mutation<
+        EstacionesCocinaInsertApiResponse,
+        EstacionesCocinaInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/Insert`,
+          method: "POST",
+          body: queryArg.estacionCocinaDto,
+        }),
+        invalidatesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaGetAll: build.query<
+        EstacionesCocinaGetAllApiResponse,
+        EstacionesCocinaGetAllApiArg
+      >({
+        query: () => ({ url: `/api/estaciones-cocina/GetAll` }),
+        providesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaGetById: build.query<
+        EstacionesCocinaGetByIdApiResponse,
+        EstacionesCocinaGetByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/GetById/${queryArg.id}`,
+        }),
+        providesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaUpdate: build.mutation<
+        EstacionesCocinaUpdateApiResponse,
+        EstacionesCocinaUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/Update`,
+          method: "PUT",
+          body: queryArg.estacionCocinaDto,
+        }),
+        invalidatesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaDelete: build.mutation<
+        EstacionesCocinaDeleteApiResponse,
+        EstacionesCocinaDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaGetAllWithPagination: build.query<
+        EstacionesCocinaGetAllWithPaginationApiResponse,
+        EstacionesCocinaGetAllWithPaginationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/GetAllWithPagination`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaCount: build.query<
+        EstacionesCocinaCountApiResponse,
+        EstacionesCocinaCountApiArg
+      >({
+        query: () => ({ url: `/api/estaciones-cocina/Count` }),
+        providesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaInsertAsync: build.mutation<
+        EstacionesCocinaInsertAsyncApiResponse,
+        EstacionesCocinaInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/InsertAsync`,
+          method: "POST",
+          body: queryArg.estacionCocinaDto,
+        }),
+        invalidatesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaGetAllAsync: build.query<
+        EstacionesCocinaGetAllAsyncApiResponse,
+        EstacionesCocinaGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/estaciones-cocina/GetAllAsync` }),
+        providesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaGetByIdAsync: build.query<
+        EstacionesCocinaGetByIdAsyncApiResponse,
+        EstacionesCocinaGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaUpdateAsync: build.mutation<
+        EstacionesCocinaUpdateAsyncApiResponse,
+        EstacionesCocinaUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/UpdateAsync`,
+          method: "PUT",
+          body: queryArg.estacionCocinaDto,
+        }),
+        invalidatesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaDeleteAsync: build.mutation<
+        EstacionesCocinaDeleteAsyncApiResponse,
+        EstacionesCocinaDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaGetAllWithPaginationAsync: build.query<
+        EstacionesCocinaGetAllWithPaginationAsyncApiResponse,
+        EstacionesCocinaGetAllWithPaginationAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/estaciones-cocina/GetAllWithPaginationAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["EstacionesCocina"],
+      }),
+      estacionesCocinaCountAsync: build.query<
+        EstacionesCocinaCountAsyncApiResponse,
+        EstacionesCocinaCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/estaciones-cocina/CountAsync` }),
+        providesTags: ["EstacionesCocina"],
+      }),
       formFieldInsert: build.mutation<
         FormFieldInsertApiResponse,
         FormFieldInsertApiArg
@@ -1131,6 +1390,122 @@ const injectedRtkApi = api
         query: () => ({ url: `/api/menus/CountAsync` }),
         providesTags: ["Menus"],
       }),
+      mesasInsert: build.mutation<MesasInsertApiResponse, MesasInsertApiArg>({
+        query: (queryArg) => ({
+          url: `/api/Mesas/Insert`,
+          method: "POST",
+          body: queryArg.mesaDto,
+        }),
+        invalidatesTags: ["Mesas"],
+      }),
+      mesasGetAll: build.query<MesasGetAllApiResponse, MesasGetAllApiArg>({
+        query: () => ({ url: `/api/Mesas/GetAll` }),
+        providesTags: ["Mesas"],
+      }),
+      mesasGetById: build.query<MesasGetByIdApiResponse, MesasGetByIdApiArg>({
+        query: (queryArg) => ({ url: `/api/Mesas/GetById/${queryArg.id}` }),
+        providesTags: ["Mesas"],
+      }),
+      mesasUpdate: build.mutation<MesasUpdateApiResponse, MesasUpdateApiArg>({
+        query: (queryArg) => ({
+          url: `/api/Mesas/Update`,
+          method: "PUT",
+          body: queryArg.mesaDto,
+        }),
+        invalidatesTags: ["Mesas"],
+      }),
+      mesasDelete: build.mutation<MesasDeleteApiResponse, MesasDeleteApiArg>({
+        query: (queryArg) => ({
+          url: `/api/Mesas/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Mesas"],
+      }),
+      mesasGetAllWithPagination: build.query<
+        MesasGetAllWithPaginationApiResponse,
+        MesasGetAllWithPaginationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Mesas/GetAllWithPagination`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Mesas"],
+      }),
+      mesasCount: build.query<MesasCountApiResponse, MesasCountApiArg>({
+        query: () => ({ url: `/api/Mesas/Count` }),
+        providesTags: ["Mesas"],
+      }),
+      mesasInsertAsync: build.mutation<
+        MesasInsertAsyncApiResponse,
+        MesasInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Mesas/InsertAsync`,
+          method: "POST",
+          body: queryArg.mesaDto,
+        }),
+        invalidatesTags: ["Mesas"],
+      }),
+      mesasGetAllAsync: build.query<
+        MesasGetAllAsyncApiResponse,
+        MesasGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Mesas/GetAllAsync` }),
+        providesTags: ["Mesas"],
+      }),
+      mesasGetByIdAsync: build.query<
+        MesasGetByIdAsyncApiResponse,
+        MesasGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Mesas/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["Mesas"],
+      }),
+      mesasUpdateAsync: build.mutation<
+        MesasUpdateAsyncApiResponse,
+        MesasUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Mesas/UpdateAsync`,
+          method: "PUT",
+          body: queryArg.mesaDto,
+        }),
+        invalidatesTags: ["Mesas"],
+      }),
+      mesasDeleteAsync: build.mutation<
+        MesasDeleteAsyncApiResponse,
+        MesasDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Mesas/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Mesas"],
+      }),
+      mesasGetAllWithPaginationAsync: build.query<
+        MesasGetAllWithPaginationAsyncApiResponse,
+        MesasGetAllWithPaginationAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Mesas/GetAllWithPaginationAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Mesas"],
+      }),
+      mesasCountAsync: build.query<
+        MesasCountAsyncApiResponse,
+        MesasCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Mesas/CountAsync` }),
+        providesTags: ["Mesas"],
+      }),
       opcionModificadoresInsert: build.mutation<
         OpcionModificadoresInsertApiResponse,
         OpcionModificadoresInsertApiArg
@@ -1266,6 +1641,147 @@ const injectedRtkApi = api
       >({
         query: () => ({ url: `/api/opcionmodificadores/CountAsync` }),
         providesTags: ["OpcionModificadores"],
+      }),
+      pedidosInsert: build.mutation<
+        PedidosInsertApiResponse,
+        PedidosInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/Insert`,
+          method: "POST",
+          body: queryArg.pedidoDto,
+        }),
+        invalidatesTags: ["Pedidos"],
+      }),
+      pedidosGetAll: build.query<PedidosGetAllApiResponse, PedidosGetAllApiArg>(
+        {
+          query: () => ({ url: `/api/Pedidos/GetAll` }),
+          providesTags: ["Pedidos"],
+        },
+      ),
+      pedidosGetById: build.query<
+        PedidosGetByIdApiResponse,
+        PedidosGetByIdApiArg
+      >({
+        query: (queryArg) => ({ url: `/api/Pedidos/GetById/${queryArg.id}` }),
+        providesTags: ["Pedidos"],
+      }),
+      pedidosUpdate: build.mutation<
+        PedidosUpdateApiResponse,
+        PedidosUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/Update`,
+          method: "PUT",
+          body: queryArg.pedidoDto,
+        }),
+        invalidatesTags: ["Pedidos"],
+      }),
+      pedidosDelete: build.mutation<
+        PedidosDeleteApiResponse,
+        PedidosDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Pedidos"],
+      }),
+      pedidosGetAllWithPagination: build.query<
+        PedidosGetAllWithPaginationApiResponse,
+        PedidosGetAllWithPaginationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/GetAllWithPagination`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Pedidos"],
+      }),
+      pedidosCount: build.query<PedidosCountApiResponse, PedidosCountApiArg>({
+        query: () => ({ url: `/api/Pedidos/Count` }),
+        providesTags: ["Pedidos"],
+      }),
+      pedidosInsertAsync: build.mutation<
+        PedidosInsertAsyncApiResponse,
+        PedidosInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/InsertAsync`,
+          method: "POST",
+          body: queryArg.pedidoDto,
+        }),
+        invalidatesTags: ["Pedidos"],
+      }),
+      pedidosInsertConDetallesAsync: build.mutation<
+        PedidosInsertConDetallesAsyncApiResponse,
+        PedidosInsertConDetallesAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/InsertConDetallesAsync`,
+          method: "POST",
+          body: queryArg.crearPedidoRequestDto,
+        }),
+        invalidatesTags: ["Pedidos"],
+      }),
+      pedidosGetAllAsync: build.query<
+        PedidosGetAllAsyncApiResponse,
+        PedidosGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Pedidos/GetAllAsync` }),
+        providesTags: ["Pedidos"],
+      }),
+      pedidosGetByIdAsync: build.query<
+        PedidosGetByIdAsyncApiResponse,
+        PedidosGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["Pedidos"],
+      }),
+      pedidosUpdateAsync: build.mutation<
+        PedidosUpdateAsyncApiResponse,
+        PedidosUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/UpdateAsync`,
+          method: "PUT",
+          body: queryArg.pedidoDto,
+        }),
+        invalidatesTags: ["Pedidos"],
+      }),
+      pedidosDeleteAsync: build.mutation<
+        PedidosDeleteAsyncApiResponse,
+        PedidosDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Pedidos"],
+      }),
+      pedidosGetAllWithPaginationAsync: build.query<
+        PedidosGetAllWithPaginationAsyncApiResponse,
+        PedidosGetAllWithPaginationAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Pedidos/GetAllWithPaginationAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Pedidos"],
+      }),
+      pedidosCountAsync: build.query<
+        PedidosCountAsyncApiResponse,
+        PedidosCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Pedidos/CountAsync` }),
+        providesTags: ["Pedidos"],
       }),
       preciosInsert: build.mutation<
         PreciosInsertApiResponse,
@@ -1644,6 +2160,414 @@ const injectedRtkApi = api
           providesTags: ["Rol"],
         },
       ),
+      sucursalesInsert: build.mutation<
+        SucursalesInsertApiResponse,
+        SucursalesInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/Insert`,
+          method: "POST",
+          body: queryArg.sucursalDto,
+        }),
+        invalidatesTags: ["Sucursales"],
+      }),
+      sucursalesGetAll: build.query<
+        SucursalesGetAllApiResponse,
+        SucursalesGetAllApiArg
+      >({
+        query: () => ({ url: `/api/Sucursales/GetAll` }),
+        providesTags: ["Sucursales"],
+      }),
+      sucursalesGetById: build.query<
+        SucursalesGetByIdApiResponse,
+        SucursalesGetByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/GetById/${queryArg.id}`,
+        }),
+        providesTags: ["Sucursales"],
+      }),
+      sucursalesUpdate: build.mutation<
+        SucursalesUpdateApiResponse,
+        SucursalesUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/Update`,
+          method: "PUT",
+          body: queryArg.sucursalDto,
+        }),
+        invalidatesTags: ["Sucursales"],
+      }),
+      sucursalesDelete: build.mutation<
+        SucursalesDeleteApiResponse,
+        SucursalesDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Sucursales"],
+      }),
+      sucursalesGetAllWithPagination: build.query<
+        SucursalesGetAllWithPaginationApiResponse,
+        SucursalesGetAllWithPaginationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/GetAllWithPagination`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Sucursales"],
+      }),
+      sucursalesCount: build.query<
+        SucursalesCountApiResponse,
+        SucursalesCountApiArg
+      >({
+        query: () => ({ url: `/api/Sucursales/Count` }),
+        providesTags: ["Sucursales"],
+      }),
+      sucursalesInsertAsync: build.mutation<
+        SucursalesInsertAsyncApiResponse,
+        SucursalesInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/InsertAsync`,
+          method: "POST",
+          body: queryArg.sucursalDto,
+        }),
+        invalidatesTags: ["Sucursales"],
+      }),
+      sucursalesGetAllAsync: build.query<
+        SucursalesGetAllAsyncApiResponse,
+        SucursalesGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Sucursales/GetAllAsync` }),
+        providesTags: ["Sucursales"],
+      }),
+      sucursalesGetByIdAsync: build.query<
+        SucursalesGetByIdAsyncApiResponse,
+        SucursalesGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["Sucursales"],
+      }),
+      sucursalesUpdateAsync: build.mutation<
+        SucursalesUpdateAsyncApiResponse,
+        SucursalesUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/UpdateAsync`,
+          method: "PUT",
+          body: queryArg.sucursalDto,
+        }),
+        invalidatesTags: ["Sucursales"],
+      }),
+      sucursalesDeleteAsync: build.mutation<
+        SucursalesDeleteAsyncApiResponse,
+        SucursalesDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Sucursales"],
+      }),
+      sucursalesGetAllWithPaginationAsync: build.query<
+        SucursalesGetAllWithPaginationAsyncApiResponse,
+        SucursalesGetAllWithPaginationAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/Sucursales/GetAllWithPaginationAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["Sucursales"],
+      }),
+      sucursalesCountAsync: build.query<
+        SucursalesCountAsyncApiResponse,
+        SucursalesCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/Sucursales/CountAsync` }),
+        providesTags: ["Sucursales"],
+      }),
+      ticketDetallesInsert: build.mutation<
+        TicketDetallesInsertApiResponse,
+        TicketDetallesInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/Insert`,
+          method: "POST",
+          body: queryArg.ticketDetalleDto,
+        }),
+        invalidatesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesGetAll: build.query<
+        TicketDetallesGetAllApiResponse,
+        TicketDetallesGetAllApiArg
+      >({
+        query: () => ({ url: `/api/TicketDetalles/GetAll` }),
+        providesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesGetById: build.query<
+        TicketDetallesGetByIdApiResponse,
+        TicketDetallesGetByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/GetById/${queryArg.id}`,
+        }),
+        providesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesUpdate: build.mutation<
+        TicketDetallesUpdateApiResponse,
+        TicketDetallesUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/Update`,
+          method: "PUT",
+          body: queryArg.ticketDetalleDto,
+        }),
+        invalidatesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesDelete: build.mutation<
+        TicketDetallesDeleteApiResponse,
+        TicketDetallesDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesGetAllWithPagination: build.query<
+        TicketDetallesGetAllWithPaginationApiResponse,
+        TicketDetallesGetAllWithPaginationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/GetAllWithPagination`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesCount: build.query<
+        TicketDetallesCountApiResponse,
+        TicketDetallesCountApiArg
+      >({
+        query: () => ({ url: `/api/TicketDetalles/Count` }),
+        providesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesInsertAsync: build.mutation<
+        TicketDetallesInsertAsyncApiResponse,
+        TicketDetallesInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/InsertAsync`,
+          method: "POST",
+          body: queryArg.ticketDetalleDto,
+        }),
+        invalidatesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesGetAllAsync: build.query<
+        TicketDetallesGetAllAsyncApiResponse,
+        TicketDetallesGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/TicketDetalles/GetAllAsync` }),
+        providesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesGetByIdAsync: build.query<
+        TicketDetallesGetByIdAsyncApiResponse,
+        TicketDetallesGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesUpdateAsync: build.mutation<
+        TicketDetallesUpdateAsyncApiResponse,
+        TicketDetallesUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/UpdateAsync`,
+          method: "PUT",
+          body: queryArg.ticketDetalleDto,
+        }),
+        invalidatesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesDeleteAsync: build.mutation<
+        TicketDetallesDeleteAsyncApiResponse,
+        TicketDetallesDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesGetAllWithPaginationAsync: build.query<
+        TicketDetallesGetAllWithPaginationAsyncApiResponse,
+        TicketDetallesGetAllWithPaginationAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketDetalles/GetAllWithPaginationAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["TicketDetalles"],
+      }),
+      ticketDetallesCountAsync: build.query<
+        TicketDetallesCountAsyncApiResponse,
+        TicketDetallesCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/TicketDetalles/CountAsync` }),
+        providesTags: ["TicketDetalles"],
+      }),
+      ticketsCocinaInsert: build.mutation<
+        TicketsCocinaInsertApiResponse,
+        TicketsCocinaInsertApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/Insert`,
+          method: "POST",
+          body: queryArg.ticketCocinaDto,
+        }),
+        invalidatesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaGetAll: build.query<
+        TicketsCocinaGetAllApiResponse,
+        TicketsCocinaGetAllApiArg
+      >({
+        query: () => ({ url: `/api/TicketsCocina/GetAll` }),
+        providesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaGetById: build.query<
+        TicketsCocinaGetByIdApiResponse,
+        TicketsCocinaGetByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/GetById/${queryArg.id}`,
+        }),
+        providesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaUpdate: build.mutation<
+        TicketsCocinaUpdateApiResponse,
+        TicketsCocinaUpdateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/Update`,
+          method: "PUT",
+          body: queryArg.ticketCocinaDto,
+        }),
+        invalidatesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaDelete: build.mutation<
+        TicketsCocinaDeleteApiResponse,
+        TicketsCocinaDeleteApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/Delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaGetAllWithPagination: build.query<
+        TicketsCocinaGetAllWithPaginationApiResponse,
+        TicketsCocinaGetAllWithPaginationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/GetAllWithPagination`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaCount: build.query<
+        TicketsCocinaCountApiResponse,
+        TicketsCocinaCountApiArg
+      >({
+        query: () => ({ url: `/api/TicketsCocina/Count` }),
+        providesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaInsertAsync: build.mutation<
+        TicketsCocinaInsertAsyncApiResponse,
+        TicketsCocinaInsertAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/InsertAsync`,
+          method: "POST",
+          body: queryArg.ticketCocinaDto,
+        }),
+        invalidatesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaGetAllAsync: build.query<
+        TicketsCocinaGetAllAsyncApiResponse,
+        TicketsCocinaGetAllAsyncApiArg
+      >({
+        query: () => ({ url: `/api/TicketsCocina/GetAllAsync` }),
+        providesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaGetByIdAsync: build.query<
+        TicketsCocinaGetByIdAsyncApiResponse,
+        TicketsCocinaGetByIdAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/GetByIdAsync/${queryArg.id}`,
+        }),
+        providesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaUpdateAsync: build.mutation<
+        TicketsCocinaUpdateAsyncApiResponse,
+        TicketsCocinaUpdateAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/UpdateAsync`,
+          method: "PUT",
+          body: queryArg.ticketCocinaDto,
+        }),
+        invalidatesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaDeleteAsync: build.mutation<
+        TicketsCocinaDeleteAsyncApiResponse,
+        TicketsCocinaDeleteAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/DeleteAsync/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaGetAllWithPaginationAsync: build.query<
+        TicketsCocinaGetAllWithPaginationAsyncApiResponse,
+        TicketsCocinaGetAllWithPaginationAsyncApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/TicketsCocina/GetAllWithPaginationAsync`,
+          params: {
+            page: queryArg.page,
+            pageSize: queryArg.pageSize,
+          },
+        }),
+        providesTags: ["TicketsCocina"],
+      }),
+      ticketsCocinaCountAsync: build.query<
+        TicketsCocinaCountAsyncApiResponse,
+        TicketsCocinaCountAsyncApiArg
+      >({
+        query: () => ({ url: `/api/TicketsCocina/CountAsync` }),
+        providesTags: ["TicketsCocina"],
+      }),
       usuarioInsert: build.mutation<
         UsuarioInsertApiResponse,
         UsuarioInsertApiArg
@@ -1984,6 +2908,64 @@ const injectedRtkApi = api
     overrideExisting: false,
   });
 export { injectedRtkApi as enhancedApi };
+export type AreasInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type AreasInsertApiArg = {
+  areaDto: AreaDto;
+};
+export type AreasGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfAreaDto;
+export type AreasGetAllApiArg = void;
+export type AreasGetByIdApiResponse = /** status 200 OK */ ResponseOfAreaDto;
+export type AreasGetByIdApiArg = {
+  id: number;
+};
+export type AreasUpdateApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type AreasUpdateApiArg = {
+  areaDto: AreaDto;
+};
+export type AreasDeleteApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type AreasDeleteApiArg = {
+  id: number;
+};
+export type AreasGetAllWithPaginationApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfAreaDto;
+export type AreasGetAllWithPaginationApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type AreasCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type AreasCountApiArg = void;
+export type AreasInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AreasInsertAsyncApiArg = {
+  areaDto: AreaDto;
+};
+export type AreasGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfAreaDto;
+export type AreasGetAllAsyncApiArg = void;
+export type AreasGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfAreaDto;
+export type AreasGetByIdAsyncApiArg = {
+  id: number;
+};
+export type AreasUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AreasUpdateAsyncApiArg = {
+  areaDto: AreaDto;
+};
+export type AreasDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type AreasDeleteAsyncApiArg = {
+  id: number;
+};
+export type AreasGetAllWithPaginationAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfAreaDto;
+export type AreasGetAllWithPaginationAsyncApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type AreasCountAsyncApiResponse = /** status 200 OK */ ResponseOfint;
+export type AreasCountAsyncApiArg = void;
 export type AuthLoginApiResponse =
   /** status 200 OK */ ResponseOfAuthResponseDto;
 export type AuthLoginApiArg = {
@@ -2236,6 +3218,70 @@ export type EmpresaGetAllWithPaginationAsyncApiArg = {
 };
 export type EmpresaCountAsyncApiResponse = /** status 200 OK */ ResponseOfint;
 export type EmpresaCountAsyncApiArg = void;
+export type EstacionesCocinaInsertApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type EstacionesCocinaInsertApiArg = {
+  estacionCocinaDto: EstacionCocinaDto;
+};
+export type EstacionesCocinaGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfEstacionCocinaDto;
+export type EstacionesCocinaGetAllApiArg = void;
+export type EstacionesCocinaGetByIdApiResponse =
+  /** status 200 OK */ ResponseOfEstacionCocinaDto;
+export type EstacionesCocinaGetByIdApiArg = {
+  id: number;
+};
+export type EstacionesCocinaUpdateApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type EstacionesCocinaUpdateApiArg = {
+  estacionCocinaDto: EstacionCocinaDto;
+};
+export type EstacionesCocinaDeleteApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type EstacionesCocinaDeleteApiArg = {
+  id: number;
+};
+export type EstacionesCocinaGetAllWithPaginationApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfEstacionCocinaDto;
+export type EstacionesCocinaGetAllWithPaginationApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type EstacionesCocinaCountApiResponse =
+  /** status 200 OK */ ResponseOfint;
+export type EstacionesCocinaCountApiArg = void;
+export type EstacionesCocinaInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type EstacionesCocinaInsertAsyncApiArg = {
+  estacionCocinaDto: EstacionCocinaDto;
+};
+export type EstacionesCocinaGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfEstacionCocinaDto;
+export type EstacionesCocinaGetAllAsyncApiArg = void;
+export type EstacionesCocinaGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfEstacionCocinaDto;
+export type EstacionesCocinaGetByIdAsyncApiArg = {
+  id: number;
+};
+export type EstacionesCocinaUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type EstacionesCocinaUpdateAsyncApiArg = {
+  estacionCocinaDto: EstacionCocinaDto;
+};
+export type EstacionesCocinaDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type EstacionesCocinaDeleteAsyncApiArg = {
+  id: number;
+};
+export type EstacionesCocinaGetAllWithPaginationAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfEstacionCocinaDto;
+export type EstacionesCocinaGetAllWithPaginationAsyncApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type EstacionesCocinaCountAsyncApiResponse =
+  /** status 200 OK */ ResponseOfint;
+export type EstacionesCocinaCountAsyncApiArg = void;
 export type FormFieldInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
 export type FormFieldInsertApiArg = {
   formFieldDto: FormFieldDto;
@@ -2494,6 +3540,64 @@ export type MenusGetAllWithPaginationAsyncApiArg = {
 };
 export type MenusCountAsyncApiResponse = /** status 200 OK */ ResponseOfint;
 export type MenusCountAsyncApiArg = void;
+export type MesasInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type MesasInsertApiArg = {
+  mesaDto: MesaDto;
+};
+export type MesasGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfMesaDto;
+export type MesasGetAllApiArg = void;
+export type MesasGetByIdApiResponse = /** status 200 OK */ ResponseOfMesaDto;
+export type MesasGetByIdApiArg = {
+  id: number;
+};
+export type MesasUpdateApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type MesasUpdateApiArg = {
+  mesaDto: MesaDto;
+};
+export type MesasDeleteApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type MesasDeleteApiArg = {
+  id: number;
+};
+export type MesasGetAllWithPaginationApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfMesaDto;
+export type MesasGetAllWithPaginationApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type MesasCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type MesasCountApiArg = void;
+export type MesasInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type MesasInsertAsyncApiArg = {
+  mesaDto: MesaDto;
+};
+export type MesasGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfMesaDto;
+export type MesasGetAllAsyncApiArg = void;
+export type MesasGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfMesaDto;
+export type MesasGetByIdAsyncApiArg = {
+  id: number;
+};
+export type MesasUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type MesasUpdateAsyncApiArg = {
+  mesaDto: MesaDto;
+};
+export type MesasDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type MesasDeleteAsyncApiArg = {
+  id: number;
+};
+export type MesasGetAllWithPaginationAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfMesaDto;
+export type MesasGetAllWithPaginationAsyncApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type MesasCountAsyncApiResponse = /** status 200 OK */ ResponseOfint;
+export type MesasCountAsyncApiArg = void;
 export type OpcionModificadoresInsertApiResponse =
   /** status 200 OK */ ResponseOfboolean;
 export type OpcionModificadoresInsertApiArg = {
@@ -2558,6 +3662,70 @@ export type OpcionModificadoresGetAllWithPaginationAsyncApiArg = {
 export type OpcionModificadoresCountAsyncApiResponse =
   /** status 200 OK */ ResponseOfint;
 export type OpcionModificadoresCountAsyncApiArg = void;
+export type PedidosInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type PedidosInsertApiArg = {
+  pedidoDto: PedidoDto;
+};
+export type PedidosGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfPedidoDto;
+export type PedidosGetAllApiArg = void;
+export type PedidosGetByIdApiResponse =
+  /** status 200 OK */ ResponseOfPedidoDto;
+export type PedidosGetByIdApiArg = {
+  id: number;
+};
+export type PedidosUpdateApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type PedidosUpdateApiArg = {
+  pedidoDto: PedidoDto;
+};
+export type PedidosDeleteApiResponse = /** status 200 OK */ ResponseOfboolean;
+export type PedidosDeleteApiArg = {
+  id: number;
+};
+export type PedidosGetAllWithPaginationApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfPedidoDto;
+export type PedidosGetAllWithPaginationApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type PedidosCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type PedidosCountApiArg = void;
+export type PedidosInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type PedidosInsertAsyncApiArg = {
+  pedidoDto: PedidoDto;
+};
+export type PedidosInsertConDetallesAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type PedidosInsertConDetallesAsyncApiArg = {
+  crearPedidoRequestDto: CrearPedidoRequestDto;
+};
+export type PedidosGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfPedidoDto;
+export type PedidosGetAllAsyncApiArg = void;
+export type PedidosGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfPedidoDto;
+export type PedidosGetByIdAsyncApiArg = {
+  id: number;
+};
+export type PedidosUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type PedidosUpdateAsyncApiArg = {
+  pedidoDto: PedidoDto;
+};
+export type PedidosDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type PedidosDeleteAsyncApiArg = {
+  id: number;
+};
+export type PedidosGetAllWithPaginationAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfPedidoDto;
+export type PedidosGetAllWithPaginationAsyncApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type PedidosCountAsyncApiResponse = /** status 200 OK */ ResponseOfint;
+export type PedidosCountAsyncApiArg = void;
 export type PreciosInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
 export type PreciosInsertApiArg = {
   precioDto: PrecioDto;
@@ -2730,6 +3898,195 @@ export type RolGetAllWithPaginationAsyncApiArg = {
 };
 export type RolCountAsyncApiResponse = /** status 200 OK */ ResponseOfint;
 export type RolCountAsyncApiArg = void;
+export type SucursalesInsertApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type SucursalesInsertApiArg = {
+  sucursalDto: SucursalDto;
+};
+export type SucursalesGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfSucursalDto;
+export type SucursalesGetAllApiArg = void;
+export type SucursalesGetByIdApiResponse =
+  /** status 200 OK */ ResponseOfSucursalDto;
+export type SucursalesGetByIdApiArg = {
+  id: number;
+};
+export type SucursalesUpdateApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type SucursalesUpdateApiArg = {
+  sucursalDto: SucursalDto;
+};
+export type SucursalesDeleteApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type SucursalesDeleteApiArg = {
+  id: number;
+};
+export type SucursalesGetAllWithPaginationApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfSucursalDto;
+export type SucursalesGetAllWithPaginationApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type SucursalesCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type SucursalesCountApiArg = void;
+export type SucursalesInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type SucursalesInsertAsyncApiArg = {
+  sucursalDto: SucursalDto;
+};
+export type SucursalesGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfSucursalDto;
+export type SucursalesGetAllAsyncApiArg = void;
+export type SucursalesGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfSucursalDto;
+export type SucursalesGetByIdAsyncApiArg = {
+  id: number;
+};
+export type SucursalesUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type SucursalesUpdateAsyncApiArg = {
+  sucursalDto: SucursalDto;
+};
+export type SucursalesDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type SucursalesDeleteAsyncApiArg = {
+  id: number;
+};
+export type SucursalesGetAllWithPaginationAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfSucursalDto;
+export type SucursalesGetAllWithPaginationAsyncApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type SucursalesCountAsyncApiResponse =
+  /** status 200 OK */ ResponseOfint;
+export type SucursalesCountAsyncApiArg = void;
+export type TicketDetallesInsertApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketDetallesInsertApiArg = {
+  ticketDetalleDto: TicketDetalleDto;
+};
+export type TicketDetallesGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfTicketDetalleDto;
+export type TicketDetallesGetAllApiArg = void;
+export type TicketDetallesGetByIdApiResponse =
+  /** status 200 OK */ ResponseOfTicketDetalleDto;
+export type TicketDetallesGetByIdApiArg = {
+  id: number;
+};
+export type TicketDetallesUpdateApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketDetallesUpdateApiArg = {
+  ticketDetalleDto: TicketDetalleDto;
+};
+export type TicketDetallesDeleteApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketDetallesDeleteApiArg = {
+  id: number;
+};
+export type TicketDetallesGetAllWithPaginationApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfTicketDetalleDto;
+export type TicketDetallesGetAllWithPaginationApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type TicketDetallesCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type TicketDetallesCountApiArg = void;
+export type TicketDetallesInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketDetallesInsertAsyncApiArg = {
+  ticketDetalleDto: TicketDetalleDto;
+};
+export type TicketDetallesGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfTicketDetalleDto;
+export type TicketDetallesGetAllAsyncApiArg = void;
+export type TicketDetallesGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfTicketDetalleDto;
+export type TicketDetallesGetByIdAsyncApiArg = {
+  id: number;
+};
+export type TicketDetallesUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketDetallesUpdateAsyncApiArg = {
+  ticketDetalleDto: TicketDetalleDto;
+};
+export type TicketDetallesDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketDetallesDeleteAsyncApiArg = {
+  id: number;
+};
+export type TicketDetallesGetAllWithPaginationAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfTicketDetalleDto;
+export type TicketDetallesGetAllWithPaginationAsyncApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type TicketDetallesCountAsyncApiResponse =
+  /** status 200 OK */ ResponseOfint;
+export type TicketDetallesCountAsyncApiArg = void;
+export type TicketsCocinaInsertApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketsCocinaInsertApiArg = {
+  ticketCocinaDto: TicketCocinaDto;
+};
+export type TicketsCocinaGetAllApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfTicketCocinaDto;
+export type TicketsCocinaGetAllApiArg = void;
+export type TicketsCocinaGetByIdApiResponse =
+  /** status 200 OK */ ResponseOfTicketCocinaDto;
+export type TicketsCocinaGetByIdApiArg = {
+  id: number;
+};
+export type TicketsCocinaUpdateApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketsCocinaUpdateApiArg = {
+  ticketCocinaDto: TicketCocinaDto;
+};
+export type TicketsCocinaDeleteApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketsCocinaDeleteApiArg = {
+  id: number;
+};
+export type TicketsCocinaGetAllWithPaginationApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfTicketCocinaDto;
+export type TicketsCocinaGetAllWithPaginationApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type TicketsCocinaCountApiResponse = /** status 200 OK */ ResponseOfint;
+export type TicketsCocinaCountApiArg = void;
+export type TicketsCocinaInsertAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketsCocinaInsertAsyncApiArg = {
+  ticketCocinaDto: TicketCocinaDto;
+};
+export type TicketsCocinaGetAllAsyncApiResponse =
+  /** status 200 OK */ ResponseOfIEnumerableOfTicketCocinaDto;
+export type TicketsCocinaGetAllAsyncApiArg = void;
+export type TicketsCocinaGetByIdAsyncApiResponse =
+  /** status 200 OK */ ResponseOfTicketCocinaDto;
+export type TicketsCocinaGetByIdAsyncApiArg = {
+  id: number;
+};
+export type TicketsCocinaUpdateAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketsCocinaUpdateAsyncApiArg = {
+  ticketCocinaDto: TicketCocinaDto;
+};
+export type TicketsCocinaDeleteAsyncApiResponse =
+  /** status 200 OK */ ResponseOfboolean;
+export type TicketsCocinaDeleteAsyncApiArg = {
+  id: number;
+};
+export type TicketsCocinaGetAllWithPaginationAsyncApiResponse =
+  /** status 200 OK */ ResponsePaginationOfIEnumerableOfTicketCocinaDto;
+export type TicketsCocinaGetAllWithPaginationAsyncApiArg = {
+  page?: number;
+  pageSize?: number;
+};
+export type TicketsCocinaCountAsyncApiResponse =
+  /** status 200 OK */ ResponseOfint;
+export type TicketsCocinaCountAsyncApiArg = void;
 export type UsuarioInsertApiResponse = /** status 200 OK */ ResponseOfboolean;
 export type UsuarioInsertApiArg = {
   usuarioDto: UsuarioDto;
@@ -2893,6 +4250,63 @@ export type VarianteProductosGetAllWithPaginationAsyncApiArg = {
 export type VarianteProductosCountAsyncApiResponse =
   /** status 200 OK */ ResponseOfint;
 export type VarianteProductosCountAsyncApiArg = void;
+export type Severity = number;
+export type ValidationFailure = {
+  propertyName?: string | null;
+  errorMessage?: string | null;
+  attemptedValue?: any;
+  customState?: any;
+  severity?: Severity;
+  errorCode?: string | null;
+  formattedMessagePlaceholderValues?: object | null;
+};
+export type ResponseOfboolean = {
+  data?: boolean;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type AreaDto = {
+  id?: number;
+  idSucursal?: number;
+  nombre?: string | null;
+  orden?: number;
+};
+export type ResponseOfIEnumerableOfAreaDto = {
+  data?: AreaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type AreaDto2 = {
+  id?: number;
+  idSucursal?: number;
+  nombre?: string | null;
+  orden?: number;
+} | null;
+export type ResponseOfAreaDto = {
+  data?: AreaDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfAreaDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: AreaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponseOfint = {
+  data?: number;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
 export type TokenDto = {
   accessToken: string;
   expiresAtUtc: string;
@@ -2911,16 +4325,6 @@ export type AuthResponseDto = {
   token: TokenDto;
   session: UserSessionDto;
 } | null;
-export type Severity = number;
-export type ValidationFailure = {
-  propertyName?: string | null;
-  errorMessage?: string | null;
-  attemptedValue?: any;
-  customState?: any;
-  severity?: Severity;
-  errorCode?: string | null;
-  formattedMessagePlaceholderValues?: object | null;
-};
 export type ResponseOfAuthResponseDto = {
   data?: AuthResponseDto;
   isSuccess?: boolean;
@@ -2972,12 +4376,6 @@ export type CatCredencialDto = {
   id?: number;
   descripcion?: string;
 };
-export type ResponseOfboolean = {
-  data?: boolean;
-  isSuccess?: boolean;
-  message?: string;
-  errors?: ValidationFailure[];
-};
 export type CategoriaMenuDto = {
   id?: number;
   idMenu?: number;
@@ -3015,12 +4413,6 @@ export type ResponsePaginationOfIEnumerableOfCategoriaMenuDto = {
   message?: string;
   errors?: ValidationFailure[];
 };
-export type ResponseOfint = {
-  data?: number;
-  isSuccess?: boolean;
-  message?: string;
-  errors?: ValidationFailure[];
-};
 export type EmpresaDto = {
   id?: number;
   nombre?: string | null;
@@ -3050,6 +4442,39 @@ export type ResponsePaginationOfIEnumerableOfEmpresaDto = {
   hasPreviousPage?: boolean;
   hasNextPage?: boolean;
   data?: EmpresaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type EstacionCocinaDto = {
+  id?: number;
+  idSucursal?: number;
+  nombre?: string | null;
+};
+export type ResponseOfIEnumerableOfEstacionCocinaDto = {
+  data?: EstacionCocinaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type EstacionCocinaDto2 = {
+  id?: number;
+  idSucursal?: number;
+  nombre?: string | null;
+} | null;
+export type ResponseOfEstacionCocinaDto = {
+  data?: EstacionCocinaDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfEstacionCocinaDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: EstacionCocinaDto[] | null;
   isSuccess?: boolean;
   message?: string;
   errors?: ValidationFailure[];
@@ -3228,6 +4653,45 @@ export type ResponsePaginationOfIEnumerableOfMenuDto = {
   message?: string;
   errors?: ValidationFailure[];
 };
+export type MesaDto = {
+  id?: number;
+  idSucursal?: number;
+  idArea?: number | null;
+  codigo?: string;
+  asientos?: number;
+  idEstadoMesa?: number;
+};
+export type ResponseOfIEnumerableOfMesaDto = {
+  data?: MesaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type MesaDto2 = {
+  id?: number;
+  idSucursal?: number;
+  idArea?: number | null;
+  codigo?: string;
+  asientos?: number;
+  idEstadoMesa?: number;
+} | null;
+export type ResponseOfMesaDto = {
+  data?: MesaDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfMesaDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: MesaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
 export type OpcionModificadorDto = {
   id?: number;
   idGrupo?: number;
@@ -3267,11 +4731,89 @@ export type ResponsePaginationOfIEnumerableOfOpcionModificadorDto = {
   message?: string;
   errors?: ValidationFailure[];
 };
+export type PedidoDto = {
+  id?: number;
+  idEmpresa?: number;
+  idSucursal?: number;
+  idMesa?: number | null;
+  idCliente?: number | null;
+  abiertoPor?: number | null;
+  cerradoPor?: number | null;
+  abiertoEn?: string;
+  cerradoEn?: string | null;
+  notas?: string | null;
+  idTipoPedido?: number;
+  idEstadoPedido?: number;
+  cargoServicioPct?: number;
+};
+export type ResponseOfIEnumerableOfPedidoDto = {
+  data?: PedidoDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type PedidoDto2 = {
+  id?: number;
+  idEmpresa?: number;
+  idSucursal?: number;
+  idMesa?: number | null;
+  idCliente?: number | null;
+  abiertoPor?: number | null;
+  cerradoPor?: number | null;
+  abiertoEn?: string;
+  cerradoEn?: string | null;
+  notas?: string | null;
+  idTipoPedido?: number;
+  idEstadoPedido?: number;
+  cargoServicioPct?: number;
+} | null;
+export type ResponseOfPedidoDto = {
+  data?: PedidoDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfPedidoDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: PedidoDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type CrearPedidoDetalleDto = {
+  idProducto?: number;
+  idVariante?: number;
+  productoNombre?: string;
+  varianteNombre?: string;
+  cantidad?: number;
+  precioUnitario?: number;
+  idImpuesto?: number;
+  tasaImpuesto?: number;
+  montoImpuesto?: number;
+  notas?: string | null;
+  idEstadoPedidoDetalle?: number;
+};
+export type CrearPedidoRequestDto = {
+  idEmpresa?: number;
+  idSucursal?: number;
+  idMesa?: number | null;
+  idCliente?: number | null;
+  personas?: number;
+  notas?: string | null;
+  idTipoPedido?: number;
+  idEstadoPedido?: number;
+  cargoServicioPct?: number;
+  detalles?: CrearPedidoDetalleDto[];
+};
 export type PrecioDto = {
   id?: number;
   idVariante?: number;
   monto?: number;
-  moneda?: string;
+  moneda?: string | null;
   idImpuesto?: number;
   idMoneda?: number;
   validoDesde?: string | null;
@@ -3290,7 +4832,7 @@ export type PrecioDto2 = {
   id?: number;
   idVariante?: number;
   monto?: number;
-  moneda?: string;
+  moneda?: string | null;
   idImpuesto?: number;
   idMoneda?: number;
   validoDesde?: string | null;
@@ -3394,6 +4936,119 @@ export type ResponsePaginationOfIEnumerableOfRolDto = {
   hasPreviousPage?: boolean;
   hasNextPage?: boolean;
   data?: RolDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type SucursalDto = {
+  id?: number;
+  idEmpresa?: number;
+  nombre?: string | null;
+  direccion?: string | null;
+  zonaHoraria?: string | null;
+};
+export type ResponseOfIEnumerableOfSucursalDto = {
+  data?: SucursalDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type SucursalDto2 = {
+  id?: number;
+  idEmpresa?: number;
+  nombre?: string | null;
+  direccion?: string | null;
+  zonaHoraria?: string | null;
+} | null;
+export type ResponseOfSucursalDto = {
+  data?: SucursalDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfSucursalDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: SucursalDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type TicketDetalleDto = {
+  id?: number;
+  idTicket?: number;
+  idDetalle?: number;
+  estadoCatalogId?: number;
+  estadoItemId?: number;
+};
+export type ResponseOfIEnumerableOfTicketDetalleDto = {
+  data?: TicketDetalleDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type TicketDetalleDto2 = {
+  id?: number;
+  idTicket?: number;
+  idDetalle?: number;
+  estadoCatalogId?: number;
+  estadoItemId?: number;
+} | null;
+export type ResponseOfTicketDetalleDto = {
+  data?: TicketDetalleDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfTicketDetalleDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: TicketDetalleDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type TicketCocinaDto = {
+  id?: number;
+  idEstacion?: number;
+  idPedido?: number;
+  estadoCatalogId?: number;
+  estadoItemId?: number;
+  completadoEn?: string | null;
+};
+export type ResponseOfIEnumerableOfTicketCocinaDto = {
+  data?: TicketCocinaDto[] | null;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type TicketCocinaDto2 = {
+  id?: number;
+  idEstacion?: number;
+  idPedido?: number;
+  estadoCatalogId?: number;
+  estadoItemId?: number;
+  completadoEn?: string | null;
+} | null;
+export type ResponseOfTicketCocinaDto = {
+  data?: TicketCocinaDto2;
+  isSuccess?: boolean;
+  message?: string;
+  errors?: ValidationFailure[];
+};
+export type ResponsePaginationOfIEnumerableOfTicketCocinaDto = {
+  pageNumber?: number;
+  totalPages?: number;
+  totalCount?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  data?: TicketCocinaDto[] | null;
   isSuccess?: boolean;
   message?: string;
   errors?: ValidationFailure[];
@@ -3509,6 +5164,28 @@ export type ResponsePaginationOfIEnumerableOfVarianteProductoDto = {
   errors?: ValidationFailure[];
 };
 export const {
+  useAreasInsertMutation,
+  useAreasGetAllQuery,
+  useLazyAreasGetAllQuery,
+  useAreasGetByIdQuery,
+  useLazyAreasGetByIdQuery,
+  useAreasUpdateMutation,
+  useAreasDeleteMutation,
+  useAreasGetAllWithPaginationQuery,
+  useLazyAreasGetAllWithPaginationQuery,
+  useAreasCountQuery,
+  useLazyAreasCountQuery,
+  useAreasInsertAsyncMutation,
+  useAreasGetAllAsyncQuery,
+  useLazyAreasGetAllAsyncQuery,
+  useAreasGetByIdAsyncQuery,
+  useLazyAreasGetByIdAsyncQuery,
+  useAreasUpdateAsyncMutation,
+  useAreasDeleteAsyncMutation,
+  useAreasGetAllWithPaginationAsyncQuery,
+  useLazyAreasGetAllWithPaginationAsyncQuery,
+  useAreasCountAsyncQuery,
+  useLazyAreasCountAsyncQuery,
   useAuthLoginMutation,
   useAuthLoginWithPinMutation,
   useAuthMeQuery,
@@ -3601,6 +5278,28 @@ export const {
   useLazyEmpresaGetAllWithPaginationAsyncQuery,
   useEmpresaCountAsyncQuery,
   useLazyEmpresaCountAsyncQuery,
+  useEstacionesCocinaInsertMutation,
+  useEstacionesCocinaGetAllQuery,
+  useLazyEstacionesCocinaGetAllQuery,
+  useEstacionesCocinaGetByIdQuery,
+  useLazyEstacionesCocinaGetByIdQuery,
+  useEstacionesCocinaUpdateMutation,
+  useEstacionesCocinaDeleteMutation,
+  useEstacionesCocinaGetAllWithPaginationQuery,
+  useLazyEstacionesCocinaGetAllWithPaginationQuery,
+  useEstacionesCocinaCountQuery,
+  useLazyEstacionesCocinaCountQuery,
+  useEstacionesCocinaInsertAsyncMutation,
+  useEstacionesCocinaGetAllAsyncQuery,
+  useLazyEstacionesCocinaGetAllAsyncQuery,
+  useEstacionesCocinaGetByIdAsyncQuery,
+  useLazyEstacionesCocinaGetByIdAsyncQuery,
+  useEstacionesCocinaUpdateAsyncMutation,
+  useEstacionesCocinaDeleteAsyncMutation,
+  useEstacionesCocinaGetAllWithPaginationAsyncQuery,
+  useLazyEstacionesCocinaGetAllWithPaginationAsyncQuery,
+  useEstacionesCocinaCountAsyncQuery,
+  useLazyEstacionesCocinaCountAsyncQuery,
   useFormFieldInsertMutation,
   useFormFieldUpdateMutation,
   useFormFieldDeleteMutation,
@@ -3693,6 +5392,28 @@ export const {
   useLazyMenusGetAllWithPaginationAsyncQuery,
   useMenusCountAsyncQuery,
   useLazyMenusCountAsyncQuery,
+  useMesasInsertMutation,
+  useMesasGetAllQuery,
+  useLazyMesasGetAllQuery,
+  useMesasGetByIdQuery,
+  useLazyMesasGetByIdQuery,
+  useMesasUpdateMutation,
+  useMesasDeleteMutation,
+  useMesasGetAllWithPaginationQuery,
+  useLazyMesasGetAllWithPaginationQuery,
+  useMesasCountQuery,
+  useLazyMesasCountQuery,
+  useMesasInsertAsyncMutation,
+  useMesasGetAllAsyncQuery,
+  useLazyMesasGetAllAsyncQuery,
+  useMesasGetByIdAsyncQuery,
+  useLazyMesasGetByIdAsyncQuery,
+  useMesasUpdateAsyncMutation,
+  useMesasDeleteAsyncMutation,
+  useMesasGetAllWithPaginationAsyncQuery,
+  useLazyMesasGetAllWithPaginationAsyncQuery,
+  useMesasCountAsyncQuery,
+  useLazyMesasCountAsyncQuery,
   useOpcionModificadoresInsertMutation,
   useOpcionModificadoresGetAllQuery,
   useLazyOpcionModificadoresGetAllQuery,
@@ -3715,6 +5436,29 @@ export const {
   useLazyOpcionModificadoresGetAllWithPaginationAsyncQuery,
   useOpcionModificadoresCountAsyncQuery,
   useLazyOpcionModificadoresCountAsyncQuery,
+  usePedidosInsertMutation,
+  usePedidosGetAllQuery,
+  useLazyPedidosGetAllQuery,
+  usePedidosGetByIdQuery,
+  useLazyPedidosGetByIdQuery,
+  usePedidosUpdateMutation,
+  usePedidosDeleteMutation,
+  usePedidosGetAllWithPaginationQuery,
+  useLazyPedidosGetAllWithPaginationQuery,
+  usePedidosCountQuery,
+  useLazyPedidosCountQuery,
+  usePedidosInsertAsyncMutation,
+  usePedidosInsertConDetallesAsyncMutation,
+  usePedidosGetAllAsyncQuery,
+  useLazyPedidosGetAllAsyncQuery,
+  usePedidosGetByIdAsyncQuery,
+  useLazyPedidosGetByIdAsyncQuery,
+  usePedidosUpdateAsyncMutation,
+  usePedidosDeleteAsyncMutation,
+  usePedidosGetAllWithPaginationAsyncQuery,
+  useLazyPedidosGetAllWithPaginationAsyncQuery,
+  usePedidosCountAsyncQuery,
+  useLazyPedidosCountAsyncQuery,
   usePreciosInsertMutation,
   usePreciosGetAllQuery,
   useLazyPreciosGetAllQuery,
@@ -3781,6 +5525,72 @@ export const {
   useLazyRolGetAllWithPaginationAsyncQuery,
   useRolCountAsyncQuery,
   useLazyRolCountAsyncQuery,
+  useSucursalesInsertMutation,
+  useSucursalesGetAllQuery,
+  useLazySucursalesGetAllQuery,
+  useSucursalesGetByIdQuery,
+  useLazySucursalesGetByIdQuery,
+  useSucursalesUpdateMutation,
+  useSucursalesDeleteMutation,
+  useSucursalesGetAllWithPaginationQuery,
+  useLazySucursalesGetAllWithPaginationQuery,
+  useSucursalesCountQuery,
+  useLazySucursalesCountQuery,
+  useSucursalesInsertAsyncMutation,
+  useSucursalesGetAllAsyncQuery,
+  useLazySucursalesGetAllAsyncQuery,
+  useSucursalesGetByIdAsyncQuery,
+  useLazySucursalesGetByIdAsyncQuery,
+  useSucursalesUpdateAsyncMutation,
+  useSucursalesDeleteAsyncMutation,
+  useSucursalesGetAllWithPaginationAsyncQuery,
+  useLazySucursalesGetAllWithPaginationAsyncQuery,
+  useSucursalesCountAsyncQuery,
+  useLazySucursalesCountAsyncQuery,
+  useTicketDetallesInsertMutation,
+  useTicketDetallesGetAllQuery,
+  useLazyTicketDetallesGetAllQuery,
+  useTicketDetallesGetByIdQuery,
+  useLazyTicketDetallesGetByIdQuery,
+  useTicketDetallesUpdateMutation,
+  useTicketDetallesDeleteMutation,
+  useTicketDetallesGetAllWithPaginationQuery,
+  useLazyTicketDetallesGetAllWithPaginationQuery,
+  useTicketDetallesCountQuery,
+  useLazyTicketDetallesCountQuery,
+  useTicketDetallesInsertAsyncMutation,
+  useTicketDetallesGetAllAsyncQuery,
+  useLazyTicketDetallesGetAllAsyncQuery,
+  useTicketDetallesGetByIdAsyncQuery,
+  useLazyTicketDetallesGetByIdAsyncQuery,
+  useTicketDetallesUpdateAsyncMutation,
+  useTicketDetallesDeleteAsyncMutation,
+  useTicketDetallesGetAllWithPaginationAsyncQuery,
+  useLazyTicketDetallesGetAllWithPaginationAsyncQuery,
+  useTicketDetallesCountAsyncQuery,
+  useLazyTicketDetallesCountAsyncQuery,
+  useTicketsCocinaInsertMutation,
+  useTicketsCocinaGetAllQuery,
+  useLazyTicketsCocinaGetAllQuery,
+  useTicketsCocinaGetByIdQuery,
+  useLazyTicketsCocinaGetByIdQuery,
+  useTicketsCocinaUpdateMutation,
+  useTicketsCocinaDeleteMutation,
+  useTicketsCocinaGetAllWithPaginationQuery,
+  useLazyTicketsCocinaGetAllWithPaginationQuery,
+  useTicketsCocinaCountQuery,
+  useLazyTicketsCocinaCountQuery,
+  useTicketsCocinaInsertAsyncMutation,
+  useTicketsCocinaGetAllAsyncQuery,
+  useLazyTicketsCocinaGetAllAsyncQuery,
+  useTicketsCocinaGetByIdAsyncQuery,
+  useLazyTicketsCocinaGetByIdAsyncQuery,
+  useTicketsCocinaUpdateAsyncMutation,
+  useTicketsCocinaDeleteAsyncMutation,
+  useTicketsCocinaGetAllWithPaginationAsyncQuery,
+  useLazyTicketsCocinaGetAllWithPaginationAsyncQuery,
+  useTicketsCocinaCountAsyncQuery,
+  useLazyTicketsCocinaCountAsyncQuery,
   useUsuarioInsertMutation,
   useUsuarioGetAllQuery,
   useLazyUsuarioGetAllQuery,

@@ -81,16 +81,16 @@ export default function VariantesPage() {
                 size="sm"
                 iconOnly
                 leftIcon={<Icon name="Edit2" />}
-                onClick={() => openModal(row.original)}
-                aria-label={`Editar variante ${row.original.nombre}`}
+                onClick={() => openModal(row)}
+                aria-label={`Editar variante ${row.nombre}`}
               />
               <Button
                 variant="ghost"
                 size="sm"
                 iconOnly
                 leftIcon={<Icon name="Trash2" />}
-                onClick={() => handleDelete(row.original.id)}
-                aria-label={`Eliminar variante ${row.original.nombre}`}
+                onClick={() => handleDelete(row.id)}
+                aria-label={`Eliminar variante ${row.nombre}`}
                 disabled={isDeleting}
               />
             </div>

@@ -4,7 +4,8 @@ import {
   useOpcionModificadoresInsertMutation,
   useOpcionModificadoresUpdateMutation,
   useOpcionModificadoresDeleteMutation,
-  useFormFieldGetFormFieldByFormCatIdQuery
+  useFormFieldGetFormFieldByFormCatIdQuery,
+  useGrupoModificadoresGetAllQuery
 } from "../../services/generated/api";
 import { type ApiFormField, FORM_CATEGORY_IDS, type SelectOptionApi, type ValidationRule, type ValidationType } from "../../forms/types";
 import { useToast } from "../../components/ui/toast";
@@ -61,6 +62,7 @@ export function useOpcionModificadores() {
   const [insertOpcion, { isLoading: isInserting }] = useOpcionModificadoresInsertMutation();
   const [updateOpcion, { isLoading: isUpdating }] = useOpcionModificadoresUpdateMutation();
   const [deleteOpcion, { isLoading: isDeleting }] = useOpcionModificadoresDeleteMutation();
+  const { data: gruposData } = useGrupoModificadoresGetAllQuery();
   
   const { data: fieldsResp, isLoading: isLoadingFields, isError: isFieldsError } = useFormFieldGetFormFieldByFormCatIdQuery({ id: FORM_CATEGORY_IDS.OPCION_MODIFICADOR_CRUD });
   const fields = useMemo(() => normalizeFields(fieldsResp), [fieldsResp]);
@@ -77,8 +79,8 @@ export function useOpcionModificadores() {
 
   // Mock data sources for selects until their APIs are implemented
   const dataSources = useMemo(() => ({
-    grupoModificadores: [{ id: 1, nombre: "Tipo de Pan" }]
-  }), []);
+    grupoModificadores: Array.isArray((gruposData as any)?.data) ? (gruposData as any).data.map((g: any) => ({ id: g.id, nombre: g.nombre })) : []
+  }), [gruposData]);
 
   const openModal = (item?: any) => {
     setFormError(null);
