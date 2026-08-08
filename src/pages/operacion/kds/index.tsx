@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { emptySplitApi as api } from "../../../services/baseApi";
 import { Check, Clock, AlertTriangle, ChefHat } from "lucide-react";
@@ -10,21 +10,21 @@ const kdsApi = api.injectEndpoints({
   endpoints: (build) => ({
     getKdsBoard: build.query<any, void>({
       query: () => '/api/TicketsCocina/GetKdsBoard',
-      providesTags: ['TicketsCocina', 'TicketDetalles']
+      providesTags: ['TicketCocina', 'TicketDetalle']
     }),
     changeTicketStatus: build.mutation<void, { id: number, status: number }>({
       query: ({ id, status }) => ({
         url: `/api/TicketsCocina/ChangeTicketStatus/${id}/${status}`,
         method: 'PUT'
       }),
-      invalidatesTags: ['TicketsCocina', 'TicketDetalles']
+      invalidatesTags: ['TicketCocina', 'TicketDetalle']
     }),
     changeItemStatus: build.mutation<void, { id: number, status: number }>({
       query: ({ id, status }) => ({
         url: `/api/TicketsCocina/ChangeItemStatus/${id}/${status}`,
         method: 'PUT'
       }),
-      invalidatesTags: ['TicketDetalles']
+      invalidatesTags: ['TicketDetalle']
     })
   })
 });
@@ -49,7 +49,7 @@ const KdsPage = () => {
 
     connection.on("ReceiveNewTicket", (ticketId) => {
       console.log("Nuevo ticket recibido via SignalR:", ticketId);
-      dispatch(api.util.invalidateTags(["TicketsCocina", "TicketDetalles"]));
+      dispatch(api.util.invalidateTags(["TicketCocina", "TicketDetalle"]));
     });
 
     connection.start()

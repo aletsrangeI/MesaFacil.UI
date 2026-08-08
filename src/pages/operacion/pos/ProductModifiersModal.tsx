@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../../../components/ui/button/Button";
 import "./pos.css";
 
@@ -136,7 +136,6 @@ export function ProductModifiersModal({
           {/* Modifiers Section */}
           {grupos.map(grupo => {
             const grupoOpciones = opciones.filter(o => o.idGrupo === grupo.id && o.activo !== false);
-            const selectedCount = selectedOptions.filter(id => grupoOpciones.some(o => o.id === id)).length;
             
             return (
               <div key={grupo.id} style={{ marginBottom: 24 }}>
