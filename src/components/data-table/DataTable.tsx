@@ -140,7 +140,9 @@ export function DataTable<T extends object>({
               </thead>
 
               <tbody>
-                {table.getRowModel().rows.map((row) => (
+                {table.getRowModel().rows.map((row) => {
+                  if (!row || !row.original) return null;
+                  return (
                   <tr
                     key={String(rowId(row.original))}
                     className={`mf-tr ${revealActionsOnHover ? "" : "show-actions"}`}
@@ -164,7 +166,7 @@ export function DataTable<T extends object>({
                       </td>
                     )}
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>
