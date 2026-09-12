@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import Icon from '../../components/ui/icons/Icon';
 
 interface DashboardKdsPulseProps {
-  ticketsKds: any[];
-  pedidosActivos: any[];
+  ticketsKds?: any[];
+  pedidosActivos?: any[];
   topPlatillos?: { nombre: string; cantidad: number }[];
 }
 
@@ -14,8 +14,12 @@ export const DashboardKdsPulse: React.FC<DashboardKdsPulseProps> = ({
   pedidosActivos = [],
   topPlatillos = []
 }) => {
+  const safeTickets = Array.isArray(ticketsKds) ? ticketsKds : [];
+  const safePedidos = Array.isArray(pedidosActivos) ? pedidosActivos : [];
+  const safePlatillos = Array.isArray(topPlatillos) ? topPlatillos : [];
+
   // Solo tickets activos (no completados)
-  const ticketsActivos = ticketsKds.filter(t => t.idEstadoTicketCocina !== 3);
+  const ticketsActivos = safeTickets.filter(t => t && t.idEstadoTicketCocina !== 3);
 
   const getTiempoEspera = (fechaCreacion?: string) => {
     if (!fechaCreacion) return { mins: 5, colorClass: 'green' };
@@ -62,8 +66,9 @@ export const DashboardKdsPulse: React.FC<DashboardKdsPulseProps> = ({
       ) : (
         <div className="dash-kds-list">
           {ticketsActivos.slice(0, 4).map(ticket => {
-            const tiempo = getTiempoEspera(ticket.fechaCreacion);
-            const pedido = pedidosActivos.find(p => p.id === ticket.idPedido);
+            if (!ticket) return null;
+            const tiempo = getTiempoEspera(ticket.createdAt || ticket.fechaCreacion);
+            const pedido = safePedidos.find(p => p?.id === ticket.idPedido);
             const esUrgente = tiempo.mins > 12;
 
             return (
@@ -78,12 +83,12 @@ export const DashboardKdsPulse: React.FC<DashboardKdsPulseProps> = ({
                     </strong>
                     {pedido && (
                       <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #64748b)' }}>
-                        • Mesa {pedido.idMesa || 'Barra'}
+                        • Mesa {ticket.mesaNombre || pedido.idMesa || 'Barra'}
                       </span>
                     )}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #64748b)', marginTop: 2 }}>
-                    Estación: {ticket.estacion?.nombre || `Estación ${ticket.idEstacion}`}
+                    Estación: {ticket.estacionNombre || ticket.estacion?.nombre || `Estación ${ticket.idEstacion || 1}`}
                   </div>
                 </div>
 
@@ -97,13 +102,13 @@ export const DashboardKdsPulse: React.FC<DashboardKdsPulseProps> = ({
       )}
 
       {/* Mini Sección: Top Favoritos del Día */}
-      {topPlatillos.length > 0 && (
+      {safePlatillos.length > 0 && (
         <div style={{ marginTop: 8, borderTop: '1px solid var(--color-border, #f1f5f9)', paddingTop: 12 }}>
           <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
             Platillos Más Pedidos Hoy
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {topPlatillos.slice(0, 3).map((item, idx) => (
+            {safePlatillos.slice(0, 3).map((item, idx) => (
               <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
                 <span style={{ color: 'var(--color-text, #1e293b)', fontWeight: 600 }}>{idx + 1}. {item.nombre}</span>
                 <span style={{ color: 'var(--color-text-muted, #64748b)', fontWeight: 700 }}>{item.cantidad} ordenados</span>

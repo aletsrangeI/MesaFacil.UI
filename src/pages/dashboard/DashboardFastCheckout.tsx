@@ -3,7 +3,7 @@ import React from 'react';
 import Icon from '../../components/ui/icons/Icon';
 
 interface DashboardFastCheckoutProps {
-  pedidosPorCobrar: any[];
+  pedidosPorCobrar?: any[];
   onCobrarPedido: (idPedido: number) => void;
   ventasEfectivo?: number;
   ventasTarjeta?: number;
@@ -17,9 +17,14 @@ export const DashboardFastCheckout: React.FC<DashboardFastCheckoutProps> = ({
   ventasTarjeta = 0,
   ventasTransferencia = 0
 }) => {
-  const totalMix = ventasEfectivo + ventasTarjeta + ventasTransferencia;
-  const pctEfectivo = totalMix > 0 ? Math.round((ventasEfectivo / totalMix) * 100) : 0;
-  const pctTarjeta = totalMix > 0 ? Math.round((ventasTarjeta / totalMix) * 100) : 0;
+  const safePedidos = Array.isArray(pedidosPorCobrar) ? pedidosPorCobrar : [];
+  const safeEfectivo = Number(ventasEfectivo) || 0;
+  const safeTarjeta = Number(ventasTarjeta) || 0;
+  const safeTransf = Number(ventasTransferencia) || 0;
+
+  const totalMix = safeEfectivo + safeTarjeta + safeTransf;
+  const pctEfectivo = totalMix > 0 ? Math.round((safeEfectivo / totalMix) * 100) : 0;
+  const pctTarjeta = totalMix > 0 ? Math.round((safeTarjeta / totalMix) * 100) : 0;
   const pctTransf = totalMix > 0 ? Math.max(0, 100 - pctEfectivo - pctTarjeta) : 0;
 
   return (
@@ -30,11 +35,11 @@ export const DashboardFastCheckout: React.FC<DashboardFastCheckoutProps> = ({
           <span>Cuentas por Cobrar</span>
         </h2>
         <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #64748b)', fontWeight: 600 }}>
-          {pedidosPorCobrar.length} pendientes
+          {safePedidos.length} pendientes
         </span>
       </div>
 
-      {pedidosPorCobrar.length === 0 ? (
+      {safePedidos.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '24px 12px', color: 'var(--color-text-muted, #64748b)' }}>
           <div style={{ margin: '0 auto 8px', width: 40, height: 40, borderRadius: '50%', background: 'var(--color-success-bg, rgba(60,141,64,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success, #3c8d40)' }}>
             <Icon name="CheckCircle" />
@@ -44,7 +49,8 @@ export const DashboardFastCheckout: React.FC<DashboardFastCheckoutProps> = ({
         </div>
       ) : (
         <div className="dash-orders-list">
-          {pedidosPorCobrar.slice(0, 5).map(pedido => {
+          {safePedidos.slice(0, 5).map(pedido => {
+            if (!pedido) return null;
             return (
               <div key={pedido.id} className="dash-order-item">
                 <div className="dash-order-info">

@@ -3,25 +3,33 @@ import React from 'react';
 import Icon from '../../components/ui/icons/Icon';
 
 interface DashboardKpiCardsProps {
-  totalVentas: number;
-  totalCuentasCobradas: number;
-  mesasOcupadas: number;
-  totalMesas: number;
-  ticketPromedio: number;
-  ticketsKdsActivos: number;
-  tiempoPromedioKdsMin: number;
+  totalVentas?: number;
+  totalCuentasCobradas?: number;
+  mesasOcupadas?: number;
+  totalMesas?: number;
+  ticketPromedio?: number;
+  ticketsKdsActivos?: number;
+  tiempoPromedioKdsMin?: number;
 }
 
 export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({
-  totalVentas,
-  totalCuentasCobradas,
-  mesasOcupadas,
-  totalMesas,
-  ticketPromedio,
-  ticketsKdsActivos,
-  tiempoPromedioKdsMin
+  totalVentas = 0,
+  totalCuentasCobradas = 0,
+  mesasOcupadas = 0,
+  totalMesas = 0,
+  ticketPromedio = 0,
+  ticketsKdsActivos = 0,
+  tiempoPromedioKdsMin = 0
 }) => {
-  const ocupacionPct = totalMesas > 0 ? Math.round((mesasOcupadas / totalMesas) * 100) : 0;
+  const safeTotalVentas = Number(totalVentas) || 0;
+  const safeTotalCuentas = Number(totalCuentasCobradas) || 0;
+  const safeMesasOcupadas = Number(mesasOcupadas) || 0;
+  const safeTotalMesas = Number(totalMesas) || 0;
+  const safeTicketPromedio = Number(ticketPromedio) || 0;
+  const safeTicketsKds = Number(ticketsKdsActivos) || 0;
+  const safeTiempoKds = Number(tiempoPromedioKdsMin) || 0;
+
+  const ocupacionPct = safeTotalMesas > 0 ? Math.round((safeMesasOcupadas / safeTotalMesas) * 100) : 0;
 
   // Color de ocupación
   let colorOcupacion = "var(--color-success, #3c8d40)";
@@ -30,8 +38,8 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({
 
   // Color de tiempo KDS
   let colorKds = "var(--color-success, #3c8d40)";
-  if (tiempoPromedioKdsMin > 10) colorKds = "var(--color-warning, #e2a72e)";
-  if (tiempoPromedioKdsMin > 15) colorKds = "var(--color-danger, #d64545)";
+  if (safeTiempoKds > 10) colorKds = "var(--color-warning, #e2a72e)";
+  if (safeTiempoKds > 15) colorKds = "var(--color-danger, #d64545)";
 
   return (
     <div className="dash-kpi-grid">
@@ -43,9 +51,9 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({
             <Icon name="DollarSign" />
           </div>
         </div>
-        <div className="dash-kpi-value">${totalVentas.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div className="dash-kpi-value">${safeTotalVentas.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
         <div className="dash-kpi-footer">
-          <span>{totalCuentasCobradas} {totalCuentasCobradas === 1 ? 'cuenta cobrada' : 'cuentas cobradas'}</span>
+          <span>{safeTotalCuentas} {safeTotalCuentas === 1 ? 'cuenta cobrada' : 'cuentas cobradas'}</span>
           <span style={{ color: 'var(--color-success, #3c8d40)', fontWeight: 700 }}>Activo hoy</span>
         </div>
       </div>
@@ -60,7 +68,7 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({
         </div>
         <div className="dash-kpi-value">{ocupacionPct}%</div>
         <div className="dash-kpi-footer">
-          <span>{mesasOcupadas} de {totalMesas} mesas ocupadas</span>
+          <span>{safeMesasOcupadas} de {safeTotalMesas} mesas ocupadas</span>
           <span style={{ color: colorOcupacion, fontWeight: 700 }}>
             {ocupacionPct > 80 ? 'Alta demanda' : ocupacionPct > 40 ? 'Flujo moderado' : 'Capacidad libre'}
           </span>
@@ -81,7 +89,7 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({
             <Icon name="TrendingUp" />
           </div>
         </div>
-        <div className="dash-kpi-value">${ticketPromedio.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div className="dash-kpi-value">${safeTicketPromedio.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
         <div className="dash-kpi-footer">
           <span>Por mesa servida</span>
           <span style={{ color: '#b45309', fontWeight: 700 }}>Promedio del día</span>
@@ -97,12 +105,12 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({
           </div>
         </div>
         <div className="dash-kpi-value" style={{ color: colorKds }}>
-          {tiempoPromedioKdsMin > 0 ? `${tiempoPromedioKdsMin} min` : `${ticketsKdsActivos} tickets`}
+          {safeTiempoKds > 0 ? `${safeTiempoKds} min` : `${safeTicketsKds} tickets`}
         </div>
         <div className="dash-kpi-footer">
-          <span>{ticketsKdsActivos} {ticketsKdsActivos === 1 ? 'comanda en proceso' : 'comandas en proceso'}</span>
+          <span>{safeTicketsKds} {safeTicketsKds === 1 ? 'comanda en proceso' : 'comandas en proceso'}</span>
           <span style={{ color: colorKds, fontWeight: 700 }}>
-            {tiempoPromedioKdsMin > 15 ? 'Demora alta' : tiempoPromedioKdsMin > 10 ? 'Tiempo estándar' : 'Cocina ágil'}
+            {safeTiempoKds > 15 ? 'Demora alta' : safeTiempoKds > 10 ? 'Tiempo estándar' : 'Cocina ágil'}
           </span>
         </div>
       </div>

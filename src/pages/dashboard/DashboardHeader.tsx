@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import Icon from '../../components/ui/icons/Icon';
 
 interface DashboardHeaderProps {
-  userName?: string;
+  userName?: string | null;
   resumenTurno?: any;
   onOpenApertura: () => void;
   onOpenCorteX: () => void;
@@ -44,13 +44,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   const tieneTurnoActivo = !!resumenTurno?.idTurno;
-  const nombreCajero = resumenTurno?.nombreUsuario || userName;
+  const safeUserName = String(userName || "Operador").trim();
+  const nombreCajero = resumenTurno?.nombreUsuario || safeUserName;
   const fondoInicial = Number(resumenTurno?.cajaInicial || 0);
 
   return (
     <header className="dash-header">
       <div className="dash-header-title">
-        <h1>{getGreeting()}, {userName.split(' ')[0]}</h1>
+        <h1>{getGreeting()}, {safeUserName.split(' ')[0]}</h1>
         <div className="dash-header-subtitle">
           <span>{currentTime}</span>
           <span>•</span>

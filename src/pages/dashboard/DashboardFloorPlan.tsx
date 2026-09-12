@@ -4,20 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/ui/icons/Icon';
 
 interface DashboardFloorPlanProps {
-  mesas: any[];
-  areas: any[];
-  pedidosActivos: any[];
-  estadosMesa: any[];
+  mesas?: any[];
+  areas?: any[];
+  pedidosActivos?: any[];
+  estadosMesa?: any[];
   onCobrarPedido: (idPedido: number) => void;
   onVerPrecuenta: (idPedido: number) => void;
   onLiberarMesa: (mesa: any) => void;
 }
 
 export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
-  mesas,
-  areas,
-  pedidosActivos,
-  estadosMesa,
+  mesas = [],
+  areas = [],
+  pedidosActivos = [],
+  estadosMesa = [],
   onCobrarPedido,
   onVerPrecuenta,
   onLiberarMesa
@@ -26,8 +26,13 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
   const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
   const [selectedMesaDetail, setSelectedMesaDetail] = useState<any>(null);
 
+  const safeMesas = Array.isArray(mesas) ? mesas : [];
+  const safeAreas = Array.isArray(areas) ? areas : [];
+  const safePedidos = Array.isArray(pedidosActivos) ? pedidosActivos : [];
+  const safeEstados = Array.isArray(estadosMesa) ? estadosMesa : [];
+
   const getEstadoInfo = (idEstadoMesa: number) => {
-    const estado = estadosMesa.find((e: any) => e.id === idEstadoMesa);
+    const estado = safeEstados.find((e: any) => e?.id === idEstadoMesa);
     const desc = estado?.descripcion?.toLowerCase() || '';
     if (desc.includes('disponible')) return { text: 'Disponible', color: 'var(--color-success, #3c8d40)', bg: 'rgba(60,141,64,0.1)', tipo: 'disponible' };
     if (desc.includes('ocupada')) return { text: 'Ocupada', color: 'var(--color-danger, #d64545)', bg: 'rgba(214,69,69,0.1)', tipo: 'ocupada' };
@@ -37,19 +42,22 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
   };
 
   const filteredMesas = selectedAreaId 
-    ? mesas.filter(m => m.idArea === selectedAreaId) 
-    : mesas;
+    ? safeMesas.filter(m => m?.idArea === selectedAreaId) 
+    : safeMesas;
 
   // Busca si la mesa tiene un pedido activo
   const getPedidoDeMesa = (idMesa: number) => {
-    return pedidosActivos.find(p => p.idMesa === idMesa && p.idEstadoPedido !== 5 && p.idEstadoPedido !== 6);
+    return safePedidos.find(p => p?.idMesa === idMesa && p?.idEstadoPedido !== 5 && p?.idEstadoPedido !== 6);
   };
 
   const handleMesaClick = (mesa: any) => {
+    if (!mesa) return;
     const estadoInfo = getEstadoInfo(mesa.idEstadoMesa || 1);
     const pedido = getPedidoDeMesa(mesa.id);
     setSelectedMesaDetail({ mesa, estadoInfo, pedido });
   };
+
+  const ocupadasCount = safeMesas.filter(m => getEstadoInfo(m?.idEstadoMesa).tipo === 'ocupada').length;
 
   return (
     <section className="dash-bento-card">
@@ -59,7 +67,7 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
           <span>Monitor de Salón (Floor Plan)</span>
         </h2>
         <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #64748b)' }}>
-          {mesas.filter(m => getEstadoInfo(m.idEstadoMesa).tipo === 'ocupada').length} de {mesas.length} ocupadas
+          {ocupadasCount} de {safeMesas.length} ocupadas
         </div>
       </div>
 
@@ -69,10 +77,11 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
           className={`dash-area-chip ${selectedAreaId === null ? 'active' : ''}`}
           onClick={() => setSelectedAreaId(null)}
         >
-          Todas las Áreas ({mesas.length})
+          Todas las Áreas ({safeMesas.length})
         </button>
-        {areas.map(area => {
-          const count = mesas.filter(m => m.idArea === area.id).length;
+        {safeAreas.map(area => {
+          if (!area) return null;
+          const count = safeMesas.filter(m => m?.idArea === area.id).length;
           return (
             <button
               key={area.id}
@@ -87,50 +96,57 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
 
       {/* Grid de Mesas */}
       <div className="dash-tables-grid">
-        {filteredMesas.map(mesa => {
-          const estado = getEstadoInfo(mesa.idEstadoMesa || 1);
-          const pedido = getPedidoDeMesa(mesa.id);
-          const tieneCuenta = !!pedido;
+        {filteredMesas.length === 0 ? (
+          <div style={{ gridColumn: '1 / -1', padding: '24px', textAlign: 'center', color: 'var(--color-text-muted, #64748b)' }}>
+            No hay mesas registradas en esta área
+          </div>
+        ) : (
+          filteredMesas.map(mesa => {
+            if (!mesa) return null;
+            const estado = getEstadoInfo(mesa.idEstadoMesa || 1);
+            const pedido = getPedidoDeMesa(mesa.id);
+            const tieneCuenta = !!pedido;
 
-          return (
-            <div
-              key={mesa.id}
-              className={`dash-table-cell ${estado.tipo}`}
-              onClick={() => handleMesaClick(mesa)}
-              title={`Mesa ${mesa.codigo} - ${estado.text}`}
-            >
-              <span className="dash-table-code">{mesa.codigo || `M${mesa.id}`}</span>
-              <span className="dash-table-pax">
-                <Icon name="User" /> {mesa.asientos} pax
-              </span>
-              <span 
-                className="dash-table-status-pill"
-                style={{ background: estado.bg, color: estado.color }}
+            return (
+              <div
+                key={mesa.id}
+                className={`dash-table-cell ${estado.tipo}`}
+                onClick={() => handleMesaClick(mesa)}
+                title={`Mesa ${mesa.codigo || mesa.id} - ${estado.text}`}
               >
-                {estado.text}
-              </span>
-              {tieneCuenta && (
-                <div style={{ 
-                  position: 'absolute', 
-                  top: -5, 
-                  right: -5, 
-                  background: 'var(--color-primary, #d64545)', 
-                  color: '#fff', 
-                  borderRadius: '50%', 
-                  width: 18, 
-                  height: 18, 
-                  fontSize: '0.65rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  fontWeight: 800
-                }}>
-                  !
-                </div>
-              )}
-            </div>
-          );
-        })}
+                <span className="dash-table-code">{mesa.codigo || `M${mesa.id}`}</span>
+                <span className="dash-table-pax">
+                  <Icon name="User" /> {mesa.asientos || 2} pax
+                </span>
+                <span 
+                  className="dash-table-status-pill"
+                  style={{ background: estado.bg, color: estado.color }}
+                >
+                  {estado.text}
+                </span>
+                {tieneCuenta && (
+                  <div style={{ 
+                    position: 'absolute', 
+                    top: -5, 
+                    right: -5, 
+                    background: 'var(--color-primary, #d64545)', 
+                    color: '#fff', 
+                    borderRadius: '50%', 
+                    width: 18, 
+                    height: 18, 
+                    fontSize: '0.65rem', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    fontWeight: 800
+                  }}>
+                    !
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* Popover / Mini Drawer de Acción Rápida de Mesa */}

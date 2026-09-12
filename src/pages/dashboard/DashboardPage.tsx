@@ -1,35 +1,35 @@
-// src/pages/HomePage.tsx
+// src/pages/dashboard/DashboardPage.tsx
 import { useState, Component, type ErrorInfo, type ReactNode } from "react";
 import { useSelector } from "react-redux";
-import { selectUserProfile } from "../state/authSlice";
-import { useToast } from "../components/ui/toast";
-import Container from "../components/ui/layout/Container";
+import { selectUserProfile } from "../../state/authSlice";
+import { useToast } from "../../components/ui/toast";
+import Container from "../../components/ui/layout/Container";
 import { 
   usePedidosGetAllAsyncQuery, 
   useMesasGetAllQuery, 
   useAreasGetAllQuery,
   useCatalogosGetAllQuery,
   useMesasUpdateAsyncMutation
-} from "../services/generated/api";
-import { useGetResumenCorteQuery } from "./operacion/pos/CorteCajaModal";
-import { useGetKdsBoardDashboardQuery } from "../services/dashboardApi";
-import { useSeedRestauranteCompletoMutation } from "../services/demoApi";
+} from "../../services/generated/api";
+import { useGetResumenCorteQuery } from "../operacion/pos/CorteCajaModal";
+import { useGetKdsBoardDashboardQuery } from "../../services/dashboardApi";
+import { useSeedRestauranteCompletoMutation } from "../../services/demoApi";
 
 // Componentes del Dashboard Bento
-import { DashboardHeader } from "./dashboard/DashboardHeader";
-import { DashboardKpiCards } from "./dashboard/DashboardKpiCards";
-import { DashboardFloorPlan } from "./dashboard/DashboardFloorPlan";
-import { DashboardKdsPulse } from "./dashboard/DashboardKdsPulse";
-import { DashboardFastCheckout } from "./dashboard/DashboardFastCheckout";
-import "./dashboard/dashboard.css";
+import { DashboardHeader } from "./DashboardHeader";
+import { DashboardKpiCards } from "./DashboardKpiCards";
+import { DashboardFloorPlan } from "./DashboardFloorPlan";
+import { DashboardKdsPulse } from "./DashboardKdsPulse";
+import { DashboardFastCheckout } from "./DashboardFastCheckout";
+import "./dashboard.css";
 
 // Modales Operativos
-import { PaymentModal } from "./operacion/pos/PaymentModal";
-import { ThermalTicketModal } from "./operacion/pos/ThermalTicketModal";
-import { CorteCajaModal } from "./operacion/pos/CorteCajaModal";
-import { CorteXModal } from "./operacion/pos/CorteXModal";
-import { MovimientoCajaModal } from "./operacion/pos/MovimientoCajaModal";
-import { AperturaTurnoModal } from "./operacion/pos/AperturaTurnoModal";
+import { PaymentModal } from "../operacion/pos/PaymentModal";
+import { ThermalTicketModal } from "../operacion/pos/ThermalTicketModal";
+import { CorteCajaModal } from "../operacion/pos/CorteCajaModal";
+import { CorteXModal } from "../operacion/pos/CorteXModal";
+import { MovimientoCajaModal } from "../operacion/pos/MovimientoCajaModal";
+import { AperturaTurnoModal } from "../operacion/pos/AperturaTurnoModal";
 
 // ─── Error Boundary Protector ────────────────────────────────────────────────
 interface ErrorBoundaryProps {
@@ -51,7 +51,7 @@ class DashboardErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundary
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Dashboard caught error:", error, errorInfo);
+    console.error("Dashboard error caught:", error, errorInfo);
   }
 
   render() {
@@ -81,7 +81,7 @@ function toArray(data: any): any[] {
   return [];
 }
 
-export default function HomePage() {
+export default function DashboardPage() {
   const profile = useSelector(selectUserProfile);
   const { addToast } = useToast();
 

@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import HomePage from "../../pages/HomePage";
+import DashboardPage from "../../pages/dashboard/DashboardPage";
 import { PrivateRoute } from "./PrivateRoute";
 import RegistroUsuario from "../../pages/auth/RegistroUsuario";
 import LoginPin from "../../pages/auth/LoginPin";
@@ -94,17 +94,9 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       >
-        <Route index element={<Navigate to="/" replace />} />
-
-        {/* Dashboard */}
-        <Route
-          path="/"
-          element={
-            <RequireAccess path="/">
-              <HomePage />
-            </RequireAccess>
-          }
-        />
+        {/* Dashboard como vista principal y ruta raíz */}
+        <Route index element={<DashboardPage />} />
+        <Route path="/" element={<DashboardPage />} />
 
         {/* Operación */}
         <Route
