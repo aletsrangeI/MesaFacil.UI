@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import HomePage from "../../pages/HomePage";
 import { PrivateRoute } from "./PrivateRoute";
 import RegistroUsuario from "../../pages/auth/RegistroUsuario";
 import LoginPin from "../../pages/auth/LoginPin";
@@ -24,7 +25,18 @@ import EmpresaPage from "../../pages/gestion/empresa";
 import SucursalesPage from "../../pages/gestion/sucursales";
 import AreasPage from "../../pages/gestion/areas";
 import MesasPage from "../../pages/gestion/mesas";
+import TiposPedidoPage from "../../pages/gestion/tipos-pedido";
 import KdsPage from "../../pages/operacion/kds";
+import MovimientosPage from "../../pages/caja/movimientos";
+import CortesPage from "../../pages/caja/cortes";
+import DeliveryPage from "../../pages/operacion/delivery";
+import DeliveryHistorialPage from "../../pages/operacion/delivery/historial";
+import InventarioPage from "../../pages/inventario";
+import ComprasPage from "../../pages/compras";
+import CxPPage from "../../pages/cxp";
+
+import { useEffect } from "react";
+import { useToast } from "../../components/ui/toast";
 
 /** Guard que valida acceso por path usando selectCanAccess */
 function RequireAccess({
@@ -35,6 +47,17 @@ function RequireAccess({
   children: React.ReactNode;
 }) {
   const can = useSelector(selectCanAccess(path));
+  const { addToast } = useToast();
+
+  useEffect(() => {
+    if (!can) {
+      addToast({
+        message: "Ya no tienes acceso a este módulo. Contacta a tu administrador.",
+        variant: "error",
+      });
+    }
+  }, [can, addToast]);
+
   return can ? <>{children}</> : <Navigate to="/" replace />;
 }
 
@@ -78,7 +101,7 @@ export default function AppRouter() {
           path="/"
           element={
             <RequireAccess path="/">
-              <Placeholder title="Dashboard" />
+              <HomePage />
             </RequireAccess>
           }
         />
@@ -120,7 +143,15 @@ export default function AppRouter() {
           path="/delivery"
           element={
             <RequireAccess path="/delivery">
-              <Placeholder title="Delivery" />
+              <DeliveryPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/delivery/historial"
+          element={
+            <RequireAccess path="/delivery/historial">
+              <DeliveryHistorialPage />
             </RequireAccess>
           }
         />
@@ -180,7 +211,7 @@ export default function AppRouter() {
           path="/caja/movimientos"
           element={
             <RequireAccess path="/caja/movimientos">
-              <Placeholder title="Movimientos" />
+              <MovimientosPage />
             </RequireAccess>
           }
         />
@@ -188,7 +219,7 @@ export default function AppRouter() {
           path="/caja/cortes"
           element={
             <RequireAccess path="/caja/cortes">
-              <Placeholder title="Cortes de Caja" />
+              <CortesPage />
             </RequireAccess>
           }
         />
@@ -328,6 +359,14 @@ export default function AppRouter() {
             </RequireAccess>
           }
         />
+        <Route
+          path="/gestion/tipos-pedido"
+          element={
+            <RequireAccess path="/">
+              <TiposPedidoPage />
+            </RequireAccess>
+          }
+        />
 
         {/* Seguridad & Administración */}
         <Route
@@ -392,10 +431,34 @@ export default function AppRouter() {
           }
         />
         <Route
+          path="/inventario"
+          element={
+            <RequireAccess path="/inventario">
+              <InventarioPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/compras"
+          element={
+            <RequireAccess path="/compras">
+              <ComprasPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/cxp"
+          element={
+            <RequireAccess path="/cxp">
+              <CxPPage />
+            </RequireAccess>
+          }
+        />
+        <Route
           path="/admin/inventory"
           element={
             <RequireAccess path="/admin/inventory">
-              <Placeholder title="Inventario" />
+              <InventarioPage />
             </RequireAccess>
           }
         />

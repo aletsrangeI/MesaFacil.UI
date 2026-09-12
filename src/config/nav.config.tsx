@@ -94,15 +94,31 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         path: "/delivery",
         icon: <Icon name="PackageSearch" />,
         sortOrder: 40,
-        allowedRoles: ["admin", "manager", "delivery"],
+        allowedRoles: ["admin", "manager", "delivery", "cashier", "waiter"],
+      },
+      {
+        key: "delivery-historial",
+        label: "Auditoría Delivery",
+        path: "/delivery/historial",
+        icon: <Icon name="ClipboardCheck" />,
+        sortOrder: 41,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "pos",
+        label: "Punto de Venta (POS)",
+        path: "/ventas/pos",
+        icon: <Icon name="Store" />,
+        sortOrder: 15,
+        allowedRoles: ["admin", "manager", "cashier", "waiter"],
       },
       {
         key: "cocina",
         label: "Cocina KDS",
-        path: "/cocina",
+        path: "/ventas/kds",
         icon: <Icon name="ChefHat" />,
         sortOrder: 50,
-        allowedRoles: ["admin", "manager", "kitchen"],
+        allowedRoles: ["admin", "manager", "kitchen", "waiter"],
       },
       {
         key: "caja-rapida",
@@ -174,6 +190,14 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         sortOrder: 30,
         allowedRoles: ["admin", "manager"],
       },
+      {
+        key: "cxp",
+        label: "Cuentas por Pagar",
+        path: "/cxp",
+        icon: <Icon name="CreditCard" />,
+        sortOrder: 40,
+        allowedRoles: ["admin", "manager", "cashier"],
+      },
     ],
   },
   {
@@ -234,6 +258,49 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         icon: <Icon name="SlidersHorizontal" />,
         sortOrder: 60,
         allowedRoles: ["admin", "manager"],
+      },
+    ],
+  },
+  {
+    key: "inventario",
+    label: "Inventario",
+    sortOrder: 45,
+    items: [
+      {
+        key: "inventario-general",
+        label: "Inventario y Kárdex",
+        path: "/inventario",
+        acceso: "/inventario",
+        icon: <Icon name="Boxes" />,
+        sortOrder: 10,
+        allowedRoles: ["admin", "manager", "kitchen"],
+      },
+      {
+        key: "recetas-escandallos",
+        label: "Recetas & Escandallos",
+        path: "/inventario?tab=recetas",
+        acceso: "/inventario",
+        icon: <Icon name="ChefHat" />,
+        sortOrder: 15,
+        allowedRoles: ["admin", "manager", "kitchen"],
+      },
+      {
+        key: "compras-facturas",
+        label: "Entradas & Facturas CFDI",
+        path: "/compras",
+        acceso: "/inventario",
+        icon: <Icon name="FileText" />,
+        sortOrder: 20,
+        allowedRoles: ["admin", "manager", "kitchen"],
+      },
+      {
+        key: "proveedores",
+        label: "Proveedores",
+        path: "/compras?tab=proveedores",
+        acceso: "/inventario",
+        icon: <Icon name="Building2" />,
+        sortOrder: 25,
+        allowedRoles: ["admin", "manager", "kitchen"],
       },
     ],
   },
@@ -458,12 +525,57 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         allowedRoles: ["admin", "manager"],
       },
       {
-        key: "cat-tipos-pedido",
+        key: "tipos-pedido",
         label: "Tipos de Pedido",
-        path: "/admin/catalogos/tipos-pedido",
-        acceso: "/admin/catalog",
+        path: "/gestion/tipos-pedido",
+        acceso: "/",
         icon: <Icon name="ClipboardPen" />,
         sortOrder: 130,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-tipos-almacen",
+        label: "Tipos de Almacén",
+        path: "/admin/catalogos/tipos-almacen",
+        acceso: "/admin/catalog",
+        icon: <Icon name="Warehouse" />,
+        sortOrder: 140,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-motivos-mov-inv",
+        label: "Motivos Mov. Inventario",
+        path: "/admin/catalogos/motivos-movimiento-inventario",
+        acceso: "/admin/catalog",
+        icon: <Icon name="ArrowLeftRight" />,
+        sortOrder: 150,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-conceptos-caja",
+        label: "Conceptos de Caja",
+        path: "/admin/catalogos/conceptos-movimiento-caja",
+        acceso: "/admin/catalog",
+        icon: <Icon name="WalletCards" />,
+        sortOrder: 160,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-motivos-cancelacion",
+        label: "Motivos Cancelación",
+        path: "/admin/catalogos/motivos-cancelacion-pedido",
+        acceso: "/admin/catalog",
+        icon: <Icon name="Ban" />,
+        sortOrder: 170,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "cat-canales-venta",
+        label: "Canales de Venta",
+        path: "/admin/catalogos/canales-venta",
+        acceso: "/admin/catalog",
+        icon: <Icon name="Globe" />,
+        sortOrder: 180,
         allowedRoles: ["admin", "manager"],
       },
     ],
@@ -542,8 +654,11 @@ function norm(p: string) {
 /** Filtra por session.accesos (lista de paths permitidos) */
 function filterByAccesos(
   sections: NavSectionConfig[],
-  accesos?: string[] | null
+  accesos?: string[] | null,
+  roles?: CanonicalRole[] | null
 ): NavSectionConfig[] {
+  // El rol 'admin' tiene acceso a todos los módulos del sistema
+  if (roles?.includes("admin")) return sections;
   if (!accesos || accesos.length === 0) return sections;
 
   const acc = new Set((accesos ?? []).map(norm));
@@ -551,7 +666,19 @@ function filterByAccesos(
     .map((sec) => ({
       ...sec,
       // Usa `acceso` si está definido, si no usa `path` para validar contra accesos
-      items: sec.items.filter((it) => acc.has(norm(it.acceso ?? it.path))),
+      items: sec.items.filter((it) => {
+        const pathNorm = norm(it.acceso ?? it.path);
+        if (acc.has(pathNorm)) return true;
+        // Respaldo para manager en módulos de caja si el token no ha refrescado
+        if (roles?.includes("manager") && pathNorm.startsWith("/caja")) return true;
+        // Respaldo para operativa en delivery
+        if ((roles?.includes("manager") || roles?.includes("waiter") || roles?.includes("cashier") || roles?.includes("delivery")) && pathNorm === "/delivery") return true;
+        // Respaldo para inventario y compras
+        if ((roles?.includes("manager") || roles?.includes("kitchen")) && (pathNorm === "/inventario" || pathNorm === "/admin/inventory" || pathNorm.startsWith("/compras"))) return true;
+        // Respaldo para cuentas por pagar
+        if ((roles?.includes("manager") || roles?.includes("cashier")) && (pathNorm === "/cxp" || pathNorm.startsWith("/cxp"))) return true;
+        return false;
+      }),
     }))
     .filter((sec) => sec.items.length > 0);
 }
@@ -587,7 +714,7 @@ export function buildNavSections(
 
   if (params.badgesCtx) result = withBadges(result, params.badgesCtx);
   result = filterByRoles(result, rolesCanon);
-  result = filterByAccesos(result, params.accesos);
+  result = filterByAccesos(result, params.accesos, rolesCanon);
   result = sortBy(result).map((sec) => ({ ...sec, items: sortBy(sec.items) }));
   return result;
 }

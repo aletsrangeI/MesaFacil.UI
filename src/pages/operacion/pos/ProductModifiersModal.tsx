@@ -15,11 +15,12 @@ export function ProductModifiersModal({
   grupos: any[];
   opciones: any[];
   onClose: () => void;
-  onAddToCart: (product: any, selectedVariant: any, selectedModifiers: any[], extraPrice: number) => void;
+  onAddToCart: (product: any, selectedVariant: any, selectedModifiers: any[], extraPrice: number, notas: string) => void;
 }) {
   // State to hold selected option IDs
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [notas, setNotas] = useState("");
 
   // Initialize with default options when opened
   useEffect(() => {
@@ -28,6 +29,7 @@ export function ProductModifiersModal({
         .filter(o => grupos.some(g => g.id === o.idGrupo) && o.esDefault)
         .map(o => o.id);
       setSelectedOptions(defaults);
+      setNotas("");
       
       if (product.variantes && product.variantes.length > 0) {
         setSelectedVariant(product.variantes[0]);
@@ -82,7 +84,7 @@ export function ProductModifiersModal({
 
   const handleConfirm = () => {
     const selectedMods = selectedOptions.map(id => opciones.find(o => o.id === id)).filter(Boolean);
-    onAddToCart(product, selectedVariant, selectedMods, extraPrice);
+    onAddToCart(product, selectedVariant, selectedMods, extraPrice, notas);
   };
 
   return (
@@ -183,6 +185,17 @@ export function ProductModifiersModal({
               </div>
             );
           })}
+
+          {/* Notas libres */}
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{ margin: 0, marginBottom: 8, fontSize: '1.1rem' }}>Notas para cocina</h3>
+            <textarea
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+              placeholder="Ej. Sin cebolla, bien cocido..."
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '80px', fontFamily: 'inherit' }}
+            />
+          </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--color-border)' }}>

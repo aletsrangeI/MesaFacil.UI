@@ -13,6 +13,7 @@
   min-height: 100dvh; /* usa viewport dinámico para móviles */
   background: var(--color-app-bg, #fafafa);
   color: var(--color-text, #111);
+  position: relative; /* para el overlay */
 }
 
 /* Colapsado: solo toca el ancho de la primera columna */
@@ -27,6 +28,7 @@
   align-self: start;
   height: 100dvh;
   background: var(--color-bg, #fff);
+  z-index: 100;
   /* NO poner overflow aquí: el propio .mf-sidebar maneja el scroll del nav */
 }
 
@@ -39,9 +41,6 @@
   background: var(--color-app-bg, #fafafa);
 }
 
-/* IMPORTANTE: El Topbar ya es <header class="mf-topbar"> con border y sombra.
-   No uses un wrapper con estilos adicionales para evitar "doble borde/sombra". */
-
 /* Área de contenido: este es el que hace scroll */
 .app-shell__content {
   overflow: auto;
@@ -50,9 +49,55 @@
   /* no le pongas fondo blanco aquí: deja ver el app-bg salvo que una vista lo requiera */
 }
 
-/* Responsive — forzar colapsado en pantallas chicas */
-@media (max-width: 920px) {
+/* Overlay para móviles */
+.app-shell__overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* =========================================
+   RESPONSIVE (Tablet y Móvil)
+   ========================================= */
+
+/* Tablets / KDS pequeños (hasta 1024px) */
+@media (max-width: 1024px) {
   .app-shell {
     grid-template-columns: var(--sidebar-w-collapsed) 1fr;
+  }
+}
+
+/* Móviles (hasta 768px) */
+@media (max-width: 768px) {
+  .app-shell, .app-shell.is-collapsed {
+    grid-template-columns: 1fr; /* Oculta el espacio del sidebar */
+  }
+
+  /* El sidebar pasa a ser off-canvas */
+  .app-shell__side {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  /* Cuando el menú móvil está abierto */
+  .app-shell__side.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  .app-shell.is-mobile-open .app-shell__overlay {
+    display: block;
+    opacity: 1;
+  }
+  
+  .app-shell__content {
+    padding: var(--space-4, 16px); /* padding más pequeño en móvil */
   }
 }

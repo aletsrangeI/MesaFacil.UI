@@ -36,6 +36,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const isDisabled = disabled || isLoading;
+    const iconContent = leftIcon || (iconOnly ? children : null);
 
     return (
       <button
@@ -54,13 +55,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={isLoading || undefined}
         {...rest}
       >
-        {leftIcon && (
-          <span className="ui-btn__icon ui-btn__icon--left" aria-hidden>
-            {leftIcon}
+        {iconContent && (
+          <span
+            className={cn(
+              "ui-btn__icon",
+              !iconOnly && Boolean(leftIcon) && "ui-btn__icon--left"
+            )}
+            aria-hidden
+          >
+            {iconContent}
           </span>
         )}
-        <span className="ui-btn__label">{children}</span>
-        {rightIcon && (
+        {!iconOnly && <span className="ui-btn__label">{children}</span>}
+        {!iconOnly && rightIcon && (
           <span className="ui-btn__icon ui-btn__icon--right" aria-hidden>
             {rightIcon}
           </span>

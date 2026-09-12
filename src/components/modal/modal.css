@@ -14,10 +14,11 @@
 
 /* Contenedor principal */
 .mf-modal {
-  background: #fff;
+  background: var(--color-surface, #ffffff);
   color: var(--color-text);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg, 20px);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
   width: 100%;
   max-width: 560px;
   display: flex;
@@ -32,8 +33,8 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 24px 28px 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface, #ffffff);
 }
 
 .mf-modal__title {
@@ -55,16 +56,21 @@
 .mf-modal__close {
   background: transparent;
   border: none;
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm, 6px);
   color: var(--color-muted);
   cursor: pointer;
-  padding: 6px;
+  padding: 8px;
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition:
     background 0.2s ease,
     color 0.2s ease;
 }
 .mf-modal__close:hover {
-  background: rgba(214, 69, 69, 0.08);
+  background: var(--color-danger-bg, rgba(214, 69, 69, 0.08));
   color: var(--color-primary);
 }
 
@@ -80,8 +86,8 @@
 /* Footer */
 .mf-modal__footer {
   padding: 16px 28px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  background: #fff;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface, #ffffff);
   display: flex;
   justify-content: flex-end;
   gap: 12px;

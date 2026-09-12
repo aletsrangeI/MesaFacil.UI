@@ -460,8 +460,8 @@
   background: rgba(0, 0, 0, 0.16);
 }
 
-/* Responsive: Colapsar en pantallas menores a 920px */
-@media (max-width: 920px) {
+/* Responsive: Tablets (hasta 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
   .mf-sidebar {
     width: var(--sidebar-w-collapsed) !important;
   }
@@ -480,6 +480,17 @@
   }
   .mf-sidebar__collapse {
     display: none !important;
+  }
+}
+
+/* Responsive: Móviles (hasta 768px) - Drawer completo */
+@media (max-width: 768px) {
+  .mf-sidebar {
+    width: var(--sidebar-w) !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.1); /* Sombra extra para modo drawer */
+  }
+  .mf-sidebar__collapse {
+    display: none !important; /* No permitir colapsar en móvil, se cierra con el overlay */
   }
 }
 

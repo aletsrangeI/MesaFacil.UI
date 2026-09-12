@@ -13,9 +13,11 @@ import {
   type SelectFormOption,
 } from "../../services/generated/api";
 import { useToast } from "../../components/ui/toast/Toast";
+import { useConfirm } from "../../components/ui/confirm-dialog";
 
 export function useFormularios() {
   const { addToast } = useToast();
+  const confirm = useConfirm();
   
   // Queries y mutaciones de Cabecera (Formulario)
   const { data: resp, isLoading: isLoadingForms, isError, refetch } = useFormularioGetAllQuery();
@@ -121,9 +123,13 @@ export function useFormularios() {
   };
 
   const handleFormDelete = async (id: number, name: string) => {
-    if (!window.confirm(`¿Estás seguro de eliminar el formulario "${name}" y todos sus campos asociados?`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: "¿Eliminar formulario?",
+      message: `Se eliminará "${name}" y todos sus campos asociados. Esta acción no se puede deshacer.`,
+      confirmLabel: "Sí, eliminar",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       const res = await deleteForm({ id }).unwrap();
       if (res.isSuccess) {
@@ -284,9 +290,13 @@ export function useFormularios() {
   };
 
   const handleFieldDelete = async (id: number, labelName: string) => {
-    if (!window.confirm(`¿Estás seguro de eliminar el campo "${labelName}"?`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: "¿Eliminar campo?",
+      message: `Se eliminará el campo "${labelName}" de forma permanente.`,
+      confirmLabel: "Sí, eliminar",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       const res = await deleteField({ id }).unwrap();
       if (res.isSuccess) {

@@ -9,6 +9,7 @@ export type AuthState = {
   expiresAt?: string;          // ISO string (UTC) de expiración
   usuarioId?: number;
   idEmpresa?: number;
+  idEstacion?: number;
   correo?: string;
   nombreCompleto?: string;
   roles: string[];             // Canonizados
@@ -126,6 +127,7 @@ const authSlice = createSlice({
       action: PayloadAction<{
         usuarioId: number;
         idEmpresa: number;
+        idEstacion?: number;
         correo: string;
         nombreCompleto?: string;
         roles: string[];
@@ -135,6 +137,7 @@ const authSlice = createSlice({
     ) {
       state.usuarioId = action.payload.usuarioId;
       state.idEmpresa = action.payload.idEmpresa;
+      state.idEstacion = action.payload.idEstacion;
       state.correo = action.payload.correo;
       state.nombreCompleto = action.payload.nombreCompleto;
       state.roles = normalizeRoles(action.payload.roles);
@@ -213,6 +216,7 @@ const authSlice = createSlice({
       action: PayloadAction<{
         usuarioId: number;
         idEmpresa: number;
+        idEstacion?: number;
         correo?: string;
         nombre?: string | null;
         sucursalId?: string | null;         // por si lo quieres guardar luego
@@ -226,6 +230,7 @@ const authSlice = createSlice({
     ) {
       state.usuarioId = action.payload.usuarioId;
       state.idEmpresa = action.payload.idEmpresa;
+      state.idEstacion = action.payload.idEstacion ?? state.idEstacion;
       state.correo = action.payload.correo;
       state.nombreCompleto = action.payload.nombre ?? state.nombreCompleto;
 
@@ -282,13 +287,19 @@ export const selectRefreshToken = (s: { auth: AuthState }) => s.auth.refreshToke
 export const selectIsAuthenticated = (s: { auth: AuthState }) =>
   Boolean(s.auth.accessToken) && !isExpired(s.auth.expiresAt);
 
-export const selectUserProfile = (s: { auth: AuthState }) => ({
-  usuarioId: s.auth.usuarioId,
-  idEmpresa: s.auth.idEmpresa,
-  correo: s.auth.correo,
-  nombreCompleto: s.auth.nombreCompleto,
-  roles: s.auth.roles,
-});
+import { createSelector } from '@reduxjs/toolkit';
+
+export const selectUserProfile = createSelector(
+  (s: { auth: AuthState }) => s.auth,
+  (auth) => ({
+    usuarioId: auth.usuarioId,
+    idEmpresa: auth.idEmpresa,
+    idEstacion: auth.idEstacion,
+    correo: auth.correo,
+    nombreCompleto: auth.nombreCompleto,
+    roles: auth.roles,
+  })
+);
 
 export const selectRolesCanon = (s: { auth: AuthState }) => s.auth.roles;
 export const selectRolesOrGuest = (s: { auth: AuthState }) =>
@@ -296,9 +307,15 @@ export const selectRolesOrGuest = (s: { auth: AuthState }) =>
 
 export const selectAccesos = (s: { auth: AuthState }) => s.auth.accesos ?? ["/"];
 export const selectCanAccess = (path: string) => (s: { auth: AuthState }) => {
+  if (s.auth.roles?.includes("admin")) return true;
   const list = s.auth.accesos ?? ["/"];
   const norm = (p: string) => (p.endsWith("/") && p.length > 1 ? p.slice(0, -1) : p);
   const target = norm(path);
+  if (s.auth.roles?.includes("manager") && target.startsWith("/caja")) return true;
+  if (s.auth.roles?.includes("manager") && target.startsWith("/delivery")) return true;
+  if ((s.auth.roles?.includes("waiter") || s.auth.roles?.includes("cashier") || s.auth.roles?.includes("delivery")) && target === "/delivery") return true;
+  if ((s.auth.roles?.includes("manager") || s.auth.roles?.includes("kitchen")) && (target.startsWith("/compras") || target.startsWith("/inventario"))) return true;
+  if ((s.auth.roles?.includes("manager") || s.auth.roles?.includes("cashier")) && target.startsWith("/cxp")) return true;
   return list.some(a => norm(a) === target);
 };
 

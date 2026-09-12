@@ -5,6 +5,8 @@ import Icon from "../../components/ui/icons/Icon";
 import Container from "../../components/ui/layout/Container";
 import { FormGenerator } from "../../forms/FormGenerator";
 import { useRolesTable } from "./useRolesTable";
+import { RolePermissionsModal } from "./RolePermissionsModal";
+import { useState } from "react";
 
 import "./roles.css";
 
@@ -12,6 +14,10 @@ export const RolesPage = () => {
   const { table, createModal, editModal } = useRolesTable({
     apiPageStartsAt: 1,
   });
+
+  const [permissionsRoleId, setPermissionsRoleId] = useState<number | null>(null);
+  const [permissionsRoleName, setPermissionsRoleName] = useState<string | null>(null);
+  const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
 
   const createDialogRef = useRef<HTMLDialogElement>(null);
   const editDialogRef = useRef<HTMLDialogElement>(null);
@@ -74,6 +80,19 @@ export const RolesPage = () => {
             const { canDelete, onEdit, onDelete } = table.rowActionFor(row);
             return (
               <div className="roles-page__actions" style={{ display: "flex", gap: 8 }}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  iconOnly
+                  leftIcon={<Icon name="Shield" />}
+                  onClick={() => {
+                    setPermissionsRoleId(row.id!);
+                    setPermissionsRoleName(row.nombre!);
+                    setIsPermissionsModalOpen(true);
+                  }}
+                  aria-label={`Permisos del rol ${row.nombre}`}
+                  title="Permisos"
+                />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -210,6 +229,17 @@ export const RolesPage = () => {
           </footer>
         </div>
       </dialog>
+      
+      <RolePermissionsModal
+        roleId={permissionsRoleId}
+        roleName={permissionsRoleName}
+        open={isPermissionsModalOpen}
+        onClose={() => {
+          setIsPermissionsModalOpen(false);
+          setPermissionsRoleId(null);
+          setPermissionsRoleName(null);
+        }}
+      />
     </Container>
   );
 };

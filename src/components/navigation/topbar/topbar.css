@@ -116,8 +116,40 @@
   background: rgba(214, 69, 69, 0.08);
 }
 
+/* Botón de menú (Mobile) */
+.mf-topbar__menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: var(--radius-md, 8px);
+}
+.mf-topbar__menu-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 /* Responsive */
 @media (max-width: 920px) {
   .mf-topbar__search-input { width: 140px; }
   .mf-topbar__email { display: none; }
+}
+
+@media (max-width: 768px) {
+  .mf-topbar__menu-btn {
+    display: block;
+  }
+  .mf-topbar__user {
+    display: none;
+  }
+  .mf-topbar__search {
+    display: none;
+  }
+  .mf-topbar__title {
+    font-size: 14px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

@@ -9,6 +9,7 @@ import {
   type GenericCatalogDto,
 } from "../../services/generated/api";
 import { useToast } from "../../components/ui/toast/Toast";
+import { useConfirm } from "../../components/ui/confirm-dialog";
 import { FORM_CATEGORY_IDS } from "../../forms/types";
 import type { ApiFormField, ValidationRule, ValidationType, SelectOptionApi } from "../../forms/types";
 
@@ -87,6 +88,7 @@ function normalizeFields(resp: unknown): ApiFormField[] {
 /* ───── Hook principal ───── */
 export function useCatalogoGenerico(catalog: string) {
   const { addToast } = useToast();
+  const confirm = useConfirm();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const [editingItem, setEditingItem] = useState<GenericCatalogDto | null>(null);
@@ -195,7 +197,13 @@ export function useCatalogoGenerico(catalog: string) {
   };
 
   const handleDelete = async (id: number, descripcion: string) => {
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar "${descripcion}"?`)) return;
+    const ok = await confirm({
+      title: "¿Eliminar registro?",
+      message: `Se eliminará "${descripcion}" de forma permanente.`,
+      confirmLabel: "Sí, eliminar",
+      variant: "danger",
+    });
+    if (!ok) return;
 
     try {
       const res = await deleteItem({ catalog, id }).unwrap();

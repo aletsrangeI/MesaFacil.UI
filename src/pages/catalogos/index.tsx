@@ -29,6 +29,11 @@ export const CATALOG_LABELS: Record<string, string> = {
   "monedas":                  "Monedas",
   "tipos-descuento":          "Tipos de Descuento",
   "tipos-pedido":             "Tipos de Pedido",
+  "tipos-almacen":            "Tipos de Almacén",
+  "motivos-movimiento-inventario": "Motivos de Movimiento de Inventario",
+  "conceptos-movimiento-caja":    "Conceptos de Caja Chica",
+  "motivos-cancelacion-pedido":   "Motivos de Cancelación / Rebote",
+  "canales-venta":            "Canales de Venta",
 };
 
 export default function CatalogoPage() {

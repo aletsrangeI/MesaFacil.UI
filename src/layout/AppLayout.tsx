@@ -60,6 +60,7 @@ export default function AppLayout({
   density = "comfortable",
 }: AppLayoutProps) {
   const [collapsed, setCollapsed] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const dispatch = useAppDispatch();
 
   const handleLogout = React.useCallback(() => {
@@ -77,12 +78,22 @@ export default function AppLayout({
   );
 
   return (
-    <div className={`app-shell ${collapsed ? "is-collapsed" : ""}`}>
-      <aside className="app-shell__side">
+    <div className={`app-shell ${collapsed ? "is-collapsed" : ""} ${mobileOpen ? "is-mobile-open" : ""}`}>
+      {/* Overlay para móviles */}
+      {mobileOpen && (
+        <div 
+          className="app-shell__overlay" 
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside className={`app-shell__side ${mobileOpen ? "is-mobile-open" : ""}`}>
         <Sidebar
           sections={sections}
           collapsed={collapsed}
           onToggle={() => setCollapsed((v) => !v)}
+          onMobileClose={() => setMobileOpen(false)}
           density={density}
           brand={{ text: "MesaFácil", subtext: "" }}
           footer={
@@ -100,7 +111,13 @@ export default function AppLayout({
 
       <div className="app-shell__main">
         {showTopbar &&
-          (topbar ?? <Topbar showBrand={false} subtitle="Backoffice" />)}
+          (topbar ?? (
+            <Topbar 
+              showBrand={false} 
+              subtitle="Backoffice" 
+              onMenuClick={() => setMobileOpen(true)}
+            />
+          ))}
         <main className="app-shell__content">
           <Outlet />
         </main>
