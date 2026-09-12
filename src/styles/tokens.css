@@ -1,16 +1,40 @@
 :root {
-  /* Paleta Cromática */
+  /* Paleta Cromática Base */
   --color-primary: #D64545; /* terracota */
   --color-primary-600: #b93c3c;
-  --color-secondary: #E2A72E; /* mostaza (anteriormente E2A72E o E9B949 de moodboard) */
+  --color-secondary: #E2A72E; /* mostaza */
   --color-success: #3C8D40; /* éxito */
+  --color-info: #3B82F6; /* informativo / acciones */
+  --color-danger: #D64545; /* error / crítico */
+  --color-warning: #E2A72E; /* advertencia */
+
+  /* Colores de Fondo de Estado Semánticos */
+  --color-success-bg: rgba(60, 141, 64, 0.12);
+  --color-info-bg: rgba(59, 130, 246, 0.12);
+  --color-danger-bg: rgba(214, 69, 69, 0.12);
+  --color-warning-bg: rgba(226, 167, 46, 0.14);
+
+  /* Superficies y Fondos */
+  --color-bg: #F9F9F9; /* Fondo base de la app */
+  --color-surface: #FFFFFF; /* Superficie de tarjetas y modales */
+  --color-surface-raised: #F4F6F8; /* Superficie elevada / agrupadores */
+  --color-surface-sunken: #E5E7EB; /* Superficie hundida / divisores activos */
+  --color-sidebar-bg: #FFFFFF; /* Fondo del Sidebar */
+
+  /* Textos y Contraste */
   --color-text: #1F1F1F;
   --color-text-muted: #6B7280;
   --color-muted: #6b7280;
-  --color-border: rgba(0,0,0,0.08); /* borde sutil */
-  --color-border-hover: rgba(0,0,0,0.18);
-  --color-bg: #F9F9F9; /* Fondo base */
-  --color-sidebar-bg: #FFFFFF; /* Fondo del Sidebar */
+  --color-text-inverse: #FFFFFF;
+  --color-text-dark: #1A1B1E;
+
+  /* Bordes */
+  --color-border: rgba(0, 0, 0, 0.08); /* borde sutil */
+  --color-border-hover: rgba(0, 0, 0, 0.18);
+  --color-border-subtle: #E2E8F0;
+
+  /* Ergonomía y Accesibilidad Táctil (UI/UX Pro Max) */
+  --touch-target-min: 44px;
 
   /* Tipografías */
   --font-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;

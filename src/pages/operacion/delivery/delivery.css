@@ -1,0 +1,623 @@
+/* delivery.css - Estilos dedicados para el módulo de Despacho y Delivery */
+
+.delivery-container {
+  padding: 1.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  font-family: var(--font-sans);
+  color: var(--color-text, #1f1f1f);
+}
+
+/* Pestañas de Navegación */
+.delivery-nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--color-border-subtle, #e2e8f0);
+  margin-bottom: 1.5rem;
+}
+
+.delivery-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.delivery-tab-btn:hover {
+  color: var(--color-text, #1e293b);
+}
+
+.delivery-tab-btn.active {
+  color: var(--color-primary, #d97706);
+  border-bottom-color: var(--color-primary, #d97706);
+}
+
+/* Header */
+.delivery-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .delivery-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.delivery-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.delivery-header-title h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.delivery-header-title p {
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #6b7280);
+  margin: 0.25rem 0 0 0;
+}
+
+.delivery-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.delivery-select-branch {
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle, #cbd5e1);
+  background-color: var(--color-surface, #ffffff);
+  font-size: 0.875rem;
+  color: var(--color-text, #1e293b);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.delivery-select-branch:focus {
+  border-color: var(--color-primary, #d64545);
+}
+
+/* Barra de Filtros por Canal */
+.delivery-channel-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border-subtle, #e2e8f0);
+}
+
+.delivery-filter-btn {
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background-color: var(--color-surface-raised, #f1f5f9);
+  color: var(--color-text-muted, #475569);
+  transition: all 0.2s ease;
+}
+
+.delivery-filter-btn:hover {
+  background-color: #e2e8f0;
+  color: var(--color-text, #0f172a);
+}
+
+.delivery-filter-btn.active {
+  background-color: #f59e0b;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.3);
+}
+
+/* Tablero Kanban */
+.delivery-kanban-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .delivery-kanban-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .delivery-kanban-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.delivery-column {
+  border-radius: var(--radius-md, 12px);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 75vh;
+  min-height: 500px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.delivery-column.col-cocina {
+  background-color: rgba(245, 158, 11, 0.04);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.delivery-column.col-listo {
+  background-color: rgba(16, 185, 129, 0.04);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.delivery-column.col-camino {
+  background-color: rgba(59, 130, 246, 0.04);
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.delivery-column.col-entregado {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.delivery-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding: 0 0.25rem;
+}
+
+.delivery-column-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.delivery-column-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+.col-cocina .delivery-column-count {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.col-listo .delivery-column-count {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.col-camino .delivery-column-count {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.delivery-column-cards {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.delivery-empty-column {
+  height: 8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Tarjetas de Pedido */
+.delivery-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-sm, 10px);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 0.875rem;
+  margin-bottom: 0.75rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.delivery-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+}
+
+.delivery-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.delivery-card-folio {
+  font-family: monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.delivery-card-external-id {
+  margin-left: 0.375rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #64748b;
+}
+
+.delivery-card-pricing {
+  text-align: right;
+}
+
+.delivery-card-amount {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: block;
+}
+
+.delivery-card-pay-status {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-top: 0.125rem;
+}
+
+.delivery-card-pay-status.pagado {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.delivery-card-pay-status.pendiente {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+/* Badges de Canal */
+.canal-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.canal-badge.llevar {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.canal-badge.uber {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.canal-badge.rappi {
+  background-color: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.canal-badge.didi {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.canal-badge.propio {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+/* Datos de Cliente & Repartidor */
+.delivery-card-info {
+  font-size: 0.75rem;
+  color: #475569;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.625rem;
+}
+
+.delivery-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.delivery-info-row.customer {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.delivery-info-row.carrier {
+  font-weight: 600;
+  color: #1d4ed8;
+  background-color: #eff6ff;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+}
+
+/* Lista Desplegable de Ítems */
+.delivery-items-toggle {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.delivery-items-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.75rem;
+  color: #64748b;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.125rem 0;
+}
+
+.delivery-items-btn:hover {
+  color: #0f172a;
+}
+
+.delivery-items-list {
+  margin-top: 0.375rem;
+  padding: 0.5rem;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #f1f5f9;
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.delivery-item-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: #334155;
+}
+
+.delivery-item-name {
+  flex: 1;
+}
+
+.delivery-item-name strong {
+  color: #0f172a;
+}
+
+.delivery-item-mods {
+  display: block;
+  font-size: 0.625rem;
+  color: #64748b;
+  margin-top: 0.125rem;
+}
+
+.delivery-item-price {
+  font-family: monospace;
+  color: #475569;
+  margin-left: 0.5rem;
+}
+
+/* Botones y Footer de Tarjeta */
+.delivery-card-footer {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.delivery-timer {
+  font-size: 0.6875rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.delivery-card-actions {
+  display: flex;
+  gap: 0.375rem;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.delivery-btn-action {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.delivery-btn-action.btn-listo {
+  background-color: #d97706;
+  color: #ffffff;
+}
+
+.delivery-btn-action.btn-listo:hover {
+  background-color: #b45309;
+}
+
+.delivery-btn-action.btn-entregar {
+  background-color: #059669;
+  color: #ffffff;
+}
+
+.delivery-btn-action.btn-entregar:hover {
+  background-color: #047857;
+}
+
+.delivery-btn-action.btn-despachar {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.delivery-btn-action.btn-despachar:hover {
+  background-color: #1d4ed8;
+}
+
+.delivery-btn-action.btn-rebote {
+  background-color: #ffffff;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.delivery-btn-action.btn-rebote:hover {
+  background-color: #fef2f2;
+}
+
+/* Modal Form Styles */
+.delivery-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.delivery-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.delivery-form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #475569);
+}
+
+.delivery-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.delivery-input-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--color-text-muted, #94a3b8);
+  pointer-events: none;
+}
+
+.delivery-form-input,
+.delivery-form-select,
+.delivery-form-textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle, #cbd5e1);
+  background-color: var(--color-surface, #ffffff);
+  font-size: 0.875rem;
+  color: var(--color-text, #1e293b);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.delivery-form-input.has-icon {
+  padding-left: 2.25rem;
+}
+
+.delivery-form-input:focus,
+.delivery-form-select:focus,
+.delivery-form-textarea:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2);
+}
+
+.delivery-form-input.focus-red:focus,
+.delivery-form-select.focus-red:focus,
+.delivery-form-textarea.focus-red:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
+.delivery-info-box {
+  background-color: #f8fafc;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.8125rem;
+}
+
+.delivery-info-box-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.delivery-alert-box {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.delivery-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-subtle, #f1f5f9);
+}
+

@@ -1,0 +1,638 @@
+/* recetas.css - MesaFacil Design System: Recetas & Recipe Studio */
+
+.recetas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Barra de Filtros y Acciones alineada con inventario.css */
+.recetas-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.625rem;
+  padding: 0.75rem 1rem;
+}
+
+.recetas-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-surface-raised, #f4f6f8);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.5rem;
+  padding: 0 0.75rem;
+  height: 44px;
+  flex: 1;
+  min-width: 240px;
+  max-width: 420px;
+}
+
+.recetas-search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.875rem;
+  color: var(--color-text, #1f1f1f);
+  outline: none;
+}
+
+.recetas-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Grid de Tarjetas de Recetas */
+.recetas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.receta-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: var(--radius, 12px);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.04));
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.receta-card:hover {
+  border-color: var(--color-primary, #d64545);
+  box-shadow: var(--shadow-md, 0 6px 16px rgba(0, 0, 0, 0.06));
+}
+
+.receta-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.receta-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.receta-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text, #1f1f1f);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.receta-card-subtitle {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* Badges Semánticos del Sistema */
+.receta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.receta-badge.optimo {
+  background: var(--color-success-bg, rgba(60, 141, 64, 0.12));
+  color: var(--color-success, #3c8d40);
+  border: 1px solid rgba(60, 141, 64, 0.25);
+}
+
+.receta-badge.ajustado {
+  background: var(--color-warning-bg, rgba(226, 167, 46, 0.14));
+  color: #b45309;
+  border: 1px solid rgba(226, 167, 46, 0.3);
+}
+
+.receta-badge.critico {
+  background: var(--color-danger-bg, rgba(214, 69, 69, 0.12));
+  color: var(--color-danger, #d64545);
+  border: 1px solid rgba(214, 69, 69, 0.3);
+}
+
+.receta-badge.subreceta {
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+}
+
+/* Grid de métricas en la tarjeta */
+.receta-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--color-surface-raised, #f4f6f8);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.receta-card-metric-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.receta-card-metric-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text, #1f1f1f);
+}
+
+.receta-card-ingredients-preview {
+  font-size: 0.8rem;
+  color: var(--color-text, #1f1f1f);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.receta-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-surface-sunken, #e5e7eb);
+  margin-top: auto;
+}
+
+/* ========================================================= */
+/* RECIPE STUDIO MODAL CANVAS (MesaFacil Brand)              */
+/* ========================================================= */
+.studio-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.studio-modal {
+  background: var(--color-surface, #ffffff);
+  border-radius: var(--radius-md, 12px);
+  width: 100%;
+  max-width: 1120px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg, 0 12px 28px rgba(0, 0, 0, 0.15));
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+}
+
+/* Header del Modal con Terracota Institucional */
+.studio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: var(--color-surface, #ffffff);
+  border-bottom: 2px solid var(--color-surface-sunken, #e5e7eb);
+  color: var(--color-text, #1f1f1f);
+}
+
+.studio-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.studio-header-title h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text, #1f1f1f);
+}
+
+.studio-header-tag {
+  background: var(--color-surface-raised, #f4f6f8);
+  color: var(--color-text-muted, #6b7280);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.studio-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.studio-close-btn:hover {
+  background: var(--color-surface-raised, #f4f6f8);
+  color: var(--color-primary, #d64545);
+}
+
+/* Cuerpo dividido en 2 columnas */
+.studio-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .studio-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.studio-main-panel {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  border-right: 1px solid var(--color-surface-sunken, #e5e7eb);
+  overflow-y: auto;
+}
+
+.studio-side-panel {
+  padding: 1.5rem;
+  background: var(--color-surface-raised, #f4f6f8);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+}
+
+/* Grid de Formulario */
+.studio-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.85rem;
+}
+
+.studio-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.studio-field label {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.studio-input,
+.studio-select {
+  height: 42px;
+  padding: 0 0.85rem;
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1f1f1f);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.studio-input:focus,
+.studio-select:focus {
+  border-color: var(--color-primary, #d64545);
+  box-shadow: 0 0 0 2px rgba(214, 69, 69, 0.15);
+}
+
+/* Tabla de Ingredientes */
+.studio-ingredients-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.studio-ingredients-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.studio-ingredients-header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text, #1f1f1f);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.studio-table-wrap {
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--color-surface, #ffffff);
+}
+
+.studio-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.studio-table th {
+  background: var(--color-surface-raised, #f4f6f8);
+  padding: 0.65rem 0.85rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+}
+
+.studio-table td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+  vertical-align: middle;
+  color: var(--color-text, #1f1f1f);
+}
+
+.studio-table tr:last-child td {
+  border-bottom: none;
+}
+
+.studio-qty-input {
+  width: 84px;
+  height: 36px;
+  padding: 0 0.5rem;
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  text-align: right;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1f1f1f);
+  outline: none;
+}
+
+.studio-qty-input:focus {
+  border-color: var(--color-primary, #d64545);
+}
+
+.studio-um-select {
+  height: 36px;
+  padding: 0 0.5rem;
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1f1f1f);
+  outline: none;
+}
+
+.studio-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.studio-remove-btn:hover {
+  color: var(--color-danger, #d64545);
+  background: var(--color-danger-bg, rgba(214, 69, 69, 0.12));
+}
+
+/* Gauges del Panel Lateral */
+.studio-gauges-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.studio-gauge-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.studio-gauge-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.studio-gauge-val {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text, #1f1f1f);
+}
+
+/* Donut Chart Wrap */
+.studio-donut-wrap {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.studio-donut-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  align-self: flex-start;
+}
+
+.studio-donut-legend {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.studio-donut-legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.studio-donut-legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Slider de Simulador */
+.studio-slider-box {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.studio-slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.studio-slider-header h4 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.studio-slider-header span {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary, #d64545);
+}
+
+.studio-slider {
+  width: 100%;
+  accent-color: var(--color-primary, #d64545);
+  cursor: pointer;
+}
+
+.studio-slider-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: var(--color-surface-raised, #f4f6f8);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  color: var(--color-text, #1f1f1f);
+}
+
+/* Footer */
+.studio-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-surface-sunken, #e5e7eb);
+  background: var(--color-surface, #ffffff);
+}
+
+/* Omni-Search Modal */
+.omni-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+}
+
+.omni-modal {
+  background: var(--color-surface, #ffffff);
+  border-radius: var(--radius, 12px);
+  width: 100%;
+  max-width: 560px;
+  box-shadow: var(--shadow-lg, 0 12px 28px rgba(0, 0, 0, 0.15));
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.omni-search-input {
+  width: 100%;
+  height: 52px;
+  padding: 0 1.25rem 0 3rem;
+  border: none;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+  font-size: 0.95rem;
+  color: var(--color-text, #1f1f1f);
+  background: var(--color-surface, #ffffff);
+  outline: none;
+}
+
+.omni-search-input:focus {
+  border-bottom-color: var(--color-primary, #d64545);
+}
+
+.omni-results-list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.omni-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.omni-result-item:hover {
+  background: var(--color-surface-raised, #f4f6f8);
+}

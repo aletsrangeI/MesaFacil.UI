@@ -1,0 +1,586 @@
+/* src/pages/cxp/cxp.css */
+/* MesaFacil Design System: Cuentas por Pagar (CxP), Programación de Pagos y Egresos */
+
+.cxp-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: calc(100vh - 4rem);
+  animation: fadeInCxP 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInCxP {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cxp-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Header principal */
+.cxp-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+}
+
+.cxp-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.cxp-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm, 8px);
+  background: rgba(214, 69, 69, 0.1);
+  color: var(--color-primary, #d64545);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cxp-header-text h1 {
+  font-family: var(--font-h1, inherit);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text, #1f1f1f);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.cxp-header-text p {
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #6b7280);
+  margin: 0.25rem 0 0 0;
+}
+
+.cxp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Tabs de navegación */
+.cxp-tabs-bar {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+  padding-bottom: 0.25rem;
+  overflow-x: auto;
+}
+
+.cxp-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+}
+
+.cxp-tab-btn:hover {
+  color: var(--color-text, #1f1f1f);
+  background: var(--color-surface-raised, #f4f6f8);
+  border-radius: var(--radius-sm, 8px) var(--radius-sm, 8px) 0 0;
+}
+
+.cxp-tab-btn.is-active {
+  color: var(--color-primary, #d64545);
+  border-bottom-color: var(--color-primary, #d64545);
+}
+
+/* KPIs Grid */
+.cxp-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.cxp-kpi-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: var(--radius-md, 12px);
+  padding: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cxp-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.cxp-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm, 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cxp-kpi-icon.danger {
+  background: var(--color-danger-bg, rgba(214, 69, 69, 0.12));
+  color: var(--color-danger, #d64545);
+}
+
+.cxp-kpi-icon.warning {
+  background: var(--color-warning-bg, rgba(226, 167, 46, 0.14));
+  color: var(--color-secondary, #e2a72e);
+}
+
+.cxp-kpi-icon.info {
+  background: var(--color-info-bg, rgba(59, 130, 246, 0.12));
+  color: var(--color-info, #3b82f6);
+}
+
+.cxp-kpi-icon.success {
+  background: var(--color-success-bg, rgba(60, 141, 64, 0.12));
+  color: var(--color-success, #3c8d40);
+}
+
+.cxp-kpi-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.cxp-kpi-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.cxp-kpi-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--color-text, #1f1f1f);
+  margin-top: 0.25rem;
+}
+
+.cxp-kpi-sub {
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #6b7280);
+  margin-top: 0.15rem;
+}
+
+/* Barra de Filtros */
+.cxp-filters-bar {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: var(--radius-md, 12px);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cxp-search-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-surface-raised, #f4f6f8);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: var(--radius-sm, 8px);
+  padding: 0.4rem 0.75rem;
+  min-width: 260px;
+  flex: 1;
+}
+
+.cxp-search-input input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.875rem;
+  color: var(--color-text, #1f1f1f);
+  outline: none;
+  min-height: 36px;
+}
+
+.cxp-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.cxp-select {
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  background: var(--color-surface, #ffffff);
+  font-size: 0.875rem;
+  color: var(--color-text, #1f1f1f);
+  outline: none;
+  cursor: pointer;
+}
+
+.cxp-select:focus {
+  border-color: var(--color-primary, #d64545);
+}
+
+/* Tabla de Cuentas por Pagar */
+.cxp-card-table {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+}
+
+.cxp-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.cxp-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.cxp-table th {
+  background: var(--color-surface-raised, #f4f6f8);
+  color: var(--color-text-muted, #6b7280);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+  white-space: nowrap;
+}
+
+.cxp-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+  color: var(--color-text, #1f1f1f);
+  vertical-align: middle;
+}
+
+.cxp-table tbody tr:hover {
+  background: var(--color-surface-raised, #f4f6f8);
+}
+
+/* Semáforo de Vencimiento */
+.cxp-semaforo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cxp-semaforo-badge.vencida {
+  background: var(--color-danger-bg, rgba(214, 69, 69, 0.12));
+  color: var(--color-danger, #d64545);
+  border: 1px solid rgba(214, 69, 69, 0.3);
+}
+
+.cxp-semaforo-badge.por-vencer {
+  background: var(--color-warning-bg, rgba(226, 167, 46, 0.14));
+  color: #925f0c;
+  border: 1px solid rgba(226, 167, 46, 0.4);
+}
+
+.cxp-semaforo-badge.al-corriente {
+  background: var(--color-success-bg, rgba(60, 141, 64, 0.12));
+  color: var(--color-success, #3c8d40);
+  border: 1px solid rgba(60, 141, 64, 0.3);
+}
+
+.cxp-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cxp-status-badge.pendiente {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.cxp-status-badge.abonada {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.cxp-status-badge.pagada {
+  background: var(--color-success-bg, rgba(60, 141, 64, 0.12));
+  color: var(--color-success, #3c8d40);
+}
+
+.cxp-status-badge.cancelada {
+  background: var(--color-danger-bg, rgba(214, 69, 69, 0.12));
+  color: var(--color-danger, #d64545);
+}
+
+/* Modales */
+.cxp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  animation: fadeInCxP 0.15s ease-out;
+}
+
+.cxp-modal-content {
+  background: var(--color-surface, #ffffff);
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.cxp-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+}
+
+.cxp-modal-header h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text, #1f1f1f);
+  margin: 0;
+}
+
+.cxp-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm, 8px);
+}
+
+.cxp-modal-close-btn:hover {
+  background: var(--color-surface-raised, #f4f6f8);
+  color: var(--color-text, #1f1f1f);
+}
+
+.cxp-modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cxp-modal-footer {
+  padding: 1rem 1.5rem;
+  background: var(--color-surface-raised, #f4f6f8);
+  border-top: 1px solid var(--color-surface-sunken, #e5e7eb);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Info Box Resumen dentro del Modal */
+.cxp-resumen-box {
+  background: var(--color-surface-raised, #f4f6f8);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  border-radius: var(--radius-sm, 8px);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cxp-resumen-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.cxp-resumen-label {
+  color: var(--color-text-muted, #6b7280);
+}
+
+.cxp-resumen-value {
+  font-weight: 600;
+  color: var(--color-text, #1f1f1f);
+}
+
+.cxp-resumen-value.highlight {
+  color: var(--color-primary, #d64545);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* Form Fields */
+.cxp-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cxp-form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text, #1f1f1f);
+}
+
+.cxp-input {
+  min-height: 44px;
+  padding: 0 0.85rem;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  font-size: 0.95rem;
+  color: var(--color-text, #1f1f1f);
+  background: var(--color-surface, #ffffff);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.cxp-input:focus {
+  border-color: var(--color-primary, #d64545);
+}
+
+.cxp-switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--color-surface-raised, #f4f6f8);
+  min-height: 44px;
+}
+
+.cxp-switch-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary, #d64545);
+  cursor: pointer;
+}
+
+.cxp-switch-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.cxp-switch-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text, #1f1f1f);
+}
+
+.cxp-switch-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* Matriz de Antigüedad de Saldos */
+.cxp-antiguedad-table th,
+.cxp-antiguedad-table td {
+  text-align: right;
+}
+
+.cxp-antiguedad-table th:first-child,
+.cxp-antiguedad-table td:first-child {
+  text-align: left;
+}
+
+.cxp-antiguedad-table tfoot td {
+  font-weight: 700;
+  background: var(--color-surface-raised, #f4f6f8);
+  border-top: 2px solid var(--color-surface-sunken, #e5e7eb);
+}
+
+/* Historial de Abonos */
+.cxp-abonos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.825rem;
+}
+
+.cxp-abonos-table th {
+  background: var(--color-surface-raised, #f4f6f8);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.cxp-abonos-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+}
+
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .cxp-printable, .cxp-printable * {
+    visibility: visible;
+  }
+  .cxp-printable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

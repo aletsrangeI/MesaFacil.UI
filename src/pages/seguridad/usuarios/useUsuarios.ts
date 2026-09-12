@@ -9,10 +9,12 @@ import {
   type UsuarioDto,
 } from "../../../services/generated/api";
 import { useToast } from "../../../components/ui/toast/Toast";
+import { useConfirm } from "../../../components/ui/confirm-dialog";
 import { useUsuariosForm } from "./useUsuariosForm";
 
 export function useUsuarios() {
   const { addToast } = useToast();
+  const confirm = useConfirm();
   const { data: resp, isLoading: isLoadingUsers, isError, refetch } = useUsuarioGetAllQuery();
   
   const { data: rolesResp } = useRolGetAllQuery();
@@ -182,9 +184,13 @@ export function useUsuarios() {
   };
 
   const handleDelete = async (id: number, name: string) => {
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar al usuario "${name}"?`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: "¿Eliminar usuario?",
+      message: `Se eliminará al usuario "${name}" de forma permanente.`,
+      confirmLabel: "Sí, eliminar",
+      variant: "danger",
+    });
+    if (!ok) return;
 
     try {
       const res = await deleteUser({ id }).unwrap();

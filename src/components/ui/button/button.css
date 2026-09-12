@@ -1,13 +1,13 @@
 .ui-btn {
-  --btn-bg: #fff;
+  --btn-bg: var(--color-surface, #ffffff);
   --btn-fg: var(--color-text);
-  --btn-bd: rgba(0, 0, 0, 0.1);
+  --btn-bd: var(--color-border);
   --btn-pad-x: 14px;
   --btn-gap: 8px;
 
-  /* Alturas por tamaño */
-  --btn-h-sm: 32px;
-  --btn-h-md: 40px;
+  /* Alturas ergonómicas (UI/UX Pro Max: touch target min 44px) */
+  --btn-h-sm: 36px;
+  --btn-h-md: var(--touch-target-min, 44px);
   --btn-h-lg: 48px;
   --btn-h: var(--btn-h-md); /* default */
 
@@ -34,7 +34,7 @@
 
 .ui-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06), 0 0 0 6px rgba(28, 100, 242, 0.25); /* anillo accesible */
+  box-shadow: var(--focus, 0 0 0 3px rgba(214, 69, 69, 0.2));
 }
 
 .ui-btn:disabled {
@@ -49,7 +49,7 @@
 /* Variants */
 .ui-btn--primary {
   --btn-bg: var(--color-primary);
-  --btn-fg: #fff;
+  --btn-fg: var(--color-text-inverse, #ffffff);
   --btn-bd: transparent;
 }
 .ui-btn--primary:hover:not(:disabled) {
@@ -58,7 +58,7 @@
 
 .ui-btn--secondary {
   --btn-bg: var(--color-secondary);
-  --btn-fg: #2c2205;
+  --btn-fg: var(--color-text-dark, #1A1B1E);
   --btn-bd: transparent;
 }
 .ui-btn--secondary:hover:not(:disabled) {
@@ -66,13 +66,13 @@
 }
 
 .ui-btn--ghost {
-  --btn-bg: #fff;
+  --btn-bg: var(--color-surface, #ffffff);
   --btn-fg: var(--color-text);
-  --btn-bd: rgba(0, 0, 0, 0.12);
+  --btn-bd: var(--color-border);
   box-shadow: none;
 }
 .ui-btn--ghost:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--color-surface-raised, rgba(0, 0, 0, 0.03));
 }
 
 .ui-btn--link {
@@ -145,9 +145,15 @@
 .ui-btn--icon {
   width: var(--btn-h);
   padding-inline: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .ui-btn--icon .ui-btn__label {
   display: none;
+}
+.ui-btn--icon .ui-btn__icon {
+  margin: 0;
 }
 
 .ui-btn--block {

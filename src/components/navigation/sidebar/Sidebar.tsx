@@ -28,6 +28,7 @@ export type SidebarProps = {
   sections: SidebarSection[];
   collapsed?: boolean;
   onToggle?: () => void;
+  onMobileClose?: () => void; // Para cerrar el menú en móviles (Drawer)
   footer?: React.ReactNode; // slot de pie (Salir, versión, etc.)
   brand?: { icon?: React.ReactNode; text?: string; subtext?: string };
   className?: string;
@@ -48,9 +49,11 @@ function renderIcon(icon?: React.ReactNode) {
 function NavSection({
   section,
   sidebarCollapsed,
+  onNavClick,
 }: {
   section: SidebarSection;
   sidebarCollapsed: boolean;
+  onNavClick?: () => void;
 }) {
   const location = useLocation();
 
@@ -122,6 +125,7 @@ function NavSection({
               <li key={it.key}>
                 <NavLink
                   to={it.to}
+                  onClick={onNavClick}
                   className={({ isActive }) =>
                     "mf-nav__link" + (isActive ? " is-active" : "")
                   }
@@ -150,12 +154,12 @@ export function Sidebar({
   sections,
   collapsed = false,
   onToggle,
+  onMobileClose,
   footer,
   brand,
   className = "",
   density = "comfortable",
 }: SidebarProps) {
-  NavLink;
   return (
     <aside
       className={[
@@ -201,6 +205,7 @@ export function Sidebar({
             key={sec.key}
             section={sec}
             sidebarCollapsed={collapsed}
+            onNavClick={onMobileClose}
           />
         ))}
       </nav>

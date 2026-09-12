@@ -9,6 +9,7 @@ import { BrowserRouter } from "react-router-dom";
 import AppRouter from "./app/routes/AppRouter";
 import { useSessionTimers } from "./session/useSessionTimers";
 import { ToastProvider } from "./components/ui/toast";
+import { ConfirmProvider } from "./components/ui/confirm-dialog";
 
 store.dispatch(hydrateFromStorage());
 store.dispatch(pruneIfExpired());
@@ -18,7 +19,9 @@ function SessionTimersGate() {
   return (
     <BrowserRouter>
       <ToastProvider position="bottom-right" max={4}>
-        <AppRouter />
+        <ConfirmProvider>
+          <AppRouter />
+        </ConfirmProvider>
       </ToastProvider>
     </BrowserRouter>
   );

@@ -12,6 +12,7 @@ export type TopbarProps = {
   actions?: React.ReactNode;     // botones extra (notificaciones, etc.)
   onSearch?: (term: string) => void;
   showBrand?: boolean;           // si no quieres repetir la marca con la del Sidebar
+  onMenuClick?: () => void;      // callback para el menú hamburguesa en mobile
 };
 
 export default function Topbar({
@@ -20,6 +21,7 @@ export default function Topbar({
   actions,
   onSearch,
   showBrand = true,
+  onMenuClick,
 }: TopbarProps) {
   const dispatch = useDispatch();
   const { nombreCompleto, correo } = useSelector((s: RootState) => s.auth);
@@ -27,6 +29,15 @@ export default function Topbar({
   return (
     <header className="mf-topbar" role="banner" aria-label="Barra superior">
       <div className="mf-topbar__left">
+        {onMenuClick && (
+          <button 
+            className="mf-topbar__menu-btn" 
+            onClick={onMenuClick}
+            aria-label="Abrir menú"
+          >
+            <Icon name="Menu" />
+          </button>
+        )}
         {showBrand && (
           <div className="mf-topbar__brand">
             <span className="mf-brand__logo" aria-hidden>
