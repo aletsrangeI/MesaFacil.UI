@@ -1,4 +1,5 @@
 import React from "react";
+import { generateUUID } from "../../../lib/uuid";
 import "./toast.css";
 
 export type ToastVariant = "info" | "success" | "error";
@@ -55,7 +56,7 @@ export function ToastProvider({
 
   const addToast = React.useCallback(
     (opts: Omit<ToastItem, "id">) => {
-      const id = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
+      const id = generateUUID();
       const next: ToastItem = {
         id,
         variant: "info",

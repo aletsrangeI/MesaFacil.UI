@@ -5,6 +5,7 @@ import { selectUserProfile } from "../../../state/authSlice";
 import { addToCart, updateQuantity, removeFromCart, clearCart, updateItemNote, selectCart } from "../../../state/cartSlice";
 import { useToast } from "../../../components/ui/toast";
 import { useConfirm } from "../../../components/ui/confirm-dialog";
+import { generateUUID } from "../../../lib/uuid";
 import "./pos.css";
 import {
   useCategoriasGetAllQuery,
@@ -181,7 +182,7 @@ export default function PosPage() {
   const dispatch = useDispatch();
   const cart = useSelector(selectCart);
   const [modalProduct, setModalProduct] = useState<any>(null);
-  const [idempotencyKey, setIdempotencyKey] = useState<string>(() => crypto.randomUUID());
+  const [idempotencyKey, setIdempotencyKey] = useState<string>(() => generateUUID());
   const { addToast } = useToast();
 
   // ─── Efectos: Retomar Pedido ──────────────────────────────────────────────
@@ -301,7 +302,7 @@ export default function PosPage() {
         if (result?.isSuccess) {
           addToast({ message: `Ítems agregados al Pedido #${pedidoActivo.id}`, variant: 'success' });
           dispatch(clearCart());
-          setIdempotencyKey(crypto.randomUUID());
+          setIdempotencyKey(generateUUID());
         } else {
           addToast({ message: result?.message || 'Error al agregar ítems', variant: 'error' });
         }
@@ -330,7 +331,7 @@ export default function PosPage() {
           const mesaInfo = isComedor && selectedMesa ? ` [Mesa ${selectedMesa.codigo}]` : '';
           addToast({ message: `¡Pedido #${pedidoId}${mesaInfo} enviado a cocina!`, variant: 'success' });
           dispatch(clearCart());
-          setIdempotencyKey(crypto.randomUUID());
+          setIdempotencyKey(generateUUID());
           setDeliveryCliente('');
           setDeliveryTelefono('');
           setDeliveryDireccion('');

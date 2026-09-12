@@ -1,155 +1,209 @@
 // src/pages/HomePage.tsx
 import { useState } from "react";
-import Container from "../components/ui/layout/Container";
-import { Button } from "../components/ui/button";
-import Icon from "../components/ui/icons/Icon";
-import { usePedidosGetAllAsyncQuery } from "../services/generated/api";
+import { useSelector } from "react-redux";
+import { selectUserProfile } from "../state/authSlice";
+import { useToast } from "../components/ui/toast";
+import { 
+  usePedidosGetAllAsyncQuery, 
+  useMesasGetAllQuery, 
+  useAreasGetAllQuery,
+  useCatalogosGetAllQuery,
+  useMesasUpdateAsyncMutation
+} from "../services/generated/api";
+import { useGetResumenCorteQuery } from "./operacion/pos/CorteCajaModal";
+import { useGetKdsBoardDashboardQuery } from "../services/dashboardApi";
+import { useSeedRestauranteCompletoMutation } from "../services/demoApi";
+
+// Componentes del Dashboard Bento
+import { DashboardHeader } from "./dashboard/DashboardHeader";
+import { DashboardKpiCards } from "./dashboard/DashboardKpiCards";
+import { DashboardFloorPlan } from "./dashboard/DashboardFloorPlan";
+import { DashboardKdsPulse } from "./dashboard/DashboardKdsPulse";
+import { DashboardFastCheckout } from "./dashboard/DashboardFastCheckout";
+import "./dashboard/dashboard.css";
+
+// Modales Operativos
 import { PaymentModal } from "./operacion/pos/PaymentModal";
+import { ThermalTicketModal } from "./operacion/pos/ThermalTicketModal";
 import { CorteCajaModal } from "./operacion/pos/CorteCajaModal";
+import { CorteXModal } from "./operacion/pos/CorteXModal";
+import { MovimientoCajaModal } from "./operacion/pos/MovimientoCajaModal";
+import { AperturaTurnoModal } from "./operacion/pos/AperturaTurnoModal";
 
 export default function HomePage() {
-  const { data: pedidosData, isLoading, refetch } = usePedidosGetAllAsyncQuery(undefined, { pollingInterval: 10000 });
-  const [selectedPedidoToPay, setSelectedPedidoToPay] = useState<number | null>(null);
-  const [showCorteModal, setShowCorteModal] = useState(false);
+  const profile = useSelector(selectUserProfile);
+  const { addToast } = useToast();
 
-  // Estados de pedido: 1=Registrado, 2=En Preparacion, 3=Listo, 4=Entregado, 5=Cerrado, 6=Cancelado
-  const pedidos = pedidosData?.data || [];
-  
-  // "Por pagar": pedidos activos que no están ni cerrados ni cancelados (o podrías filtrarlo a solo 'Entregados')
-  const pedidosPorPagar = pedidos.filter((p: any) => p.idEstadoPedido !== 5 && p.idEstadoPedido !== 6);
-  
-  // "Tickets Cobrados": pedidos cerrados (5)
-  const ticketsCobrados = pedidos.filter((p: any) => p.idEstadoPedido === 5);
+  // Queries de Datos con Polling en tiempo real
+  const { data: pedidosData, refetch: refetchPedidos } = usePedidosGetAllAsyncQuery(undefined, { pollingInterval: 8000 });
+  const { data: mesasData, refetch: refetchMesas } = useMesasGetAllQuery();
+  const { data: areasData } = useAreasGetAllQuery();
+  const { data: catEstadosMesa } = useCatalogosGetAllQuery({ catalog: 'estados-mesa' });
+  const { data: resumenTurnoData, refetch: refetchTurno } = useGetResumenCorteQuery({ idSucursal: 1 }, { pollingInterval: 10000 });
+  const { data: kdsBoardData, refetch: refetchKds } = useGetKdsBoardDashboardQuery(undefined, { pollingInterval: 6000 });
+
+  // Mutaciones
+  const [seedDemo, { isLoading: isSeedingDemo }] = useSeedRestauranteCompletoMutation();
+  const [updateMesa] = useMesasUpdateAsyncMutation();
+
+  // Estados de Modales
+  const [selectedPedidoToPay, setSelectedPedidoToPay] = useState<number | null>(null);
+  const [selectedPedidoPrecuenta, setSelectedPedidoPrecuenta] = useState<number | null>(null);
+  const [showAperturaModal, setShowAperturaModal] = useState(false);
+  const [showCorteModal, setShowCorteModal] = useState(false);
+  const [showCorteXModal, setShowCorteXModal] = useState(false);
+  const [showMovimientoModal, setShowMovimientoModal] = useState(false);
+
+  // Normalización de Datos
+  const pedidos: any[] = pedidosData?.data || [];
+  const mesas: any[] = (mesasData as any)?.data || [];
+  const areas: any[] = (areasData as any)?.data || [];
+  const estadosMesa: any[] = (catEstadosMesa as any)?.data || [];
+  const resumenTurno = (resumenTurnoData as any)?.data;
+  const ticketsKds: any[] = (kdsBoardData as any)?.data || [];
+
+  // Pedidos del día por estado (5 = Cerrado/Cobrado, 6 = Cancelado)
+  const pedidosCobrados = pedidos.filter((p: any) => p.idEstadoPedido === 5);
+  const pedidosPorCobrar = pedidos.filter((p: any) => p.idEstadoPedido !== 5 && p.idEstadoPedido !== 6);
+
+  // 1. Cálculo de Ventas y Tickets
+  const ventasDesdePedidos = pedidosCobrados.reduce((acc: number, curr: any) => {
+    // Si tiene cuenta o detalles, acumulamos el total
+    const totalPedido = curr.cuentas?.[0]?.total || curr.detalles?.reduce((dAcc: number, d: any) => dAcc + ((d.precioUnitario || 0) * (d.cantidad || 1)), 0) || 0;
+    return acc + totalPedido;
+  }, 0);
+
+  const totalVentas = Number(resumenTurno?.totalVentas || ventasDesdePedidos || 0);
+  const totalCuentasCobradas = pedidosCobrados.length;
+  const ticketPromedio = totalCuentasCobradas > 0 ? totalVentas / totalCuentasCobradas : 0;
+
+  // 2. Cálculo de Mesas Ocupadas
+  const mesasOcupadasCount = mesas.filter((m: any) => {
+    const estado = estadosMesa.find((e: any) => e.id === m.idEstadoMesa);
+    const isOcupada = estado?.descripcion?.toLowerCase().includes('ocupada');
+    const tienePedidoActivo = pedidosPorCobrar.some((p: any) => p.idMesa === m.id);
+    return isOcupada || tienePedidoActivo;
+  }).length;
+
+  // 3. Tiempos KDS
+  const ticketsActivos = ticketsKds.filter((t: any) => t.idEstadoTicketCocina !== 3);
+  const tiempoPromedioKdsMin = ticketsActivos.length > 0
+    ? Math.round(
+        ticketsActivos.reduce((acc: number, curr: any) => {
+          if (!curr.fechaCreacion) return acc + 6;
+          const mins = (Date.now() - new Date(curr.fechaCreacion).getTime()) / 60000;
+          return acc + Math.max(1, mins);
+        }, 0) / ticketsActivos.length
+      )
+    : 0;
+
+  // 4. Top Platillos
+  const platillosCountMap: { [key: string]: number } = {};
+  pedidos.forEach((p: any) => {
+    if (p.detalles) {
+      p.detalles.forEach((d: any) => {
+        if (!d.cancelado && d.productoNombre) {
+          platillosCountMap[d.productoNombre] = (platillosCountMap[d.productoNombre] || 0) + (d.cantidad || 1);
+        }
+      });
+    }
+  });
+
+  const topPlatillos = Object.entries(platillosCountMap)
+    .map(([nombre, cantidad]) => ({ nombre, cantidad }))
+    .sort((a, b) => b.cantidad - a.cantidad)
+    .slice(0, 4);
+
+  // Acción: Cargar Demo
+  const handleSeedDemo = async () => {
+    try {
+      addToast({ message: "Poblando restaurante demo 'Bistró & Brasa La Central'...", variant: "info" });
+      const res = await seedDemo({ resetOrders: true }).unwrap();
+      if (res?.isSuccess) {
+        addToast({ message: res.message || "¡Escenario demo en hora pico cargado con éxito!", variant: "success" });
+        refetchPedidos();
+        refetchMesas();
+        refetchTurno();
+        refetchKds();
+      } else {
+        addToast({ message: res?.message || "Error al cargar demo", variant: "error" });
+      }
+    } catch (err: any) {
+      addToast({ message: err?.data?.message || "Error de conexión al cargar demo", variant: "error" });
+    }
+  };
+
+  // Acción: Liberar Mesa Sucia
+  const handleLiberarMesa = async (mesa: any) => {
+    try {
+      const idEstadoDisponible = estadosMesa.find((e: any) => e.descripcion.toLowerCase().includes('disponible'))?.id || 1;
+      await updateMesa({ mesaDto: { ...mesa, idEstadoMesa: idEstadoDisponible } }).unwrap();
+      addToast({ message: `Mesa ${mesa.codigo || mesa.id} marcada como limpia y lista`, variant: "success" });
+      refetchMesas();
+    } catch {
+      addToast({ message: "Error al actualizar estado de la mesa", variant: "error" });
+    }
+  };
 
   return (
-    <Container as="main" maxWidth="xl" style={{ display: "grid", gap: 24, paddingTop: 24, paddingBottom: 48 }}>
-      <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-        <div>
-          <h1 style={{ margin: 0, fontFamily: 'var(--font-h1)' }}>Dashboard Operativo</h1>
-          <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>Resumen del día y accesos rápidos</p>
+    <main className="dash-container">
+      {/* 1. Header Contextual con Quick Actions y Turno Activo */}
+      <DashboardHeader
+        userName={profile?.nombreCompleto || "Carlos Mendoza"}
+        resumenTurno={resumenTurno}
+        onOpenApertura={() => setShowAperturaModal(true)}
+        onOpenCorteX={() => setShowCorteXModal(true)}
+        onOpenMovimiento={() => setShowMovimientoModal(true)}
+        onOpenCorteCaja={() => setShowCorteModal(true)}
+        onSeedDemo={handleSeedDemo}
+        isSeedingDemo={isSeedingDemo}
+      />
+
+      {/* 2. Grid Bento de 4 KPIs Clave */}
+      <DashboardKpiCards
+        totalVentas={totalVentas}
+        totalCuentasCobradas={totalCuentasCobradas}
+        mesasOcupadas={mesasOcupadasCount}
+        totalMesas={mesas.length}
+        ticketPromedio={ticketPromedio}
+        ticketsKdsActivos={ticketsActivos.length}
+        tiempoPromedioKdsMin={tiempoPromedioKdsMin}
+      />
+
+      {/* 3. Bento Grid Principal Asimétrico (Floor Plan + Pulso Cocina & Cobros) */}
+      <div className="dash-main-grid">
+        {/* Columna Izquierda: Monitor de Salón en Vivo */}
+        <DashboardFloorPlan
+          mesas={mesas}
+          areas={areas}
+          pedidosActivos={pedidosPorCobrar}
+          estadosMesa={estadosMesa}
+          onCobrarPedido={(idPedido) => setSelectedPedidoToPay(idPedido)}
+          onVerPrecuenta={(idPedido) => setSelectedPedidoPrecuenta(idPedido)}
+          onLiberarMesa={handleLiberarMesa}
+        />
+
+        {/* Columna Derecha: Pulso de Cocina KDS y Cuentas por Cobrar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6, 24px)' }}>
+          <DashboardKdsPulse
+            ticketsKds={ticketsKds}
+            pedidosActivos={pedidos}
+            topPlatillos={topPlatillos}
+          />
+
+          <DashboardFastCheckout
+            pedidosPorCobrar={pedidosPorCobrar}
+            onCobrarPedido={(idPedido) => setSelectedPedidoToPay(idPedido)}
+            ventasEfectivo={resumenTurno?.ventasEfectivo || 0}
+            ventasTarjeta={resumenTurno?.ventasTarjeta || 0}
+            ventasTransferencia={resumenTurno?.ventasTransferencia || 0}
+          />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Button variant="secondary" onClick={() => setShowCorteModal(true)}>
-            <Icon name="Coins" /> Corte de Caja
-          </Button>
-          <Button variant="primary" onClick={refetch}>
-            <Icon name="RefreshCw" /> Actualizar
-          </Button>
-        </div>
-      </header>
-
-      {/* Grid estilo BentoBox */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: 'var(--space-6, 24px)',
-        alignItems: 'start'
-      }}>
-        
-        {/* Bento: Pedidos por Pagar */}
-        <section style={{
-          background: 'var(--color-bg, #FFFFFF)',
-          borderRadius: 'var(--radius-lg, 20px)',
-          boxShadow: 'var(--shadow-md)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--space-6, 24px)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--space-4, 16px)',
-          gridColumn: 'span 2'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ background: 'var(--color-warning-bg)', padding: 12, borderRadius: 12, color: 'var(--color-secondary)' }}>
-              <Icon name="BellRing" />
-            </div>
-            <h2 style={{ margin: 0, fontSize: 20 }}>Pedidos Activos / Por Pagar</h2>
-          </div>
-          
-          {isLoading ? (
-            <p>Cargando pedidos...</p>
-          ) : pedidosPorPagar.length === 0 ? (
-            <p style={{ color: 'var(--color-text-muted)' }}>No hay pedidos pendientes de cobro. (Se encontraron {pedidos.length} totales en la respuesta del API)</p>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 'var(--space-4, 16px)' }}>
-              {pedidosPorPagar.map((pedido: any) => (
-                <div key={pedido.id} style={{
-                  padding: 'var(--space-4, 16px)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md, 12px)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 'var(--space-2, 8px)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                    <span>Orden #{pedido.id}</span>
-                    <span style={{ color: 'var(--color-primary)' }}>Mesa {pedido.idMesa}</span>
-                  </div>
-                  <div style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
-                    Personas: {pedido.personas || 1} <br/>
-                    Apertura: {pedido.abiertoEn ? new Date(pedido.abiertoEn).toLocaleTimeString() : 'N/A'}
-                  </div>
-                  <Button 
-                    variant="primary" 
-                    style={{ marginTop: 8 }}
-                    onClick={() => setSelectedPedidoToPay(pedido.id)}
-                  >
-                    Generar Cobro
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Bento: Tickets Cobrados (Reporte Rápido) */}
-        <section style={{
-          background: 'var(--color-bg, #FFFFFF)',
-          borderRadius: 'var(--radius-lg, 20px)',
-          boxShadow: 'var(--shadow-md)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--space-6, 24px)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--space-4, 16px)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ background: 'var(--color-success-bg)', padding: 12, borderRadius: 12, color: 'var(--color-success)' }}>
-              <Icon name="CheckCircle" />
-            </div>
-            <h2 style={{ margin: 0, fontSize: 20 }}>Tickets Cobrados Hoy</h2>
-          </div>
-          
-          {isLoading ? (
-            <p>Cargando historial...</p>
-          ) : ticketsCobrados.length === 0 ? (
-            <p style={{ color: 'var(--color-text-muted)' }}>No se han cobrado tickets aún.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3, 12px)' }}>
-              {ticketsCobrados.map((ticket: any) => (
-                <div key={ticket.id} style={{
-                  padding: 'var(--space-3, 12px)',
-                  background: 'rgba(0,0,0,0.02)',
-                  borderRadius: 'var(--radius-md, 12px)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <div>
-                    <strong style={{ display: 'block' }}>Ticket #{ticket.id}</strong>
-                    <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>Mesa {ticket.idMesa}</span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>Cerrado</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
       </div>
 
-      {/* Reutilizamos el Modal de Pago del POS */}
+      {/* ─── Modales Operativos Conectados ────────────────────────────────────── */}
+
+      {/* Modal de Pago con División de Cuenta (Split Bill) */}
       {selectedPedidoToPay && (
         <PaymentModal
           isOpen={true}
@@ -157,18 +211,58 @@ export default function HomePage() {
           onClose={() => setSelectedPedidoToPay(null)}
           onPaymentSuccess={() => {
             setSelectedPedidoToPay(null);
-            refetch();
+            refetchPedidos();
+            refetchMesas();
+            refetchTurno();
           }}
         />
       )}
 
-      {/* Modal de Corte de Caja y Arqueo */}
+      {/* Modal de Pre-cuenta Térmica */}
+      {selectedPedidoPrecuenta && (
+        <ThermalTicketModal
+          isOpen={true}
+          onClose={() => setSelectedPedidoPrecuenta(null)}
+          idPedido={selectedPedidoPrecuenta}
+          tipo="pre-cuenta"
+        />
+      )}
+
+      {/* Modal de Apertura de Turno */}
+      <AperturaTurnoModal
+        isOpen={showAperturaModal}
+        onClose={() => setShowAperturaModal(false)}
+        idSucursal={1}
+        onTurnoAbierto={() => {
+          refetchTurno();
+          addToast({ message: "Turno de caja abierto correctamente", variant: "success" });
+        }}
+      />
+
+      {/* Modal de Arqueo en Vivo (Corte X) */}
+      <CorteXModal
+        isOpen={showCorteXModal}
+        onClose={() => setShowCorteXModal(false)}
+        idSucursal={1}
+      />
+
+      {/* Modal de Movimiento de Caja (Ingreso / Egreso) */}
+      <MovimientoCajaModal
+        isOpen={showMovimientoModal}
+        onClose={() => setShowMovimientoModal(false)}
+        idSucursal={1}
+      />
+
+      {/* Modal de Corte Definitivo de Turno */}
       <CorteCajaModal
         isOpen={showCorteModal}
         onClose={() => setShowCorteModal(false)}
-        onCorteSuccess={refetch}
+        idSucursal={1}
+        onCorteSuccess={() => {
+          refetchTurno();
+          refetchPedidos();
+        }}
       />
-
-    </Container>
+    </main>
   );
 }
