@@ -1,5 +1,6 @@
 import React from "react";
 import { Trash2, AlertTriangle, Info } from "lucide-react";
+import { generateUUID } from "../../../lib/uuid";
 import "./confirm-dialog.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -53,7 +54,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
 
   const confirm = React.useCallback((opts: ConfirmOptions): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
-      const id = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
+      const id = generateUUID();
       setStack((prev) => [...prev, { ...opts, id, resolve }]);
     });
   }, []);

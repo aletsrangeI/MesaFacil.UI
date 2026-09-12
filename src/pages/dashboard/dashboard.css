@@ -1,0 +1,448 @@
+/* src/pages/dashboard/dashboard.css */
+/* MesaFacil - Dashboard Ejecutivo y Operativo Bento Grid */
+
+.dash-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6, 24px);
+  padding: var(--space-6, 24px) var(--space-4, 16px) var(--space-10, 48px);
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ─── Header Contextual ─────────────────────────────────────────────────── */
+.dash-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4, 16px);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-lg, 16px);
+  padding: var(--space-5, 20px) var(--space-6, 24px);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+}
+
+.dash-header-title h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-text, #1e293b);
+  letter-spacing: -0.02em;
+}
+
+.dash-header-subtitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #64748b);
+}
+
+.dash-badge-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dash-badge-pulse.active {
+  background: var(--color-success-bg, rgba(60, 141, 64, 0.12));
+  color: var(--color-success, #3c8d40);
+  border: 1px solid rgba(60, 141, 64, 0.25);
+}
+
+.dash-badge-pulse.warning {
+  background: var(--color-warning-bg, rgba(226, 167, 46, 0.14));
+  color: #b45309;
+  border: 1px solid rgba(226, 167, 46, 0.3);
+}
+
+.dash-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dashPulse 2s infinite;
+}
+
+@keyframes dashPulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Quick Actions Toolbar */
+.dash-actions-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+.dash-btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-height: 40px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #334155);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
+  text-decoration: none;
+}
+
+.dash-btn-action:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.08));
+  border-color: #cbd5e1;
+}
+
+.dash-btn-action.primary {
+  background: var(--color-primary, #d64545);
+  color: #ffffff;
+  border-color: var(--color-primary, #d64545);
+}
+.dash-btn-action.primary:hover {
+  background: #bf3939;
+}
+
+.dash-btn-action.demo {
+  background: #f1f5f9;
+  color: #475569;
+  border-style: dashed;
+}
+.dash-btn-action.demo:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* ─── Grid Bento de KPIs ─────────────────────────────────────────────────── */
+.dash-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4, 16px);
+}
+
+.dash-kpi-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-lg, 16px);
+  padding: var(--space-5, 20px);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-3, 12px);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dash-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 6px 12px -2px rgba(0, 0, 0, 0.08));
+}
+
+.dash-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dash-kpi-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dash-kpi-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-kpi-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-text, #0f172a);
+  line-height: 1.1;
+}
+
+.dash-kpi-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #64748b);
+}
+
+.dash-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-surface-sunken, #f1f5f9);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.dash-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ─── Bento Grid Principal (2 Columnas Asimétricas) ─────────────────────── */
+.dash-main-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--space-6, 24px);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .dash-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dash-bento-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-lg, 16px);
+  padding: var(--space-6, 24px);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border, #f1f5f9);
+  padding-bottom: var(--space-3, 12px);
+}
+
+.dash-card-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text, #1e293b);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ─── Live Floor Plan (Mesas) ───────────────────────────────────────────── */
+.dash-areas-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.dash-area-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text-muted, #64748b);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.dash-area-chip.active {
+  background: var(--color-primary, #d64545);
+  color: #ffffff;
+  border-color: var(--color-primary, #d64545);
+}
+
+.dash-tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  gap: var(--space-3, 12px);
+}
+
+.dash-table-cell {
+  background: var(--color-surface-raised, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  text-align: center;
+}
+
+.dash-table-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.08));
+  border-color: #cbd5e1;
+}
+
+.dash-table-cell.disponible {
+  border-color: rgba(60, 141, 64, 0.3);
+  background: rgba(60, 141, 64, 0.04);
+}
+
+.dash-table-cell.ocupada {
+  border-color: rgba(214, 69, 69, 0.3);
+  background: rgba(214, 69, 69, 0.04);
+}
+
+.dash-table-cell.sucia {
+  border-color: rgba(249, 115, 22, 0.3);
+  background: rgba(249, 115, 22, 0.04);
+}
+
+.dash-table-code {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-text, #0f172a);
+}
+
+.dash-table-pax {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dash-table-status-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: capitalize;
+}
+
+/* ─── KDS Live Pulse ────────────────────────────────────────────────────── */
+.dash-kds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dash-kds-ticket {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--color-surface-raised, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.dash-kds-ticket.urgente {
+  border-color: rgba(214, 69, 69, 0.4);
+  background: rgba(214, 69, 69, 0.05);
+}
+
+.dash-kds-time {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.dash-kds-time.green {
+  background: rgba(60, 141, 64, 0.15);
+  color: #2e7d32;
+}
+
+.dash-kds-time.yellow {
+  background: rgba(226, 167, 46, 0.18);
+  color: #b45309;
+}
+
+.dash-kds-time.red {
+  background: rgba(214, 69, 69, 0.15);
+  color: #d64545;
+}
+
+/* ─── Fast Checkout List ────────────────────────────────────────────────── */
+.dash-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dash-order-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-surface, #ffffff);
+  transition: background 0.15s ease;
+}
+
+.dash-order-item:hover {
+  background: var(--color-surface-raised, #f8fafc);
+}
+
+.dash-order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-order-mesa {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text, #1e293b);
+}
+
+.dash-order-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+}
+
+.dash-btn-pay {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--color-primary, #d64545);
+  color: #ffffff;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 36px;
+  transition: background 0.15s ease;
+}
+
+.dash-btn-pay:hover {
+  background: #bf3939;
+}
