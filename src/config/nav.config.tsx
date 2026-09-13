@@ -416,6 +416,15 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         allowedRoles: ["admin", "manager"],
       },
       {
+        key: "impresoras",
+        label: "Impresoras",
+        path: "/gestion/impresoras",
+        acceso: "/",
+        icon: <Icon name="Printer" />,
+        sortOrder: 45,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
         key: "planes",
         label: "Planes y Suscripción",
         path: "/gestion/planes",

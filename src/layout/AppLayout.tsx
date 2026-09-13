@@ -14,6 +14,7 @@ import { useAppDispatch } from "../app/hooks";
 import { logout } from "../state/authSlice";
 import Icon from "../components/ui/icons/Icon";
 import { NetworkStatusBanner } from "../components/ui/network-status-banner/NetworkStatusBanner";
+import { PrinterStatusBadge } from "../components/impresoras/PrinterStatusBadge";
 
 import "../styles/tokens.css";
 import "../components/navigation/sidebar/sidebar.css";
@@ -156,6 +157,7 @@ export default function AppLayout({
               showBrand={false}
               subtitle="Backoffice"
               onMenuClick={() => setMobileOpen(true)}
+              actions={<PrinterStatusBadge />}
             />
           ))}
         <main className={`app-shell__content ${isFlushRoute ? "is-flush" : ""}`}>

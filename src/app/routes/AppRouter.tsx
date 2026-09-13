@@ -23,6 +23,7 @@ import PreciosPage from "../../pages/precios";
 import ModificadoresPage from "../../pages/modificadores";
 import EmpresaPage from "../../pages/gestion/empresa";
 import SucursalesPage from "../../pages/gestion/sucursales";
+import ImpresorasPage from "../../pages/gestion/impresoras";
 import AreasPage from "../../pages/gestion/areas";
 import MesasPage from "../../pages/gestion/mesas";
 import TiposPedidoPage from "../../pages/gestion/tipos-pedido";
@@ -339,6 +340,14 @@ export default function AppRouter() {
           element={
             <RequireAccess path="/">
               <SucursalesPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/gestion/impresoras"
+          element={
+            <RequireAccess path="/">
+              <ImpresorasPage />
             </RequireAccess>
           }
         />
