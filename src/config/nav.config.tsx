@@ -407,6 +407,15 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         sortOrder: 40,
         allowedRoles: ["admin", "manager"],
       },
+      {
+        key: "planes",
+        label: "Planes y Suscripción",
+        path: "/gestion/planes",
+        acceso: "/",
+        icon: <Icon name="Sparkles" />,
+        sortOrder: 50,
+        allowedRoles: ["admin", "manager"],
+      },
     ],
   },
   {

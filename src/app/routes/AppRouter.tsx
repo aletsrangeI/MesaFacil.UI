@@ -34,6 +34,7 @@ import DeliveryHistorialPage from "../../pages/operacion/delivery/historial";
 import InventarioPage from "../../pages/inventario";
 import ComprasPage from "../../pages/compras";
 import CxPPage from "../../pages/cxp";
+import PlanesPage from "../../pages/planes";
 
 import { useEffect } from "react";
 import { useToast } from "../../components/ui/toast";
@@ -356,6 +357,14 @@ export default function AppRouter() {
           element={
             <RequireAccess path="/">
               <TiposPedidoPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/gestion/planes"
+          element={
+            <RequireAccess path="/">
+              <PlanesPage />
             </RequireAccess>
           }
         />

@@ -115,5 +115,7 @@ export const emptySplitApi = createApi({
     "CuentaPorPagar",
     "PagoCxP",
     "ReporteAntiguedad",
+    "PlanSuscripcion",
+    "EmpresaSuscripcion",
   ],
 });
