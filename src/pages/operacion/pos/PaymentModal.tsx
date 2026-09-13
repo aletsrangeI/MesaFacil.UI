@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
 import { emptySplitApi as api } from '../../../services/baseApi';
 import { useToast } from '../../../components/ui/toast';
 import { useCatalogosGetAllQuery } from '../../../services/generated/api';
 import { ThermalTicketModal } from './ThermalTicketModal';
+import { useTimbrarPedidoMutation } from '../../../services/facturacionApi';
+import {
+  DatosFiscalesForm,
+  datosFiscalesCompletos,
+  DATOS_FISCALES_VACIOS,
+  type DatosFiscalesReceptor,
+} from '../../../components/facturacion/DatosFiscalesForm';
 
 const paymentApi = api.injectEndpoints({
   endpoints: (build) => ({
@@ -29,6 +36,7 @@ export const { useGenerarCuentaMutation, useRegistrarPagoMutation } = paymentApi
 export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: any) {
   const [generarCuenta, { isLoading: isGenerating }] = useGenerarCuentaMutation();
   const [registrarPago, { isLoading: isPaying }] = useRegistrarPagoMutation();
+  const [timbrarPedido, { isLoading: isTimbrando }] = useTimbrarPedidoMutation();
   const { data: metodosData } = useCatalogosGetAllQuery({ catalog: 'metodos-pago' });
   const { addToast } = useToast();
 
@@ -40,6 +48,10 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
   const [selectedSplit, setSelectedSplit] = useState<number>(1);
   const [showFinalTicket, setShowFinalTicket] = useState(false);
   const [finalTicketData, setFinalTicketData] = useState<any>(null);
+
+  // --- Facturación fiscal (spec 020) ---
+  const [solicitaFactura, setSolicitaFactura] = useState(false);
+  const [datosFiscales, setDatosFiscales] = useState<DatosFiscalesReceptor>(DATOS_FISCALES_VACIOS);
 
   const metodos = Array.isArray((metodosData as any)?.data) ? (metodosData as any).data : [];
 
@@ -72,6 +84,8 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
       setPropina('0');
       setSelectedPercentage(null);
       setSelectedSplit(1);
+      setSolicitaFactura(false);
+      setDatosFiscales(DATOS_FISCALES_VACIOS);
       cargarCuenta(idPedido);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,6 +144,11 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
     const saldo = cuenta.saldoRestante !== undefined ? cuenta.saldoRestante : cuenta.total;
     const esPagoFinal = monto >= (saldo - 0.01);
 
+    if (solicitaFactura && esPagoFinal && !datosFiscalesCompletos(datosFiscales)) {
+      addToast({ message: 'Completa los datos fiscales (RFC, Régimen, CP y Uso de CFDI) o desactiva la Factura Fiscal', variant: 'error' });
+      return;
+    }
+
     try {
       const res = await registrarPago({
         idCuenta: cuenta.id,
@@ -141,6 +160,26 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
       if (res?.isSuccess) {
         if (esPagoFinal) {
           addToast({ message: 'Cuenta liquidada exitosamente. Mesa liberada.', variant: 'success' });
+
+          if (solicitaFactura) {
+            try {
+              const facturaRes = await timbrarPedido({
+                pedidoId: idPedido,
+                ...datosFiscales,
+              }).unwrap();
+              if (facturaRes?.isSuccess) {
+                addToast({
+                  message: `Factura CFDI generada (Folio ${facturaRes.data?.folio ?? ''})`,
+                  variant: 'success',
+                });
+              } else {
+                addToast({ message: facturaRes?.message || 'No se pudo timbrar la factura', variant: 'error' });
+              }
+            } catch {
+              addToast({ message: 'Error de conexión al timbrar la factura. El cobro ya quedó registrado.', variant: 'error' });
+            }
+          }
+
           // Preparar datos para el Ticket Final
           const metodoNombre = metodos.find((m: any) => m.id === idMetodo)?.descripcion || 'Efectivo';
           const nuevosPagos = [
@@ -363,14 +402,34 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
                   })}
                 </div>
 
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   step="0.01"
                   placeholder="Monto personalizado"
-                  value={propina} 
+                  value={propina}
                   onChange={handlePropinaChange}
                   style={{ width: '100%', boxSizing: 'border-box', padding: 'var(--space-3, 12px)', borderRadius: 'var(--radius-md, 12px)', border: '1px solid var(--color-border, rgba(0,0,0,0.12))', color: 'var(--color-text, #1F1F1F)', outlineColor: 'var(--color-primary, #D64545)' }}
                 />
+              </div>
+
+              {/* Facturación Fiscal CFDI (spec 020) */}
+              <div style={{ borderTop: '1px solid var(--color-border, rgba(0,0,0,0.12))', paddingTop: 'var(--space-3, 12px)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14, color: 'var(--color-text, #1F1F1F)' }}>
+                  <input
+                    type="checkbox"
+                    checked={solicitaFactura}
+                    onChange={(e) => setSolicitaFactura(e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: 'var(--color-primary, #D64545)' }}
+                  />
+                  <FileText size={16} />
+                  Solicitar Factura Fiscal (CFDI)
+                </label>
+
+                {solicitaFactura && (
+                  <div style={{ marginTop: 'var(--space-3, 12px)' }}>
+                    <DatosFiscalesForm value={datosFiscales} onChange={setDatosFiscales} showEmail />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -385,9 +444,9 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
             flexShrink: 0,
             paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))'
           }}>
-            <button 
+            <button
               onClick={handlePay}
-              disabled={isPaying || !montoRecibido || montoActual <= 0}
+              disabled={isPaying || isTimbrando || !montoRecibido || montoActual <= 0}
               style={{
                 width: '100%',
                 background: 'var(--color-primary, #D64545)',
@@ -397,13 +456,19 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
                 borderRadius: 'var(--radius-md, 12px)',
                 fontSize: '1.05rem',
                 fontWeight: 700,
-                cursor: (isPaying || !montoRecibido || montoActual <= 0) ? 'not-allowed' : 'pointer',
-                opacity: (isPaying || !montoRecibido || montoActual <= 0) ? 0.6 : 1,
+                cursor: (isPaying || isTimbrando || !montoRecibido || montoActual <= 0) ? 'not-allowed' : 'pointer',
+                opacity: (isPaying || isTimbrando || !montoRecibido || montoActual <= 0) ? 0.6 : 1,
                 boxShadow: '0 4px 12px rgba(214, 69, 69, 0.25)',
                 transition: 'all 0.15s ease'
               }}
             >
-              {isPaying ? 'Procesando...' : (montoActual >= (saldoActual - 0.01) ? 'Confirmar Pago y Liquidar' : `Registrar Abono ($${montoActual.toFixed(2)})`)}
+              {isPaying
+                ? 'Procesando...'
+                : isTimbrando
+                ? 'Timbrando factura...'
+                : montoActual >= (saldoActual - 0.01)
+                ? 'Confirmar Pago y Liquidar'
+                : `Registrar Abono ($${montoActual.toFixed(2)})`}
             </button>
           </div>
         )}

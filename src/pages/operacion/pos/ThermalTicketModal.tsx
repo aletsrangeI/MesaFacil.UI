@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import QRCode from 'qrcode';
 import { Printer, X } from 'lucide-react';
 import { useGenerarCuentaMutation } from './PaymentModal';
 
@@ -20,6 +21,8 @@ export const ThermalTicketModal: React.FC<ThermalTicketModalProps> = ({
 }) => {
   const [generarCuenta, { data: fetchedRes, isLoading }] = useGenerarCuentaMutation();
   const ticketRef = useRef<HTMLDivElement>(null);
+  const qrCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [qrError, setQrError] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (isOpen && idPedido && !cuentaData) {
@@ -27,9 +30,28 @@ export const ThermalTicketModal: React.FC<ThermalTicketModalProps> = ({
     }
   }, [isOpen, idPedido, cuentaData, generarCuenta]);
 
-  if (!isOpen) return null;
-
   const cuenta = cuentaData || (fetchedRes as any)?.data;
+
+  // Guid del pedido para el QR de autofacturación (spec 020). `idPedido` y
+  // `cuenta.idPedido` ya son string (Guid) tras la migración de spec 019.
+  const pedidoGuid: string | null = idPedido || cuenta?.idPedido || null;
+  const codigoFacturacion = pedidoGuid ? pedidoGuid.replace(/-/g, '').slice(0, 8).toUpperCase() : '';
+  const urlAutofactura = pedidoGuid ? `https://app.mesafacil.mx/facturar?ticket=${pedidoGuid}` : '';
+
+  useEffect(() => {
+    if (!isOpen || tipo !== 'ticket-final' || !pedidoGuid) return;
+    const canvas = qrCanvasRef.current;
+    if (!canvas) return;
+    setQrError(null);
+    QRCode.toCanvas(canvas, urlAutofactura, {
+      width: 140,
+      margin: 1,
+      color: { dark: '#1e293b', light: '#ffffff' },
+    }).catch(() => setQrError('No se pudo generar el código QR de facturación.'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, tipo, pedidoGuid, urlAutofactura, cuenta]);
+
+  if (!isOpen) return null;
 
   const handlePrint = () => {
     window.print();
@@ -231,6 +253,32 @@ export const ThermalTicketModal: React.FC<ThermalTicketModalProps> = ({
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                       <span>Total Liquidado:</span>
                       <span>${cuenta.total?.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  <div className="thermal-divider" />
+
+                  {/* Autofacturación QR (spec 020) */}
+                  {pedidoGuid && (
+                    <div style={{ textAlign: 'center', padding: '4px 0 8px' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '11px', marginBottom: 6 }}>
+                        FACTURA TU CONSUMO
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <canvas ref={qrCanvasRef} width={140} height={140} />
+                      </div>
+                      {qrError && (
+                        <div style={{ fontSize: '10px', color: '#dc2626', marginTop: 4 }}>{qrError}</div>
+                      )}
+                      <div style={{ fontSize: '11px', marginTop: 6 }}>
+                        Escanea el QR o entra a app.mesafacil.mx/facturar
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 'bold', marginTop: 4, letterSpacing: '1px' }}>
+                        Código: {codigoFacturacion}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#4b5563' }}>
+                        Vigencia: hasta el último día del mes en curso
+                      </div>
                     </div>
                   )}
 

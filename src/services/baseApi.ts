@@ -117,5 +117,7 @@ export const emptySplitApi = createApi({
     "ReporteAntiguedad",
     "PlanSuscripcion",
     "EmpresaSuscripcion",
+    "FacturaVenta",
+    "BolsaTimbres",
   ],
 });
