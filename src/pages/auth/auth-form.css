@@ -1,7 +1,10 @@
 .auth-wrapper {
-  min-height: 70vh;
-  display: grid;
-  place-items: center;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .auth-card {
@@ -274,6 +277,82 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text);
+}
+
+/* Responsive: Landscape mode on smartphones (< 520px de altura) */
+@media (max-height: 520px) and (orientation: landscape) {
+  .auth-wrapper {
+    min-height: 100dvh;
+    padding: 8px 12px;
+    align-items: center;
+    padding-left: calc(12px + env(safe-area-inset-left, 0px));
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
+  }
+  .auth-card {
+    max-width: 620px;
+    padding: 10px 16px;
+    gap: 8px;
+    max-height: 94dvh;
+    overflow-y: auto;
+  }
+  .auth-header {
+    gap: 2px;
+  }
+  .auth-logo {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 2px;
+    border-radius: 8px;
+  }
+  .auth-title {
+    font-size: 15px;
+  }
+  .auth-subtitle {
+    font-size: 11px;
+  }
+  .pos-pin-entry {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 14px;
+    align-items: center;
+  }
+  .auth-user-selected {
+    padding: 6px 10px;
+    margin-bottom: 6px;
+  }
+  .pin-keypad {
+    gap: 5px;
+    margin-top: 0 !important;
+  }
+  .pin-keypad__btn {
+    height: 36px;
+    font-size: 16px;
+  }
+  .pin-feedback {
+    margin-block: 2px;
+    gap: 4px;
+  }
+  .pin-feedback__dot {
+    width: 10px;
+    height: 10px;
+  }
+  .auth-actions {
+    margin-top: 6px !important;
+  }
+  .user-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-height: 160px;
+    gap: 8px;
+  }
+  .user-grid__item {
+    padding: 8px;
+    gap: 4px;
+  }
+  .user-grid__avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
 }
 
 

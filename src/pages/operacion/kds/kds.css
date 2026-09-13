@@ -28,7 +28,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 100vh;
+  min-height: 0;
+  max-height: 100dvh;
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -44,6 +45,7 @@
   border-bottom: 2px solid var(--color-primary);
   box-shadow: var(--shadow-sm);
   z-index: 10;
+  flex-shrink: 0;
 }
 
 .kds-header h1 {
@@ -68,7 +70,8 @@
   gap: 1rem;
   padding: 1.5rem;
   overflow-x: auto;
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
   align-items: flex-start;
 }
 
@@ -312,19 +315,78 @@
 }
 
 @media (max-width: 768px) {
-  .kds-board {
-    flex-direction: column;
-    padding: 1rem;
-    align-items: stretch;
-  }
-  .kds-ticket {
-    min-width: 100%;
-    max-width: 100%;
-    max-height: none;
+  .kds-container {
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
   }
   .kds-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+    flex-shrink: 0 !important;
+    padding: 8px 10px;
+    gap: 6px;
+    padding-left: calc(10px + env(safe-area-inset-left, 0px));
+    padding-right: calc(10px + env(safe-area-inset-right, 0px));
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  }
+  .kds-board {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex-direction: column !important;
+    padding: 10px 12px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    align-items: stretch !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 12px !important;
+    margin-top: 6px !important;
+  }
+  /* Contenedores hijos de tickets dentro del tablero se apilan verticalmente */
+  .kds-board > div {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+  .kds-ticket {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .ticket-body {
+    max-height: none !important;
+    overflow: visible !important;
+    flex: none !important;
+  }
+}
+
+/* Modo Landscape en móvil (< 500px altura) */
+@media (max-height: 500px) and (orientation: landscape) {
+  .kds-header {
+    flex-shrink: 0 !important;
+    padding: 6px 12px;
+    gap: 6px;
+    padding-left: calc(12px + env(safe-area-inset-left, 0px));
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
+  }
+  .kds-board {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 10px;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-direction: row !important;
+  }
+  .kds-ticket {
+    min-width: 270px;
+    max-width: 300px;
+    max-height: calc(100vh - 65px);
+    flex-shrink: 0;
   }
 }

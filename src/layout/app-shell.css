@@ -46,7 +46,21 @@
   overflow: auto;
   min-width: 0;
   padding: var(--space-6, 24px);
-  /* no le pongas fondo blanco aquí: deja ver el app-bg salvo que una vista lo requiera */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Modo flush para vistas operativas a pantalla completa (POS, KDS) */
+.app-shell__content.is-flush {
+  padding: 0 !important;
+  overflow: hidden;
+  height: 100%;
+  max-height: 100dvh;
+}
+
+.app-shell.has-flush-content .app-shell__main {
+  grid-template-rows: 1fr;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 /* Overlay para móviles */
@@ -55,36 +69,43 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
   z-index: 90;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 /* =========================================
-   RESPONSIVE (Tablet y Móvil)
+   RESPONSIVE (Laptops <15'', 4:3 & Móvil)
    ========================================= */
 
-/* Tablets / KDS pequeños (hasta 1024px) */
+/* Laptops < 15'' (1366x768), Monitores 4:3 (1024x768) y Tablets */
 @media (max-width: 1024px) {
   .app-shell {
     grid-template-columns: var(--sidebar-w-collapsed) 1fr;
   }
+
+  .app-shell__content {
+    padding: var(--space-4, 16px);
+  }
 }
 
-/* Móviles (hasta 768px) */
-@media (max-width: 768px) {
+/* Móviles (hasta 768px o móviles en landscape con <= 500px de altura) */
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
   .app-shell, .app-shell.is-collapsed {
-    grid-template-columns: 1fr; /* Oculta el espacio del sidebar */
+    grid-template-columns: 1fr; /* Oculta el espacio reservado del sidebar */
   }
 
-  /* El sidebar pasa a ser off-canvas */
+  /* El sidebar pasa a ser off-canvas deslizante */
   .app-shell__side {
     position: fixed;
     left: 0;
     top: 0;
     bottom: 0;
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   /* Cuando el menú móvil está abierto */
@@ -98,6 +119,20 @@
   }
   
   .app-shell__content {
-    padding: var(--space-4, 16px); /* padding más pequeño en móvil */
+    padding: var(--space-3, 12px); /* Padding compacto para maximizar legibilidad en móvil */
+    padding-bottom: calc(var(--space-3, 12px) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Ajuste fino específico para Móvil en modo landscape (< 500px de altura) */
+@media (max-height: 500px) and (orientation: landscape) {
+  :root {
+    --topbar-h: 44px;
+  }
+
+  .app-shell__content {
+    padding: 8px 12px;
+    padding-left: calc(12px + env(safe-area-inset-left, 0px));
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
   }
 }

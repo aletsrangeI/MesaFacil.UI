@@ -90,6 +90,7 @@ export default function PosPage() {
   // ─── Retomar Pedido ───────────────────────────────────────────────────────
   const [pedidoActivo, setPedidoActivo] = useState<any>(null);
   const [modoRetomar, setModoRetomar] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [skipPedidoQuery, setSkipPedidoQuery] = useState(true);
   const [paymentPedidoId, setPaymentPedidoId] = useState<number | null>(null);
   const [showCorteModal, setShowCorteModal] = useState(false);
@@ -263,11 +264,15 @@ export default function PosPage() {
 
   const handleEnviarPedido = async () => {
     if (isComedor && !selectedMesa) {
-      addToast({ message: 'Por favor asigna una mesa primero', variant: 'error' });
+      addToast({ 
+        message: 'Por favor asigna una mesa para consumo en comedor.', 
+        variant: 'error' 
+      });
+      setShowMesaSelector(true);
       return;
     }
     if (cart.length === 0) {
-      addToast({ message: 'El carrito está vacío', variant: 'error' });
+      addToast({ message: 'El carrito está vacío. Agrega productos al pedido.', variant: 'error' });
       return;
     }
 
@@ -331,6 +336,7 @@ export default function PosPage() {
           const mesaInfo = isComedor && selectedMesa ? ` [Mesa ${selectedMesa.codigo}]` : '';
           addToast({ message: `¡Pedido #${pedidoId}${mesaInfo} enviado a cocina!`, variant: 'success' });
           dispatch(clearCart());
+          setMobileCartOpen(false);
           setIdempotencyKey(generateUUID());
           setDeliveryCliente('');
           setDeliveryTelefono('');
@@ -369,7 +375,7 @@ export default function PosPage() {
             <ChevronLeft size={24} />
             <span>Volver</span>
           </Link>
-          <div className="pos-brand" style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <div className="pos-brand">
             <h2>MesaFácil POS</h2>
             {isComedor && (
               <button 
@@ -382,93 +388,43 @@ export default function PosPage() {
             )}
           </div>
         </div>
-        <div className="pos-header-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="pos-header-right">
           {!tieneTurnoActivo ? (
             <button
               onClick={() => setShowAperturaModal(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: 'var(--radius-md, 10px)',
-                border: '1px solid #10b981',
-                background: 'rgba(16, 185, 129, 0.1)',
-                color: '#059669',
-                cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: '13px'
-              }}
+              className="pos-header-btn-caja pos-header-btn-apertura"
+              title="Abrir turno de caja"
             >
               <DoorOpen size={16} />
-              <span>Abrir Turno de Caja</span>
+              <span className="pos-btn-text">Abrir Turno</span>
             </button>
           ) : (
-            <>
+            <div className="pos-caja-actions-group">
               <button 
                 onClick={() => setShowCorteXModal(true)}
-                title="Arqueo parcial en vivo sin cerrar turno"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-md, 10px)',
-                  border: '1px solid var(--color-border, rgba(0,0,0,0.12))',
-                  background: 'var(--color-surface, #FFFFFF)',
-                  color: '#2563eb',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  boxShadow: 'var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))'
-                }}
+                title="Corte X: Arqueo parcial en vivo sin cerrar turno"
+                className="pos-header-btn-caja pos-btn-cortex"
               >
                 <Activity size={16} />
-                <span>Corte X</span>
+                <span className="pos-btn-text">Corte X</span>
               </button>
               <button 
                 onClick={() => setShowMovimientoModal(true)}
-                title="Registrar entrada o salida de efectivo"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-md, 10px)',
-                  border: '1px solid var(--color-border, rgba(0,0,0,0.12))',
-                  background: 'var(--color-surface, #FFFFFF)',
-                  color: '#059669',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  boxShadow: 'var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))'
-                }}
+                title="Movimiento: Registrar entrada o salida de efectivo"
+                className="pos-header-btn-caja pos-btn-mov"
               >
                 <ArrowDownUp size={16} />
-                <span>Movimiento</span>
+                <span className="pos-btn-text">Movimiento</span>
               </button>
               <button 
                 onClick={() => setShowCorteModal(true)}
-                title="Cerrar turno y arquear caja"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-md, 10px)',
-                  border: '1px solid var(--color-border, rgba(0,0,0,0.12))',
-                  background: 'var(--color-surface, #FFFFFF)',
-                  color: 'var(--color-primary, #D64545)',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  boxShadow: 'var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))'
-                }}
+                title="Cierre de Turno: Cerrar turno y arquear caja"
+                className="pos-header-btn-caja pos-btn-cierre"
               >
                 <Coins size={16} />
-                <span>Cierre Turno</span>
+                <span className="pos-btn-text">Cerrar Turno</span>
               </button>
-            </>
+            </div>
           )}
           <div className="pos-user-info">
             <User size={20} />
@@ -532,9 +488,20 @@ export default function PosPage() {
         </div>
 
         {/* Right Sidebar: Order Summary (Cart) */}
-        <aside className="pos-cart-sidebar">
+        <aside className={`pos-cart-sidebar ${mobileCartOpen ? "is-mobile-open" : ""}`}>
           <div className="pos-cart-header">
-            <h3>Pedido Actual</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                className="pos-cart-close-mobile"
+                onClick={() => setMobileCartOpen(false)}
+                aria-label="Volver al catálogo"
+                title="Volver al catálogo"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <h3>Pedido Actual</h3>
+            </div>
             <span className="pos-cart-count">{cart.length} items</span>
           </div>
 
@@ -847,6 +814,28 @@ export default function PosPage() {
 
       </div>
 
+      {/* Floating mobile cart bar */}
+      <div 
+        className={`pos-mobile-cart-bar ${cart.length > 0 ? "has-items" : ""}`}
+        onClick={() => setMobileCartOpen(true)}
+        role="button"
+        tabIndex={0}
+      >
+        <div className="pos-mobile-cart-bar-left">
+          <div className="pos-mobile-cart-badge">
+            <ShoppingCart size={18} />
+            <span>{cart.reduce((acc, curr) => acc + (curr.cantidad || 1), 0)}</span>
+          </div>
+          <div className="pos-mobile-cart-pricing">
+            <span className="pos-mobile-cart-label">Ver Pedido</span>
+            <span className="pos-mobile-cart-total">${cartTotal.toFixed(2)}</span>
+          </div>
+        </div>
+        <button type="button" className="pos-mobile-cart-btn-view">
+          Continuar →
+        </button>
+      </div>
+
       <ProductModifiersModal
         isOpen={!!modalProduct}
         product={modalProduct}
@@ -877,40 +866,44 @@ export default function PosPage() {
       {/* Inline Mesa Selector Modal using Real Data */}
       {showMesaSelector && (
         <div className="pos-modal-overlay">
-          <div className="pos-modal-content" style={{ maxWidth: 900, width: '95%', padding: 0, background: '#f8fafc', borderRadius: 16, overflow: 'hidden' }}>
-            <div style={{ background: '#ffffff', padding: '24px 32px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ background: 'var(--color-primary-light, #dbeafe)', padding: 12, borderRadius: 12 }}>
-                  <MapPin size={28} color="var(--color-primary, #3b82f6)" />
+          <div className="pos-modal-content" style={{ maxWidth: 860, width: '95%', maxHeight: '90dvh', display: 'flex', flexDirection: 'column', padding: 0, background: '#f8fafc', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ background: '#ffffff', padding: '14px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ background: 'var(--color-primary-light, #dbeafe)', padding: 8, borderRadius: 10 }}>
+                  <MapPin size={22} color="var(--color-primary, #3b82f6)" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.5rem', color: '#1e293b' }}>Selección de Mesa</h3>
-                  <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', marginTop: 4 }}>Asigna el pedido a una ubicación específica</p>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#1e293b' }}>Selección de Mesa</h3>
+                  <p style={{ margin: 0, color: '#64748b', fontSize: '0.8rem', marginTop: 2 }}>Asigna el pedido a una ubicación específica</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowMesaSelector(false)}
-                style={{ background: '#f1f5f9', border: 'none', width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                style={{ background: '#f1f5f9', border: 'none', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
                 onMouseLeave={e => e.currentTarget.style.background = '#f1f5f9'}
+                aria-label="Cerrar modal"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
             
-            <div style={{ padding: '24px 32px' }}>
-              <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 12, marginBottom: 16 }}>
+            <div style={{ padding: '14px 20px', overflowY: 'auto', flex: 1, minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 14, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
                 <button
                   style={{
-                    padding: '10px 24px',
+                    padding: '8px 18px',
                     borderRadius: 30,
                     border: 'none',
                     background: selectedAreaId === null ? 'var(--color-primary, #3b82f6)' : '#ffffff',
                     color: selectedAreaId === null ? '#ffffff' : '#475569',
                     fontWeight: 'bold',
+                    fontSize: '0.85rem',
                     boxShadow: selectedAreaId === null ? '0 4px 12px rgba(59, 130, 246, 0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
                     cursor: 'pointer',
-                    transition: 'all 0.2s'
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s',
+                    flexShrink: 0
                   }}
                   onClick={() => setSelectedAreaId(null)}
                 >
@@ -920,16 +913,18 @@ export default function PosPage() {
                   <button
                     key={area.id}
                     style={{
-                      padding: '10px 24px',
+                      padding: '8px 18px',
                       borderRadius: 30,
                       border: 'none',
                       background: selectedAreaId === area.id ? 'var(--color-primary, #3b82f6)' : '#ffffff',
                       color: selectedAreaId === area.id ? '#ffffff' : '#475569',
                       fontWeight: 'bold',
+                      fontSize: '0.85rem',
                       boxShadow: selectedAreaId === area.id ? '0 4px 12px rgba(59, 130, 246, 0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
                       cursor: 'pointer',
                       whiteSpace: 'nowrap',
-                      transition: 'all 0.2s'
+                      transition: 'all 0.2s',
+                      flexShrink: 0
                     }}
                     onClick={() => setSelectedAreaId(area.id)}
                   >
@@ -938,7 +933,7 @@ export default function PosPage() {
                 ))}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16, maxHeight: '50vh', overflowY: 'auto', paddingRight: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 12, paddingRight: 4 }}>
                 {filteredMesas.map((mesa: any) => {
                   const status = getEstadoMesaLabel(mesa.idEstadoMesa || 1);
                   const isSelected = selectedMesa?.id === mesa.id;

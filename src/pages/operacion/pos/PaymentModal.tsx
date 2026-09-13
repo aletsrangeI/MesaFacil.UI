@@ -183,23 +183,26 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
       <div 
         className="pos-modal-content" 
         style={{ 
-          width: '90%',
-          maxWidth: 550, 
+          width: '95%',
+          maxWidth: 540, 
+          maxHeight: '90dvh',
           padding: 0, 
           overflow: 'hidden',
           borderRadius: 'var(--radius-lg, 20px)',
-          boxShadow: 'var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08))',
-          backgroundColor: 'var(--color-bg, #FFFFFF)'
+          boxShadow: 'var(--shadow-lg, 0 10px 25px rgba(0,0,0,0.15))',
+          backgroundColor: 'var(--color-surface, #FFFFFF)',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
-        <div style={{ padding: 'var(--space-6, 24px)', borderBottom: '1px solid var(--color-border, rgba(0,0,0,0.12))', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ margin: 0, color: 'var(--color-text, #1F1F1F)', fontFamily: 'var(--font-h2)' }}>Cobrar Pedido #{idPedido}</h2>
-          <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--color-text-muted, #6B7280)', display: 'flex', alignItems: 'center' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border, rgba(0,0,0,0.12))', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-text, #1F1F1F)', fontFamily: 'var(--font-h2)' }}>Cobrar Pedido #{idPedido}</h2>
+          <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--color-text-muted, #6B7280)', display: 'flex', alignItems: 'center', padding: '6px' }}>
             <X size={22} />
           </button>
         </div>
         
-        <div style={{ padding: 'var(--space-6, 24px)' }}>
+        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1, minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
           {isGenerating || !cuenta ? (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted, #6B7280)' }}>Calculando totales...</div>
           ) : (
@@ -369,29 +372,41 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
                   style={{ width: '100%', boxSizing: 'border-box', padding: 'var(--space-3, 12px)', borderRadius: 'var(--radius-md, 12px)', border: '1px solid var(--color-border, rgba(0,0,0,0.12))', color: 'var(--color-text, #1F1F1F)', outlineColor: 'var(--color-primary, #D64545)' }}
                 />
               </div>
-
-              <button 
-                onClick={handlePay}
-                disabled={isPaying || !montoRecibido || montoActual <= 0}
-                style={{
-                  background: 'var(--color-primary, #D64545)',
-                  color: 'white',
-                  padding: '16px',
-                  border: 'none',
-                  borderRadius: 'var(--radius-md, 12px)',
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  cursor: (isPaying || !montoRecibido || montoActual <= 0) ? 'not-allowed' : 'pointer',
-                  opacity: (isPaying || !montoRecibido || montoActual <= 0) ? 0.6 : 1,
-                  marginTop: 'var(--space-2, 8px)',
-                  boxShadow: 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.06))'
-                }}
-              >
-                {isPaying ? 'Procesando...' : (montoActual >= (saldoActual - 0.01) ? 'Confirmar Pago y Liquidar' : `Registrar Abono ($${montoActual.toFixed(2)})`)}
-              </button>
             </div>
           )}
         </div>
+
+        {/* Modal Footer con botón de pago siempre visible */}
+        {cuenta && !isGenerating && (
+          <div style={{
+            padding: '12px 20px',
+            borderTop: '1px solid var(--color-border, rgba(0,0,0,0.12))',
+            background: 'var(--color-surface, #FFFFFF)',
+            flexShrink: 0,
+            paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))'
+          }}>
+            <button 
+              onClick={handlePay}
+              disabled={isPaying || !montoRecibido || montoActual <= 0}
+              style={{
+                width: '100%',
+                background: 'var(--color-primary, #D64545)',
+                color: 'white',
+                padding: '14px',
+                border: 'none',
+                borderRadius: 'var(--radius-md, 12px)',
+                fontSize: '1.05rem',
+                fontWeight: 700,
+                cursor: (isPaying || !montoRecibido || montoActual <= 0) ? 'not-allowed' : 'pointer',
+                opacity: (isPaying || !montoRecibido || montoActual <= 0) ? 0.6 : 1,
+                boxShadow: '0 4px 12px rgba(214, 69, 69, 0.25)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {isPaying ? 'Procesando...' : (montoActual >= (saldoActual - 0.01) ? 'Confirmar Pago y Liquidar' : `Registrar Abono ($${montoActual.toFixed(2)})`)}
+            </button>
+          </div>
+        )}
       </div>
 
       <ThermalTicketModal
