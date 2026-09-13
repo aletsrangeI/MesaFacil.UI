@@ -112,7 +112,7 @@ export default function ImportadorMenuWizard({
         modo,
         sucursalId: Number(sucursalId),
       }).unwrap();
-      setPreview(resp);
+      setPreview(resp.data);
       setPaso(2);
     } catch (err: any) {
       addToast({
@@ -131,7 +131,10 @@ export default function ImportadorMenuWizard({
         sucursalId: Number(sucursalId),
       }).unwrap();
       setResultado("exito");
-      setMensajeResultado(resp?.message || "Importación completada correctamente.");
+      setMensajeResultado(
+        resp?.message ||
+          `Importación completada: ${resp.data.productosCreados} productos creados, ${resp.data.productosActualizados} actualizados.`
+      );
       onImportacionCompletada?.();
     } catch (err: any) {
       setResultado("error");

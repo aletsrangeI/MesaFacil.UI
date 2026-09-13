@@ -36,13 +36,21 @@ export interface ErrorImportacion {
   mensaje: string;
 }
 
+export interface ApiResponse<T> {
+  isSuccess: boolean;
+  data: T;
+  message?: string;
+}
+
 export interface PreviewImportacionMenuResponse {
   tokenPreview: string;
   totalRenglones: number;
   categoriasNuevas: number;
+  categoriasExistentes: number;
   productosNuevos: number;
   productosActualizar: number;
   gruposModificadoresDetectados: number;
+  opcionesModificadoresDetectadas: number;
   esValido: boolean;
   errores: ErrorImportacion[];
   advertencias: AdvertenciaImportacion[];
@@ -61,24 +69,25 @@ export interface ConfirmarImportacionMenuRequest {
 }
 
 export interface ConfirmarImportacionMenuResponse {
-  isSuccess: boolean;
-  message?: string;
-  categoriasCreadas?: number;
-  productosCreados?: number;
-  productosActualizados?: number;
+  categoriasCreadas: number;
+  productosCreados: number;
+  productosActualizados: number;
+  productosDesactivados: number;
+  gruposModificadoresCreados: number;
+  opcionesModificadoresCreadas: number;
 }
 
 export const importadorMenuApi = api.injectEndpoints({
   endpoints: (build) => ({
     previewImportacionMenu: build.mutation<
-      PreviewImportacionMenuResponse,
+      ApiResponse<PreviewImportacionMenuResponse>,
       PreviewImportacionMenuRequest
     >({
       query: ({ archivo, modo, sucursalId }) => {
         const formData = new FormData();
-        formData.append('Archivo', archivo);
-        formData.append('Modo', modo);
-        formData.append('SucursalId', String(sucursalId));
+        formData.append('archivo', archivo);
+        formData.append('modo', modo);
+        formData.append('sucursalId', String(sucursalId));
         return {
           url: '/api/catalogos/importar-menu/preview',
           method: 'POST',
@@ -88,7 +97,7 @@ export const importadorMenuApi = api.injectEndpoints({
     }),
 
     confirmarImportacionMenu: build.mutation<
-      ConfirmarImportacionMenuResponse,
+      ApiResponse<ConfirmarImportacionMenuResponse>,
       ConfirmarImportacionMenuRequest
     >({
       query: (body) => ({
