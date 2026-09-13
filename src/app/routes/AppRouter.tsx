@@ -38,6 +38,7 @@ import CxPPage from "../../pages/cxp";
 import PlanesPage from "../../pages/planes";
 import FacturacionPage from "../../pages/facturacion";
 import AutofacturacionPage from "../../pages/public/AutofacturacionPage";
+import ComanderoPage from "../../pages/operacion/comandero";
 
 import { useEffect } from "react";
 import { useToast } from "../../components/ui/toast";
@@ -88,6 +89,20 @@ export default function AppRouter() {
       {/* Portal Público de Autofacturación (spec 020) — sin login, standalone */}
       <Route path="/facturar" element={<AutofacturacionPage />} />
       <Route path="/facturar/:ticketId" element={<AutofacturacionPage />} />
+
+      {/* Modo Comandero Móvil (spec 025) — requiere sesión (PrivateRoute) pero se renderiza
+          FUERA de <AppLayout> a propósito: es una vista a pantalla completa, sin el sidebar
+          denso del backoffice, pensada para tablets de 8.4"/smartphones de meseros. */}
+      <Route
+        path="/operacion/comandero"
+        element={
+          <PrivateRoute>
+            <RequireAccess path="/operacion/comandero">
+              <ComanderoPage />
+            </RequireAccess>
+          </PrivateRoute>
+        }
+      />
 
       {/* Privado */}
       <Route

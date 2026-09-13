@@ -316,6 +316,9 @@ export const selectCanAccess = (path: string) => (s: { auth: AuthState }) => {
   if ((s.auth.roles?.includes("waiter") || s.auth.roles?.includes("cashier") || s.auth.roles?.includes("delivery")) && target === "/delivery") return true;
   if ((s.auth.roles?.includes("manager") || s.auth.roles?.includes("kitchen")) && (target.startsWith("/compras") || target.startsWith("/inventario"))) return true;
   if ((s.auth.roles?.includes("manager") || s.auth.roles?.includes("cashier")) && target.startsWith("/cxp")) return true;
+  // Spec 025: Modo Comandero Móvil — accesible para Mesero (waiter) y Gerente (manager) sin
+  // depender de que el backend ya tenga sembrado el acceso explícito en session.accesos.
+  if ((s.auth.roles?.includes("manager") || s.auth.roles?.includes("waiter")) && target.startsWith("/operacion/comandero")) return true;
   return list.some(a => norm(a) === target);
 };
 
