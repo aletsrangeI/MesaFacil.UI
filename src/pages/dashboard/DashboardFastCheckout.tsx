@@ -4,7 +4,7 @@ import Icon from '../../components/ui/icons/Icon';
 
 interface DashboardFastCheckoutProps {
   pedidosPorCobrar?: any[];
-  onCobrarPedido: (idPedido: number) => void;
+  onCobrarPedido: (idPedido: string) => void;
   ventasEfectivo?: number;
   ventasTarjeta?: number;
   ventasTransferencia?: number;
@@ -55,7 +55,7 @@ export const DashboardFastCheckout: React.FC<DashboardFastCheckoutProps> = ({
               <div key={pedido.id} className="dash-order-item">
                 <div className="dash-order-info">
                   <div className="dash-order-mesa">
-                    Orden #{pedido.id} • {pedido.idMesa ? `Mesa ${pedido.idMesa}` : 'Para Llevar / Mostrador'}
+                    Orden #{pedido.folioDiario ?? pedido.id} • {pedido.idMesa ? `Mesa ${pedido.idMesa}` : 'Para Llevar / Mostrador'}
                   </div>
                   <div className="dash-order-meta">
                     {pedido.personas || 1} personas • Abierto: {pedido.abiertoEn ? new Date(pedido.abiertoEn).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : 'Hoy'}

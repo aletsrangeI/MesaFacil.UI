@@ -98,8 +98,8 @@ export default function DashboardPage() {
   const [updateMesa] = useMesasUpdateAsyncMutation();
 
   // Estados de Modales
-  const [selectedPedidoToPay, setSelectedPedidoToPay] = useState<number | null>(null);
-  const [selectedPedidoPrecuenta, setSelectedPedidoPrecuenta] = useState<number | null>(null);
+  const [selectedPedidoToPay, setSelectedPedidoToPay] = useState<string | null>(null);
+  const [selectedPedidoPrecuenta, setSelectedPedidoPrecuenta] = useState<string | null>(null);
   const [showAperturaModal, setShowAperturaModal] = useState(false);
   const [showCorteModal, setShowCorteModal] = useState(false);
   const [showCorteXModal, setShowCorteXModal] = useState(false);

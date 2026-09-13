@@ -39,7 +39,7 @@ export interface PagoCuentaPorPagar {
   fechaPago: string;
   idMetodoPago: number;
   metodoPagoNombre: string;
-  idMovimientoCaja?: number;
+  idMovimientoCaja?: string;
   turnoUsuario?: string;
   referenciaBancaria?: string;
   comprobanteUrl?: string;

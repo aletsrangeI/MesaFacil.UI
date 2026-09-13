@@ -5,7 +5,7 @@ import { useGenerarCuentaMutation } from './PaymentModal';
 interface ThermalTicketModalProps {
   isOpen: boolean;
   onClose: () => void;
-  idPedido: number | null;
+  idPedido: string | null;
   tipo: 'pre-cuenta' | 'ticket-final';
   // En caso de que ya tengamos la cuenta cargada (ej. desde PaymentModal)
   cuentaData?: any;

@@ -44,7 +44,7 @@ const kdsApi = api.injectEndpoints({
       }),
       providesTags: ['TicketCocina', 'TicketDetalle']
     }),
-    changeTicketStatus: build.mutation<void, { id: number, status: number }>({
+    changeTicketStatus: build.mutation<void, { id: string, status: number }>({
       query: ({ id, status }) => ({
         url: `/api/TicketsCocina/ChangeTicketStatus/${id}/${status}`,
         method: 'PUT'
@@ -58,7 +58,7 @@ const kdsApi = api.injectEndpoints({
       }),
       invalidatesTags: ['TicketDetalle']
     }),
-    recuperarTicket: build.mutation<void, number>({
+    recuperarTicket: build.mutation<void, string>({
       query: (id) => ({
         url: `/api/TicketsCocina/RecuperarTicket/${id}`,
         method: 'PUT'

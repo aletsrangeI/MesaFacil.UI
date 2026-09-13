@@ -7,7 +7,7 @@ import { ThermalTicketModal } from './ThermalTicketModal';
 
 const paymentApi = api.injectEndpoints({
   endpoints: (build) => ({
-    generarCuenta: build.mutation<any, number>({
+    generarCuenta: build.mutation<any, string>({
       query: (idPedido) => ({
         url: `/api/Cuentas/Generar/${idPedido}`,
         method: 'POST'
@@ -43,7 +43,7 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
 
   const metodos = Array.isArray((metodosData as any)?.data) ? (metodosData as any).data : [];
 
-  const cargarCuenta = (id: number) => {
+  const cargarCuenta = (id: string) => {
     generarCuenta(id).unwrap()
       .then(res => {
         if (res?.isSuccess) {

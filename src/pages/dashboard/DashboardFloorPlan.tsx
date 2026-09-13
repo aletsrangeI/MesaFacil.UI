@@ -8,8 +8,8 @@ interface DashboardFloorPlanProps {
   areas?: any[];
   pedidosActivos?: any[];
   estadosMesa?: any[];
-  onCobrarPedido: (idPedido: number) => void;
-  onVerPrecuenta: (idPedido: number) => void;
+  onCobrarPedido: (idPedido: string) => void;
+  onVerPrecuenta: (idPedido: string) => void;
   onLiberarMesa: (mesa: any) => void;
 }
 
@@ -181,7 +181,7 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #64748b)', marginTop: 2 }}>
               Capacidad: {selectedMesaDetail.mesa.asientos} comensales
               {selectedMesaDetail.pedido && (
-                <span> • Orden #{selectedMesaDetail.pedido.id} activa</span>
+                <span> • Orden #{selectedMesaDetail.pedido.folioDiario ?? selectedMesaDetail.pedido.id} activa</span>
               )}
             </div>
           </div>

@@ -39,7 +39,7 @@ const posApi = api.injectEndpoints({
       query: (idMesa) => `/api/Pedidos/GetPedidoActivoByMesa/${idMesa}`,
       providesTags: ['Pedido']
     }),
-    agregarDetalles: build.mutation<any, { idPedido: number; detalles: any[] }>({
+    agregarDetalles: build.mutation<any, { idPedido: string; detalles: any[] }>({
       query: ({ idPedido, detalles }) => ({
         url: `/api/Pedidos/AgregarDetalles/${idPedido}`,
         method: 'POST',
@@ -47,7 +47,7 @@ const posApi = api.injectEndpoints({
       }),
       invalidatesTags: ['Pedido', 'Mesa']
     }),
-    cancelarDetalle: build.mutation<any, { idDetalle: number; motivo?: string }>({
+    cancelarDetalle: build.mutation<any, { idDetalle: string; motivo?: string }>({
       query: ({ idDetalle, motivo }) => ({
         url: `/api/Pedidos/CancelarDetalle/${idDetalle}${motivo ? `?motivo=${encodeURIComponent(motivo)}` : ''}`,
         method: 'PUT'
@@ -92,7 +92,7 @@ export default function PosPage() {
   const [modoRetomar, setModoRetomar] = useState(false);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [skipPedidoQuery, setSkipPedidoQuery] = useState(true);
-  const [paymentPedidoId, setPaymentPedidoId] = useState<number | null>(null);
+  const [paymentPedidoId, setPaymentPedidoId] = useState<string | null>(null);
   const [showCorteModal, setShowCorteModal] = useState(false);
   const [showMovimientoModal, setShowMovimientoModal] = useState(false);
   const [showCorteXModal, setShowCorteXModal] = useState(false);
