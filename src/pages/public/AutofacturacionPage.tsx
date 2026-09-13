@@ -29,7 +29,7 @@ export default function AutofacturacionPage() {
   const [generarFactura, { isLoading: isGenerando }] = useGenerarFacturaAutofacturaMutation();
 
   const [datos, setDatos] = useState<DatosFiscalesReceptor>(DATOS_FISCALES_VACIOS);
-  const [resultado, setResultado] = useState<{ facturaVentaId: number; uuid: string; urlXml: string; urlPdf: string } | null>(null);
+  const [resultado, setResultado] = useState<{ id: number; uuid: string | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const ticket = data?.data;
@@ -89,14 +89,10 @@ export default function AutofacturacionPage() {
         {puedeFacturar && !resultado && (
           <>
             <div style={ticketInfoStyle}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--color-text-muted)' }}>
-                <span>Fecha</span>
-                <span>{new Date(ticket!.fecha).toLocaleDateString()}</span>
-              </div>
-              {ticket!.folio && (
+              {ticket!.fechaPedido && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--color-text-muted)' }}>
-                  <span>Folio</span>
-                  <span>{ticket!.folio}</span>
+                  <span>Fecha</span>
+                  <span>{new Date(ticket!.fechaPedido).toLocaleDateString()}</span>
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-text)', marginTop: 6 }}>
@@ -146,13 +142,13 @@ export default function AutofacturacionPage() {
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
-                onClick={() => descargarXmlFactura(resultado.facturaVentaId)}
+                onClick={() => descargarXmlFactura(resultado.id)}
                 style={downloadBtnStyle}
               >
                 <FileText size={16} /> Descargar XML
               </button>
               <button
-                onClick={() => descargarPdfFactura(resultado.facturaVentaId)}
+                onClick={() => descargarPdfFactura(resultado.id)}
                 style={{ ...downloadBtnStyle, background: 'var(--color-primary, #D64545)', color: '#fff', borderColor: 'var(--color-primary, #D64545)' }}
               >
                 <Download size={16} /> Descargar PDF

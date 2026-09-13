@@ -169,7 +169,7 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
               }).unwrap();
               if (facturaRes?.isSuccess) {
                 addToast({
-                  message: `Factura CFDI generada (Folio ${facturaRes.data?.factura?.folio ?? ''})`,
+                  message: `Factura CFDI generada (Folio ${facturaRes.data?.folio ?? ''})`,
                   variant: 'success',
                 });
               } else {

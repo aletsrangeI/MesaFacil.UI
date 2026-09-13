@@ -10,9 +10,11 @@ import {
   Search,
   XCircle,
 } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import Container from '../../components/ui/layout/Container';
 import { useToast } from '../../components/ui/toast';
 import { Modal } from '../../components/modal/Modal';
+import { selectUserProfile } from '../../state/authSlice';
 import {
   useGetFacturasQuery,
   useGetBolsaTimbresQuery,
@@ -26,7 +28,11 @@ import {
 } from '../../services/facturacionApi';
 
 function BolsaTimbresWidget() {
-  const { data, isLoading, refetch, isFetching } = useGetBolsaTimbresQuery();
+  const { idEmpresa } = useSelector(selectUserProfile);
+  const { data, isLoading, refetch, isFetching } = useGetBolsaTimbresQuery(
+    { idEmpresa: idEmpresa ?? 0 },
+    { skip: !idEmpresa }
+  );
   const bolsa = data?.data;
 
   const disponibles = bolsa?.timbresDisponibles ?? 0;
@@ -133,12 +139,17 @@ export default function FacturacionPage() {
   const [motivoSat, setMotivoSat] = useState<MotivoCancelacionSat>('02');
 
   const { addToast } = useToast();
+  const { idEmpresa } = useSelector(selectUserProfile);
 
-  const { data, isLoading, isFetching, refetch } = useGetFacturasQuery({
-    fechaInicio: fechaInicio ? `${fechaInicio}T00:00:00Z` : undefined,
-    fechaFin: fechaFin ? `${fechaFin}T23:59:59Z` : undefined,
-    rfc: rfc || undefined,
-  });
+  const { data, isLoading, isFetching, refetch } = useGetFacturasQuery(
+    {
+      idEmpresa: idEmpresa ?? 0,
+      fechaInicio: fechaInicio ? `${fechaInicio}T00:00:00Z` : undefined,
+      fechaFin: fechaFin ? `${fechaFin}T23:59:59Z` : undefined,
+      rfc: rfc || undefined,
+    },
+    { skip: !idEmpresa }
+  );
 
   const [cancelarFactura, { isLoading: isCancelando }] = useCancelarFacturaMutation();
   const [enviarCorreo] = useEnviarCorreoMutation();

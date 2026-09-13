@@ -105,15 +105,9 @@ export interface FacturaVentaItem {
   ticketAutofacturaGuid?: string;
 }
 
-export interface TimbrarPedidoResponseData {
-  factura: FacturaVentaItem;
-  urlXml?: string;
-  urlPdf?: string;
-}
-
 export interface CancelarFacturaRequest {
   motivoSat: MotivoCancelacionSat;
-  folioSustitucion?: string;
+  folioSustitucionUUID?: string;
 }
 
 export interface EnviarCorreoRequest {
@@ -121,23 +115,24 @@ export interface EnviarCorreoRequest {
 }
 
 export interface BolsaTimbresConsumo {
-  id: number;
-  fecha: string;
-  tipo: 'Compra' | 'Consumo';
+  tipo: 'Compra' | 'Consumo' | string;
   cantidad: number;
-  facturaVentaId?: number;
+  saldoResultante: number;
+  idFacturaVenta?: number;
   descripcion?: string;
+  fechaMovimiento: string;
 }
 
 export interface BolsaTimbresData {
-  empresaId: number;
+  idEmpresa: number;
   timbresDisponibles: number;
   timbresConsumidos: number;
   ultimaRecargaFecha?: string;
-  historial: BolsaTimbresConsumo[];
+  historialReciente: BolsaTimbresConsumo[];
 }
 
 export interface GetFacturasParams {
+  idEmpresa: number;
   fechaInicio?: string;
   fechaFin?: string;
   rfc?: string;
@@ -145,67 +140,60 @@ export interface GetFacturasParams {
 
 /** === Portal público de autofacturación (sin auth) === */
 export interface ValidarTicketData {
-  pedidoId: string;
-  ticketGuid: string;
-  total: number;
-  fecha: string;
-  folio?: string;
+  existePedido: boolean;
+  pedidoPagado: boolean;
   yaFacturado: boolean;
   vigente: boolean;
-  nombreSucursal?: string;
+  total: number;
+  fechaPedido?: string;
+  ticketGuid: string;
+  mensajeError?: string;
 }
 
 export interface GenerarFacturaAutofacturaRequest extends DatosFiscalesReceptor {
   ticketGuid: string;
 }
 
-export interface GenerarFacturaAutofacturaData {
-  facturaVentaId: number;
-  uuid: string;
-  urlXml: string;
-  urlPdf: string;
-}
-
 export const facturacionApi = api.injectEndpoints({
   endpoints: (build) => ({
     // ---- POS / Administración (requiere auth) ----
-    timbrarPedido: build.mutation<ApiResponse<TimbrarPedidoResponseData>, TimbrarPedidoRequest>({
+    timbrarPedido: build.mutation<ApiResponse<FacturaVentaItem>, TimbrarPedidoRequest>({
       query: (body) => ({
-        url: '/api/FacturasVenta/timbrar-pedido',
+        url: '/api/facturas-venta/timbrar-pedido',
         method: 'POST',
         body,
       }),
       invalidatesTags: ['FacturaVenta', 'BolsaTimbres', 'Pedido'],
     }),
 
-    getFacturas: build.query<ApiResponse<FacturaVentaItem[]>, GetFacturasParams | void>({
+    getFacturas: build.query<ApiResponse<FacturaVentaItem[]>, GetFacturasParams>({
       query: (params) => ({
-        url: '/api/FacturasVenta',
-        params: params ?? undefined,
+        url: '/api/facturas-venta',
+        params,
       }),
       providesTags: ['FacturaVenta'],
     }),
 
     enviarCorreo: build.mutation<ApiResponse<null>, { id: number } & EnviarCorreoRequest>({
-      query: ({ id, ...body }) => ({
-        url: `/api/FacturasVenta/${id}/enviar-correo`,
+      query: ({ id }) => ({
+        url: `/api/facturas-venta/${id}/enviar-correo`,
         method: 'POST',
-        body,
       }),
     }),
 
     cancelarFactura: build.mutation<ApiResponse<FacturaVentaItem>, { id: number } & CancelarFacturaRequest>({
       query: ({ id, ...body }) => ({
-        url: `/api/FacturasVenta/${id}/cancelar`,
+        url: `/api/facturas-venta/${id}/cancelar`,
         method: 'POST',
         body,
       }),
       invalidatesTags: ['FacturaVenta'],
     }),
 
-    getBolsaTimbres: build.query<ApiResponse<BolsaTimbresData>, void>({
-      query: () => ({
-        url: '/api/FacturasVenta/bolsa-timbres',
+    getBolsaTimbres: build.query<ApiResponse<BolsaTimbresData>, { idEmpresa: number }>({
+      query: ({ idEmpresa }) => ({
+        url: '/api/facturas-venta/bolsa-timbres',
+        params: { idEmpresa },
       }),
       providesTags: ['BolsaTimbres'],
     }),
@@ -213,16 +201,16 @@ export const facturacionApi = api.injectEndpoints({
     // ---- Portal público de Autofacturación (sin auth) ----
     validarTicket: build.query<ApiResponse<ValidarTicketData>, string>({
       query: (guid) => ({
-        url: `/api/Autofacturacion/validar-ticket/${guid}`,
+        url: `/api/autofacturacion/validar-ticket/${guid}`,
       }),
     }),
 
     generarFacturaAutofactura: build.mutation<
-      ApiResponse<GenerarFacturaAutofacturaData>,
+      ApiResponse<FacturaVentaItem>,
       GenerarFacturaAutofacturaRequest
     >({
       query: (body) => ({
-        url: '/api/Autofacturacion/generar-factura',
+        url: '/api/autofacturacion/generar-factura',
         method: 'POST',
         body,
       }),
@@ -277,14 +265,14 @@ export async function descargarArchivoFactura(url: string, nombreArchivo: string
 
 export function descargarXmlFactura(facturaId: number, folio?: string) {
   return descargarArchivoFactura(
-    `/api/FacturasVenta/${facturaId}/descargar-xml`,
+    `/api/facturas-venta/${facturaId}/descargar-xml`,
     `factura-${folio || facturaId}.xml`
   );
 }
 
 export function descargarPdfFactura(facturaId: number, folio?: string) {
   return descargarArchivoFactura(
-    `/api/FacturasVenta/${facturaId}/descargar-pdf`,
+    `/api/facturas-venta/${facturaId}/descargar-pdf`,
     `factura-${folio || facturaId}.pdf`
   );
 }
