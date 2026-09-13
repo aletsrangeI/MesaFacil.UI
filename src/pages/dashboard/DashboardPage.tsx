@@ -21,6 +21,7 @@ import { DashboardKpiCards } from "./DashboardKpiCards";
 import { DashboardFloorPlan } from "./DashboardFloorPlan";
 import { DashboardKdsPulse } from "./DashboardKdsPulse";
 import { DashboardFastCheckout } from "./DashboardFastCheckout";
+import { DashboardCancelacionesAlert } from "./DashboardCancelacionesAlert";
 import "./dashboard.css";
 
 // Modales Operativos
@@ -247,6 +248,9 @@ export default function DashboardPage() {
               pedidosActivos={pedidos}
               topPlatillos={topPlatillos}
             />
+
+            {/* Spec 024: Monitor y Alerta de Cancelaciones Sospechosas (umbral 2%) */}
+            <DashboardCancelacionesAlert idTurno={resumenTurno?.idTurno ?? null} />
 
             <DashboardFastCheckout
               pedidosPorCobrar={pedidosPorCobrar}

@@ -31,6 +31,7 @@ import { CorteXModal } from "./CorteXModal";
 import { AperturaTurnoModal } from "./AperturaTurnoModal";
 import { ThermalTicketModal } from "./ThermalTicketModal";
 import { emptySplitApi as api } from '../../../services/baseApi';
+import { SupervisorPinModal } from "../../../components/seguridad/SupervisorPinModal";
 
 // ─── POS-specific injected endpoints ────────────────────────────────────────
 const posApi = api.injectEndpoints({
@@ -53,11 +54,28 @@ const posApi = api.injectEndpoints({
         method: 'PUT'
       }),
       invalidatesTags: ['Pedido']
+    }),
+    // Spec 024, criterio de aceptación #1: cuando el PedidoDetalle ya fue enviado a cocina (tiene
+    // un TicketDetalle asociado), el backend (WebApi/Modules/Endpoints/PedidoDetalleEndpoints.cs,
+    // ruta DELETE /api/pedidodetalle/delete-async/{id}) exige el header "X-Authorization-Token"
+    // con el JWT efímero de 60s emitido por /api/seguridad/autorizar-supervisor-pin. Sin ticket
+    // asociado el mismo endpoint funciona igual que un borrado normal (sin header).
+    cancelarDetalleProtegido: build.mutation<any, { idDetalle: string; motivo?: string; tokenAutorizacion: string }>({
+      query: ({ idDetalle, motivo, tokenAutorizacion }) => ({
+        url: `/api/pedidodetalle/delete-async/${idDetalle}${motivo ? `?motivo=${encodeURIComponent(motivo)}` : ''}`,
+        method: 'DELETE',
+        headers: { 'X-Authorization-Token': tokenAutorizacion }
+      }),
+      invalidatesTags: ['Pedido', 'PedidoDetalle', 'TicketCocina', 'TicketDetalle']
     })
   })
 });
 
-const { useGetPedidoActivoByMesaQuery, useAgregarDetallesMutation, useCancelarDetalleMutation } = posApi;
+const {
+  useGetPedidoActivoByMesaQuery,
+  useAgregarDetallesMutation,
+  useCancelarDetalleProtegidoMutation
+} = posApi;
 
 export default function PosPage() {
   const profile = useSelector(selectUserProfile);
@@ -107,7 +125,10 @@ export default function PosPage() {
     { skip: skipPedidoQuery || !selectedMesa?.id }
   );
   const [agregarDetalles, { isLoading: isLoadingAgregar }] = useAgregarDetallesMutation();
-  const [cancelarDetalle] = useCancelarDetalleMutation();
+  const [cancelarDetalleProtegido] = useCancelarDetalleProtegidoMutation();
+
+  // ─── Spec 024: Candado de Supervisor para cancelación de platillos en cocina ───────────────
+  const [pinModalCancelacion, setPinModalCancelacion] = useState<{ idPedido: string; idDetalle: string; productoNombre: string } | null>(null);
 
   
   const rawOrderTypes = Array.isArray((catTiposData as any)?.data) ? (catTiposData as any).data : [];
@@ -754,25 +775,20 @@ export default function PosPage() {
                       {!d.cancelado && (
                         <button
                           onClick={async () => {
+                            // Spec 024, Flujo 1: todo ítem en esta lista ("En cocina") ya fue
+                            // persistido y AgregarDetalles/InsertConDetalles ya le generó un
+                            // TicketDetalle (comanda enviada a cocina) — por lo tanto SIEMPRE
+                            // requiere el candado de PIN de supervisor antes de poder cancelarse
+                            // (a diferencia de los ítems locales del carrito aún no enviados, que
+                            // se quitan sin PIN vía handleRemoveFromCart, sin llamada al backend).
                             const ok = await confirm({
-                              title: "¿Cancelar ítem?",
-                              message: `¿Estás seguro de cancelar "${d.productoNombre}"?`,
-                              confirmLabel: "Sí, cancelar",
+                              title: "¿Cancelar platillo enviado a cocina?",
+                              message: `"${d.productoNombre}" ya fue enviado a cocina. Se requerirá el PIN de un supervisor para cancelarlo.`,
+                              confirmLabel: "Continuar",
                               variant: "danger"
                             });
                             if (ok) {
-                              try {
-                                await cancelarDetalle({ idDetalle: d.id }).unwrap();
-                                setPedidoActivo((prev: any) => ({
-                                  ...prev,
-                                  detalles: prev.detalles.map((item: any) =>
-                                    item.id === d.id ? { ...item, cancelado: true } : item
-                                  )
-                                }));
-                                addToast({ message: 'Ítem cancelado', variant: 'success' });
-                              } catch {
-                                addToast({ message: 'Error al cancelar', variant: 'error' });
-                              }
+                              setPinModalCancelacion({ idPedido: pedidoActivo.id, idDetalle: d.id, productoNombre: d.productoNombre });
                             }
                           }}
                           style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', borderRadius: '4px', padding: '3px 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
@@ -853,6 +869,35 @@ export default function PosPage() {
           setPaymentPedidoId(null);
           setSelectedMesa(null);
           setPedidoActivo(null);
+        }}
+      />
+
+      {/* Spec 024: Candado de Supervisor para cancelar platillos ya enviados a cocina */}
+      <SupervisorPinModal
+        isOpen={!!pinModalCancelacion}
+        onClose={() => setPinModalCancelacion(null)}
+        accionProtegida="CancelarPlatilloCocina"
+        idPedido={pinModalCancelacion?.idPedido ?? ''}
+        idPedidoDetalle={pinModalCancelacion?.idDetalle ?? null}
+        titulo="Cancelar Platillo en Cocina"
+        descripcion={pinModalCancelacion ? `"${pinModalCancelacion.productoNombre}" ya fue enviado a cocina` : undefined}
+        onAutorizado={async (tokenAutorizacion, motivo) => {
+          if (!pinModalCancelacion) return;
+          const { idDetalle, productoNombre } = pinModalCancelacion;
+          try {
+            await cancelarDetalleProtegido({ idDetalle, motivo, tokenAutorizacion }).unwrap();
+            setPedidoActivo((prev: any) => ({
+              ...prev,
+              detalles: prev.detalles.map((item: any) =>
+                item.id === idDetalle ? { ...item, cancelado: true, motivoCancelacion: motivo } : item
+              )
+            }));
+            addToast({ message: `"${productoNombre}" cancelado con autorización de supervisor`, variant: 'success' });
+          } catch {
+            addToast({ message: 'Error al cancelar el platillo (token expirado o rechazado por el servidor)', variant: 'error' });
+          } finally {
+            setPinModalCancelacion(null);
+          }
         }}
       />
 
