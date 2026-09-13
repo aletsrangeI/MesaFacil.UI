@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "../../../components/ui/button/Button";
 import Icon from "../../../components/ui/icons/Icon";
@@ -6,9 +6,11 @@ import Container from "../../../components/ui/layout/Container";
 import { FormGenerator } from "../../../forms/FormGenerator";
 import { mesaFacilFields } from "../../../components/ui/adapters";
 import { DataTable } from "../../../components/data-table/DataTable";
+import { QRDevicePairingModal } from "../../../components/modal/QRDevicePairingModal";
 import { useSucursal } from "./useSucursal";
 
 export default function SucursalesPage() {
+  const [showPairingModal, setShowPairingModal] = useState(false);
   const {
     sucursales,
     isLoadingList,
@@ -47,14 +49,28 @@ export default function SucursalesPage() {
             Configura las distintas sucursales del restaurante.
           </p>
         </div>
-        <Button
-          variant="primary"
-          leftIcon={<Icon name="Plus" />}
-          onClick={() => openModal()}
-        >
-          Crear Sucursal
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            variant="secondary"
+            leftIcon={<Icon name="QrCode" />}
+            onClick={() => setShowPairingModal(true)}
+          >
+            Emparejar dispositivo
+          </Button>
+          <Button
+            variant="primary"
+            leftIcon={<Icon name="Plus" />}
+            onClick={() => openModal()}
+          >
+            Crear Sucursal
+          </Button>
+        </div>
       </header>
+
+      <QRDevicePairingModal
+        open={showPairingModal}
+        onClose={() => setShowPairingModal(false)}
+      />
 
       <div>
         <DataTable

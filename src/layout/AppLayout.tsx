@@ -13,6 +13,7 @@ import {
 import { useAppDispatch } from "../app/hooks";
 import { logout } from "../state/authSlice";
 import Icon from "../components/ui/icons/Icon";
+import { NetworkStatusBanner } from "../components/ui/network-status-banner/NetworkStatusBanner";
 
 import "../styles/tokens.css";
 import "../components/navigation/sidebar/sidebar.css";
@@ -148,6 +149,7 @@ export default function AppLayout({
       </aside>
 
       <div className="app-shell__main">
+        <NetworkStatusBanner />
         {showTopbar && !isFlushRoute &&
           (topbar ?? (
             <Topbar
