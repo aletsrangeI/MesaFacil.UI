@@ -34,6 +34,8 @@ import DeliveryHistorialPage from "../../pages/operacion/delivery/historial";
 import InventarioPage from "../../pages/inventario";
 import ComprasPage from "../../pages/compras";
 import CxPPage from "../../pages/cxp";
+import FacturacionPage from "../../pages/facturacion";
+import AutofacturacionPage from "../../pages/public/AutofacturacionPage";
 
 import { useEffect } from "react";
 import { useToast } from "../../components/ui/toast";
@@ -80,6 +82,10 @@ export default function AppRouter() {
       {/* Público */}
       <Route path="/login" element={<RegistroUsuario />} />
       <Route path="/login-pin" element={<LoginPin />} />
+
+      {/* Portal Público de Autofacturación (spec 020) — sin login, standalone */}
+      <Route path="/facturar" element={<AutofacturacionPage />} />
+      <Route path="/facturar/:ticketId" element={<AutofacturacionPage />} />
 
       {/* Privado */}
       <Route
@@ -443,6 +449,14 @@ export default function AppRouter() {
           element={
             <RequireAccess path="/cxp">
               <CxPPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/facturacion"
+          element={
+            <RequireAccess path="/facturacion">
+              <FacturacionPage />
             </RequireAccess>
           }
         />
