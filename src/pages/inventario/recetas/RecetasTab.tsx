@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   ChefHat,
   Search,
@@ -25,6 +26,7 @@ interface RecetasTabProps {
 
 export const RecetasTab: React.FC<RecetasTabProps> = ({ insumos, unidadesMedida }) => {
   const { addToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [subTab, setSubTab] = useState<"todos" | "platillos" | "subrecetas">("todos");
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,6 +35,44 @@ export const RecetasTab: React.FC<RecetasTabProps> = ({ insumos, unidadesMedida 
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [recetaSeleccionada, setRecetaSeleccionada] = useState<Receta | null>(null);
   const [modoStudio, setModoStudio] = useState<"platillo" | "subreceta">("platillo");
+
+  const [initialStudioParams, setInitialStudioParams] = useState<{
+    productoId?: number;
+    varianteId?: number;
+    precio?: number;
+    nombre?: string;
+  }>({});
+
+  // Auto-apertura si viene redirigido desde el Wizard de Platillos (Spec 026)
+  useEffect(() => {
+    const openStudioParam = searchParams.get("openStudio") === "1" || searchParams.get("studio") === "1";
+    const productoIdParam = searchParams.get("productoId") ? Number(searchParams.get("productoId")) : undefined;
+    const varianteIdParam = searchParams.get("varianteId") ? Number(searchParams.get("varianteId")) : undefined;
+    const precioParam = searchParams.get("precio") ? Number(searchParams.get("precio")) : undefined;
+    const nombreParam = searchParams.get("nombre") || undefined;
+
+    if (openStudioParam || productoIdParam) {
+      setRecetaSeleccionada(null);
+      setModoStudio("platillo");
+      setInitialStudioParams({
+        productoId: productoIdParam,
+        varianteId: varianteIdParam,
+        precio: precioParam,
+        nombre: nombreParam,
+      });
+      setIsStudioOpen(true);
+
+      // Limpiar parámetros para no reabrir en refrescos posteriores
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("openStudio");
+      newParams.delete("studio");
+      newParams.delete("productoId");
+      newParams.delete("varianteId");
+      newParams.delete("precio");
+      newParams.delete("nombre");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Queries
   const { data: recetas = [], isLoading, refetch } = useGetRecetasQuery();
@@ -337,12 +377,19 @@ export const RecetasTab: React.FC<RecetasTabProps> = ({ insumos, unidadesMedida 
       {/* Modal Recipe Studio */}
       <RecipeStudioModal
         isOpen={isStudioOpen}
-        onClose={() => setIsStudioOpen(false)}
+        onClose={() => {
+          setIsStudioOpen(false);
+          setInitialStudioParams({});
+        }}
         recetaEditar={recetaSeleccionada}
         modoInicial={modoStudio}
         insumos={insumos}
         unidadesMedida={unidadesMedida}
         subRecetas={subRecetas}
+        initialProductoId={initialStudioParams.productoId}
+        initialVarianteId={initialStudioParams.varianteId}
+        initialPrecioVenta={initialStudioParams.precio}
+        initialNombre={initialStudioParams.nombre}
         onSaved={() => {
           refetch();
           refetchSubs();

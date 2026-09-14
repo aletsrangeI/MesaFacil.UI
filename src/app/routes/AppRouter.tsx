@@ -470,6 +470,14 @@ export default function AppRouter() {
           }
         />
         <Route
+          path="/inventario/recetas"
+          element={
+            <RequireAccess path="/inventario">
+              <InventarioPage />
+            </RequireAccess>
+          }
+        />
+        <Route
           path="/compras"
           element={
             <RequireAccess path="/compras">

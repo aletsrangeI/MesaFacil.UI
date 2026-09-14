@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../components/ui/button/Button";
 import { useSucursalesGetAllQuery } from "../../services/generated/api";
 import {
@@ -35,19 +35,27 @@ export type InventarioTabKey =
 
 export default function InventarioPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isRecetasPath = location.pathname.endsWith("/recetas");
   const tabFromUrl = searchParams.get("tab") as InventarioTabKey | null;
   const validTabs: InventarioTabKey[] = ["existencias", "recetas", "insumos", "kardex", "traspasos", "conteo"];
 
-  const [activeTab, setActiveTab] = useState<InventarioTabKey>(
-    tabFromUrl && validTabs.includes(tabFromUrl) ? tabFromUrl : "existencias"
-  );
+  const resolvedInitialTab = (): InventarioTabKey => {
+    if (tabFromUrl && validTabs.includes(tabFromUrl)) return tabFromUrl;
+    if (isRecetasPath) return "recetas";
+    return "existencias";
+  };
+
+  const [activeTab, setActiveTab] = useState<InventarioTabKey>(resolvedInitialTab);
 
   useEffect(() => {
     if (tabFromUrl && validTabs.includes(tabFromUrl) && tabFromUrl !== activeTab) {
       setActiveTab(tabFromUrl);
+    } else if (isRecetasPath && activeTab !== "recetas") {
+      setActiveTab("recetas");
     }
-  }, [tabFromUrl]);
+  }, [tabFromUrl, isRecetasPath]);
 
   const handleTabChange = (key: InventarioTabKey) => {
     setActiveTab(key);

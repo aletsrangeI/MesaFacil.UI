@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   UtensilsCrossed,
   Plus,
@@ -52,6 +52,28 @@ export const PlatilloWizardModal: React.FC<PlatilloWizardModalProps> = ({
     { nombre: "Familiar", codigo: "", precioVenta: 180, esDefault: false },
   ]);
 
+  // Sincronizar y reiniciar formulario al abrir
+  useEffect(() => {
+    if (isOpen) {
+      setNombre("");
+      setDescripcion("");
+      setCodigo("");
+      if (categorias.length > 0) {
+        setIdCategoria(categorias[0].id);
+      }
+      if (menus.length > 0) {
+        setIdMenu(menus[0].id);
+      }
+      setIdEstacionCocina(undefined);
+      setTieneVariantes(false);
+      setPrecioVenta(100);
+      setVariantes([
+        { nombre: "Individual", codigo: "", precioVenta: 100, esDefault: true },
+        { nombre: "Familiar", codigo: "", precioVenta: 180, esDefault: false },
+      ]);
+    }
+  }, [isOpen, categorias, menus]);
+
   if (!isOpen) return null;
 
   const handleAddVariante = () => {
@@ -104,15 +126,21 @@ export const PlatilloWizardModal: React.FC<PlatilloWizardModalProps> = ({
       return;
     }
 
-    if (!tieneVariantes && (precioVenta === undefined || precioVenta < 0)) {
-      addToast({ message: "El precio de venta debe ser mayor o igual a 0.", variant: "error" });
+    const precioNum = Number(precioVenta);
+    if (!tieneVariantes && (isNaN(precioNum) || precioNum <= 0)) {
+      addToast({ message: "El precio de venta debe ser mayor a $0.00.", variant: "error" });
       return;
     }
 
     if (tieneVariantes) {
-      const variantesInvalidas = variantes.some((v) => !v.nombre.trim() || v.precioVenta < 0);
+      const variantesInvalidas = variantes.some(
+        (v) => !v.nombre.trim() || isNaN(v.precioVenta) || v.precioVenta <= 0
+      );
       if (variantesInvalidas) {
-        addToast({ message: "Verifica que todas las variantes tengan nombre y precio válido.", variant: "error" });
+        addToast({
+          message: "Verifica que todas las variantes tengan nombre y un precio mayor a $0.00.",
+          variant: "error",
+        });
         return;
       }
     }
@@ -126,7 +154,7 @@ export const PlatilloWizardModal: React.FC<PlatilloWizardModalProps> = ({
         idMenu: Number(idMenu) || (menus[0]?.id ?? 1),
         idEstacionCocina: idEstacionCocina ? Number(idEstacionCocina) : undefined,
         tieneVariantes,
-        precioVenta: !tieneVariantes ? Number(precioVenta) : undefined,
+        precioVenta: !tieneVariantes ? (precioNum > 0 ? precioNum : 100) : undefined,
         variantes: tieneVariantes ? variantes : undefined,
       };
 

@@ -191,10 +191,12 @@ export default function ProductosPage() {
       <PlatilloWizardModal
         isOpen={isWizardOpen}
         onClose={() => setIsWizardOpen(false)}
-        onCreated={(_result, abrirStudio) => {
+        onCreated={(result, abrirStudio) => {
           refetch();
           if (abrirStudio) {
-            navigate("/inventario/recetas");
+            navigate(
+              `/inventario/recetas?tab=recetas&openStudio=1&productoId=${result.idProducto}&varianteId=${result.idVarianteDefault}&precio=${result.precioVentaDefault}&nombre=${encodeURIComponent(result.nombre)}`
+            );
           }
         }}
         categorias={dataSources.categorias || []}

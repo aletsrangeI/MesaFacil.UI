@@ -41,6 +41,10 @@ interface RecipeStudioModalProps {
   unidadesMedida: UnidadMedida[];
   subRecetas: SubRecetaSimple[];
   onSaved?: () => void;
+  initialProductoId?: number;
+  initialVarianteId?: number;
+  initialPrecioVenta?: number;
+  initialNombre?: string;
 }
 
 interface DetalleStudio {
@@ -67,6 +71,10 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
   unidadesMedida,
   subRecetas,
   onSaved,
+  initialProductoId,
+  initialVarianteId,
+  initialPrecioVenta,
+  initialNombre,
 }) => {
   const { addToast } = useToast();
 
@@ -160,20 +168,32 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
       setDetalles(mapped);
     } else {
       setEsSubReceta(modoInicial === "subreceta");
-      setNombre("");
+      const suggestedName = initialNombre
+        ? (initialNombre.startsWith("Receta ") ? initialNombre : `Receta ${initialNombre}`)
+        : "";
+      setNombre(suggestedName);
       setDescripcion("");
-      setIdProducto(undefined);
-      setIdVariante(undefined);
+      setIdProducto(initialProductoId || undefined);
+      setIdVariante(initialVarianteId || undefined);
       setRendimiento(modoInicial === "subreceta" ? 1000 : 1);
       const defaultUm = modoInicial === "subreceta"
         ? (unidadesMedida.find((u) => u.codigo === "ML" || u.codigo === "G")?.id || unidadesMedida[0]?.id || 1)
         : (unidadesMedida.find((u) => u.codigo === "PZA")?.id || unidadesMedida[0]?.id || 1);
       setIdUnidadRendimiento(defaultUm);
-      setPrecioVenta(120);
+      setPrecioVenta(initialPrecioVenta && initialPrecioVenta > 0 ? initialPrecioVenta : 120);
       setMargenObjetivo(70);
       setDetalles([]);
     }
-  }, [recetaEditar, modoInicial, isOpen, unidadesMedida]);
+  }, [
+    recetaEditar,
+    modoInicial,
+    isOpen,
+    unidadesMedida,
+    initialProductoId,
+    initialVarianteId,
+    initialPrecioVenta,
+    initialNombre,
+  ]);
 
   const variantesFiltradas = useMemo(() => {
     if (!idProducto) return [];

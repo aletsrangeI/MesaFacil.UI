@@ -9,6 +9,9 @@ import {
 import {
   useGetCatalogosBaseInventarioQuery,
   useGetInsumosQuery,
+  useCrearInsumoMutation,
+  type UnidadMedida,
+  type CategoriaInsumo,
 } from "../../services/inventarioApi";
 import { useSucursalesGetAllQuery } from "../../services/generated/api";
 import { useToast } from "../../components/ui/toast";
@@ -27,6 +30,8 @@ import {
   HelpCircle,
   Copy,
   Layers,
+  Sparkles,
+  X,
 } from "lucide-react";
 
 interface PartidaMapeoRow {
@@ -48,6 +53,135 @@ interface PartidaMapeoRow {
   sugeridoPorMapeo: boolean;
 }
 
+function mapSatUnitToUnidadId(unidadSAT: string, unidades: UnidadMedida[]): number {
+  if (!unidades || unidades.length === 0) return 1;
+  const satUpper = (unidadSAT || "").trim().toUpperCase();
+
+  let targetCodigo = "PZA";
+  if (["KGM", "KG", "KILO", "KILOGRAMO"].includes(satUpper)) {
+    targetCodigo = "KG";
+  } else if (["LTR", "LT", "LITRO", "L"].includes(satUpper)) {
+    targetCodigo = "L";
+  } else if (["GRM", "GR", "G", "GRAMO"].includes(satUpper)) {
+    targetCodigo = "G";
+  } else if (["MLT", "ML", "MILILITRO"].includes(satUpper)) {
+    targetCodigo = "ML";
+  } else if (["H87", "PZA", "PIEZA", "PZ", "EA"].includes(satUpper)) {
+    targetCodigo = "PZA";
+  } else if (["XBX", "CAJA", "CJA"].includes(satUpper)) {
+    targetCodigo = "CJA";
+  } else if (["XPK", "PAQUETE", "PAQ", "PQ"].includes(satUpper)) {
+    targetCodigo = "PAQ";
+  } else if (["BLL", "BTO", "BULTO"].includes(satUpper)) {
+    targetCodigo = "BTO";
+  } else if (["XBO", "BOT", "BOTELLA"].includes(satUpper)) {
+    targetCodigo = "BOT";
+  }
+
+  const match = unidades.find((u) => u.codigo.toUpperCase() === targetCodigo);
+  if (match) return match.id;
+
+  const pza = unidades.find((u) => u.codigo.toUpperCase() === "PZA");
+  return pza ? pza.id : (unidades[0]?.id || 1);
+}
+
+function suggestCategoriaId(descripcion: string, categorias: CategoriaInsumo[]): number {
+  if (!categorias || categorias.length === 0) return 1;
+  const descLower = (descripcion || "").toLowerCase();
+
+  for (const cat of categorias) {
+    const catLower = cat.nombre.toLowerCase();
+    if (
+      catLower.includes("carne") &&
+      (descLower.includes("arrachera") ||
+        descLower.includes("rib") ||
+        descLower.includes("corte") ||
+        descLower.includes("res") ||
+        descLower.includes("pollo") ||
+        descLower.includes("cerdo") ||
+        descLower.includes("carne") ||
+        descLower.includes("vacio") ||
+        descLower.includes("angus") ||
+        descLower.includes("sirloin") ||
+        descLower.includes("pella"))
+    ) {
+      return cat.id;
+    }
+    if (
+      catLower.includes("marisco") &&
+      (descLower.includes("camaron") ||
+        descLower.includes("salmon") ||
+        descLower.includes("pulpo") ||
+        descLower.includes("atun") ||
+        descLower.includes("pescado") ||
+        descLower.includes("marisco") ||
+        descLower.includes("filete"))
+    ) {
+      return cat.id;
+    }
+    if (
+      (catLower.includes("bebida") || catLower.includes("licor") || catLower.includes("bar")) &&
+      (descLower.includes("mezcal") ||
+        descLower.includes("ginebra") ||
+        descLower.includes("licor") ||
+        descLower.includes("vino") ||
+        descLower.includes("cerveza") ||
+        descLower.includes("tonica") ||
+        descLower.includes("cafe") ||
+        descLower.includes("tequila") ||
+        descLower.includes("vodka") ||
+        descLower.includes("whisky") ||
+        descLower.includes("ron") ||
+        descLower.includes("botella"))
+    ) {
+      return cat.id;
+    }
+    if (
+      (catLower.includes("verdura") || catLower.includes("fruta") || catLower.includes("vegetal")) &&
+      (descLower.includes("aguacate") ||
+        descLower.includes("portobello") ||
+        descLower.includes("arugula") ||
+        descLower.includes("esparrago") ||
+        descLower.includes("pepino") ||
+        descLower.includes("elote") ||
+        descLower.includes("frutos") ||
+        descLower.includes("fresa") ||
+        descLower.includes("jitomate") ||
+        descLower.includes("cebolla") ||
+        descLower.includes("limon"))
+    ) {
+      return cat.id;
+    }
+    if (
+      (catLower.includes("lacteo") || catLower.includes("queso") || catLower.includes("embutido")) &&
+      (descLower.includes("queso") ||
+        descLower.includes("jamon") ||
+        descLower.includes("leche") ||
+        descLower.includes("crema") ||
+        descLower.includes("mantequilla") ||
+        descLower.includes("provolone") ||
+        descLower.includes("parmesano") ||
+        descLower.includes("chorizo") ||
+        descLower.includes("chistorra"))
+    ) {
+      return cat.id;
+    }
+    if (
+      (catLower.includes("abarrote") || catLower.includes("seco") || catLower.includes("pan")) &&
+      (descLower.includes("pan") ||
+        descLower.includes("aceite") ||
+        descLower.includes("harina") ||
+        descLower.includes("dulce") ||
+        descLower.includes("brioche") ||
+        descLower.includes("trufa"))
+    ) {
+      return cat.id;
+    }
+  }
+
+  return categorias[0]?.id || 1;
+}
+
 export function RecepcionCompraTab({
   onCompraRegistrada,
 }: {
@@ -62,8 +196,9 @@ export function RecepcionCompraTab({
   // Queries
   const { data: catalogos } = useGetCatalogosBaseInventarioQuery();
   const { data: sucursalesResp } = useSucursalesGetAllQuery();
-  const { data: insumos = [] } = useGetInsumosQuery();
+  const { data: insumos = [], refetch: refetchInsumos } = useGetInsumosQuery();
   const { data: proveedores = [] } = useGetProveedoresQuery();
+  const [crearInsumo, { isLoading: isCreandoInsumo }] = useCrearInsumoMutation();
 
   const almacenes = useMemo(() => catalogos?.almacenes ?? [], [catalogos?.almacenes]);
 
@@ -134,6 +269,21 @@ export function RecepcionCompraTab({
   // Items / Grid State
   const [partidas, setPartidas] = useState<PartidaMapeoRow[]>([]);
 
+  // Estado de Creación de Insumos al Vuelo
+  const [isCrearInsumoModalOpen, setIsCrearInsumoModalOpen] = useState(false);
+  const [modalPartidaIndex, setModalPartidaIndex] = useState<number | null>(null);
+  const [formInsumoNombre, setFormInsumoNombre] = useState("");
+  const [formInsumoCodigo, setFormInsumoCodigo] = useState("");
+  const [formInsumoCategoria, setFormInsumoCategoria] = useState<number>(1);
+  const [formInsumoUnidad, setFormInsumoUnidad] = useState<number>(1);
+  const [formInsumoCosto, setFormInsumoCosto] = useState<number>(0);
+  const [isCreandoLote, setIsCreandoLote] = useState(false);
+
+  const partidasSinAsignarCount = useMemo(
+    () => partidas.filter((p) => !p.idInsumo || p.idInsumo === 0).length,
+    [partidas]
+  );
+
   // Calculate Due Date
   const fechaVencimientoCalculada = useMemo(() => {
     if (!esCredito || diasCredito <= 0) return undefined;
@@ -196,12 +346,13 @@ export function RecepcionCompraTab({
 
         if (!insumoAsignado && insumos.length > 0) {
           const matchByName = insumos.find((i) =>
-            c.descripcion.toLowerCase().includes(i.nombre.toLowerCase())
+            c.descripcion.toLowerCase().includes(i.nombre.toLowerCase()) ||
+            i.nombre.toLowerCase().includes(c.descripcion.toLowerCase())
           );
           if (matchByName) {
             insumoAsignado = matchByName.id;
           } else {
-            insumoAsignado = insumos[0].id;
+            insumoAsignado = 0; // Fix Bug 2.2: Do NOT fallback to insumos[0].id
           }
         }
 
@@ -316,6 +467,150 @@ export function RecepcionCompraTab({
     setPartidas((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleOpenCrearInsumoModal = (partida: PartidaMapeoRow, index: number) => {
+    setModalPartidaIndex(index);
+    setFormInsumoNombre(partida.descripcionOriginal.trim());
+    setFormInsumoCodigo(`INS-${Date.now().toString().slice(-6)}`);
+    const catSugerida = suggestCategoriaId(partida.descripcionOriginal, catalogos?.categorias || []);
+    setFormInsumoCategoria(catSugerida);
+    const umSugerida = mapSatUnitToUnidadId(partida.unidadSAT, catalogos?.unidadesMedida || []);
+    setFormInsumoUnidad(umSugerida);
+    setFormInsumoCosto(partida.valorUnitario || 0);
+    setIsCrearInsumoModalOpen(true);
+  };
+
+  const handleGuardarInsumoModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formInsumoNombre.trim()) {
+      addToast({ variant: "error", message: "El nombre del insumo es obligatorio." });
+      return;
+    }
+    if (modalPartidaIndex === null || !partidas[modalPartidaIndex]) {
+      return;
+    }
+
+    try {
+      const nuevo = await crearInsumo({
+        nombre: formInsumoNombre.trim(),
+        codigo: formInsumoCodigo.trim() || undefined,
+        idCategoriaInsumo: formInsumoCategoria,
+        idUnidadMedidaBase: formInsumoUnidad,
+        costoInicial: formInsumoCosto,
+        stockMinimo: 0,
+        stockMaximo: 0,
+        esCritico: false,
+        idAlmacenInicial: idAlmacen > 0 ? idAlmacen : undefined,
+        stockInicial: 0,
+      }).unwrap();
+
+      addToast({
+        variant: "success",
+        message: `Insumo "${nuevo.nombre}" dado de alta y asignado a la compra.`,
+      });
+
+      refetchInsumos();
+
+      const descOriginal = partidas[modalPartidaIndex].descripcionOriginal.toLowerCase();
+      setPartidas((prev) =>
+        prev.map((p, idx) => {
+          if (
+            idx === modalPartidaIndex ||
+            (!p.idInsumo && p.descripcionOriginal.toLowerCase() === descOriginal)
+          ) {
+            return {
+              ...p,
+              idInsumo: nuevo.id,
+              sugeridoPorMapeo: false,
+            };
+          }
+          return p;
+        })
+      );
+
+      setIsCrearInsumoModalOpen(false);
+      setModalPartidaIndex(null);
+    } catch (err: any) {
+      addToast({
+        variant: "error",
+        message: err?.data?.message || err?.message || "Error al crear el nuevo insumo.",
+      });
+    }
+  };
+
+  const handleCrearTodosInsumosFaltantes = async () => {
+    const unassigned = partidas
+      .map((p, index) => ({ p, index }))
+      .filter((item) => !item.p.idInsumo || item.p.idInsumo === 0);
+
+    if (unassigned.length === 0) {
+      addToast({ variant: "info", message: "Todas las partidas ya tienen un insumo asignado." });
+      return;
+    }
+
+    setIsCreandoLote(true);
+    let creados = 0;
+    try {
+      // Deduplicar por descripción para evitar dar de alta insumos duplicados en la misma factura
+      const creadosPorDesc: Record<string, number> = {};
+
+      for (const item of unassigned) {
+        const descKey = item.p.descripcionOriginal.trim().toLowerCase();
+        if (creadosPorDesc[descKey]) {
+          continue;
+        }
+
+        const catId = suggestCategoriaId(item.p.descripcionOriginal, catalogos?.categorias || []);
+        const umId = mapSatUnitToUnidadId(item.p.unidadSAT, catalogos?.unidadesMedida || []);
+
+        const nuevo = await crearInsumo({
+          nombre: item.p.descripcionOriginal.trim(),
+          codigo: `INS-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 900 + 100)}`,
+          idCategoriaInsumo: catId,
+          idUnidadMedidaBase: umId,
+          costoInicial: item.p.valorUnitario,
+          stockMinimo: 0,
+          stockMaximo: 0,
+          esCritico: false,
+          idAlmacenInicial: idAlmacen > 0 ? idAlmacen : undefined,
+          stockInicial: 0,
+        }).unwrap();
+
+        creadosPorDesc[descKey] = nuevo.id;
+        creados++;
+      }
+
+      refetchInsumos();
+
+      setPartidas((prev) =>
+        prev.map((p) => {
+          if (!p.idInsumo || p.idInsumo === 0) {
+            const descKey = p.descripcionOriginal.trim().toLowerCase();
+            if (creadosPorDesc[descKey]) {
+              return {
+                ...p,
+                idInsumo: creadosPorDesc[descKey],
+                sugeridoPorMapeo: false,
+              };
+            }
+          }
+          return p;
+        })
+      );
+
+      addToast({
+        variant: "success",
+        message: `¡${creados} nuevo(s) insumo(s) creado(s) y asignado(s) exitosamente!`,
+      });
+    } catch (err: any) {
+      addToast({
+        variant: "error",
+        message: err?.data?.message || err?.message || "Error al procesar el lote de insumos.",
+      });
+    } finally {
+      setIsCreandoLote(false);
+    }
+  };
+
   const totalesCalculados = useMemo(() => {
     let subtotal = 0;
     let totalIVA = 0;
@@ -353,6 +648,15 @@ export function RecepcionCompraTab({
     }
     if (partidas.length === 0) {
       addToast({ variant: "error", message: "Debes agregar al menos una partida a la compra." });
+      return;
+    }
+
+    const partidasSinAsignar = partidas.filter((p) => !p.idInsumo || p.idInsumo === 0);
+    if (partidasSinAsignar.length > 0) {
+      addToast({
+        variant: "error",
+        message: `Hay ${partidasSinAsignar.length} partida(s) sin insumo interno asignado. Da de alta o asigna los insumos antes de registrar la compra.`,
+      });
       return;
     }
 
@@ -730,18 +1034,68 @@ export function RecepcionCompraTab({
               </p>
             </div>
 
-            {modo === "manual" && (
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              {partidasSinAsignarCount > 0 && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  leftIcon={<Sparkles size={14} />}
+                  onClick={handleCrearTodosInsumosFaltantes}
+                  isLoading={isCreandoLote}
+                >
+                  ⚡ Crear Insumos Faltantes ({partidasSinAsignarCount})
+                </Button>
+              )}
+
+              {modo === "manual" && (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  leftIcon={<Plus size={14} />}
+                  onClick={handleAddManualItem}
+                >
+                  Agregar Partida
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {partidasSinAsignarCount > 0 && (
+            <div
+              style={{
+                margin: "0.75rem 0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0.75rem 1rem",
+                borderRadius: "0.5rem",
+                backgroundColor: "#fffbeb",
+                border: "1px solid #fef3c7",
+                color: "#92400e",
+                gap: "1rem",
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <AlertCircle size={20} color="#b45309" />
+                <span style={{ fontSize: "0.85rem" }}>
+                  <strong>Atención:</strong> Hay {partidasSinAsignarCount} partida(s) de la factura sin insumo interno asignado. Puedes crearlos renglón por renglón o presionar el botón para registrarlos en el almacén automáticamente con sus claves SAT.
+                </span>
+              </div>
               <Button
                 type="button"
                 variant="primary"
                 size="sm"
-                leftIcon={<Plus size={14} />}
-                onClick={handleAddManualItem}
+                leftIcon={<Sparkles size={14} />}
+                onClick={handleCrearTodosInsumosFaltantes}
+                isLoading={isCreandoLote}
               >
-                Agregar Partida
+                Crear todos ({partidasSinAsignarCount})
               </Button>
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="compras-table-card">
             <div className="compras-table-wrapper">
@@ -785,31 +1139,62 @@ export function RecepcionCompraTab({
                             <div className="compras-text-subtle">
                               Clave SAT: {p.claveProdServ} | {p.unidadSAT}
                             </div>
-                            {p.sugeridoPorMapeo ? (
+                            {p.idInsumo && p.sugeridoPorMapeo ? (
                               <span className="compras-badge compras-badge--success" style={{ marginTop: 4 }}>
                                 <CheckCircle2 size={10} /> Auto-identificado
                               </span>
+                            ) : p.idInsumo ? (
+                              <span className="compras-badge compras-badge--info" style={{ marginTop: 4 }}>
+                                <CheckCircle2 size={10} /> Asignado
+                              </span>
                             ) : (
-                              <span className="compras-badge compras-badge--warning" style={{ marginTop: 4 }}>
-                                <AlertCircle size={10} /> Confirmar insumo
+                              <span
+                                className="compras-badge compras-badge--danger"
+                                style={{ marginTop: 4, backgroundColor: "#fee2e2", color: "#b91c1c" }}
+                              >
+                                <AlertCircle size={10} /> ⚠️ Insumo no asignado
                               </span>
                             )}
                           </td>
 
                           <td>
-                            <select
-                              value={p.idInsumo}
-                              onChange={(e) =>
-                                handleUpdatePartidaInsumo(idx, parseInt(e.target.value) || 0)
-                              }
-                              className="compras-cell-select"
-                            >
-                              {insumos.map((i) => (
-                                <option key={i.id} value={i.id}>
-                                  {i.codigo} - {i.nombre} ({i.unidadMedidaCodigo})
-                                </option>
-                              ))}
-                            </select>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                              <select
+                                value={p.idInsumo || 0}
+                                onChange={(e) =>
+                                  handleUpdatePartidaInsumo(idx, parseInt(e.target.value) || 0)
+                                }
+                                className={`compras-cell-select ${!p.idInsumo ? "compras-cell-select--warning" : ""}`}
+                              >
+                                <option value={0}>-- Sin asignar (Selecciona o crea insumo) --</option>
+                                {insumos.map((i) => (
+                                  <option key={i.id} value={i.id}>
+                                    {i.codigo} - {i.nombre} ({i.unidadMedidaCodigo})
+                                  </option>
+                                ))}
+                              </select>
+                              {!p.idInsumo && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenCrearInsumoModal(p, idx)}
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    fontSize: "0.75rem",
+                                    color: "var(--color-primary, #d64545)",
+                                    fontWeight: 700,
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    padding: "2px 0",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  <Plus size={13} /> + Dar de alta en almacén
+                                </button>
+                              )}
+                            </div>
                           </td>
 
                           <td>
@@ -975,6 +1360,136 @@ export function RecepcionCompraTab({
             >
               Aprobar e Ingresar a Almacén
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Crear Insumo desde Partida CFDI */}
+      {isCrearInsumoModalOpen && (
+        <div className="compras-modal-overlay" onClick={() => setIsCrearInsumoModalOpen(false)}>
+          <div
+            className="compras-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <header className="compras-modal-header">
+              <h3>Dar de Alta Insumo desde Partida CFDI</h3>
+              <button
+                type="button"
+                className="compras-icon-btn"
+                onClick={() => setIsCrearInsumoModalOpen(false)}
+                aria-label="Cerrar modal"
+              >
+                <X size={18} />
+              </button>
+            </header>
+
+            <form onSubmit={handleGuardarInsumoModal}>
+              <div className="compras-modal-body">
+                <div className="compras-form-group">
+                  <label className="compras-form-label">Nombre del Insumo *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formInsumoNombre}
+                    onChange={(e) => setFormInsumoNombre(e.target.value)}
+                    className="compras-form-input"
+                    placeholder="ej. Mezcal Espadín 750ml"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="compras-grid-2">
+                  <div className="compras-form-group">
+                    <label className="compras-form-label">Código / SKU</label>
+                    <input
+                      type="text"
+                      value={formInsumoCodigo}
+                      onChange={(e) => setFormInsumoCodigo(e.target.value)}
+                      className="compras-form-input compras-form-input--mono"
+                      placeholder="INS-0001"
+                    />
+                  </div>
+
+                  <div className="compras-form-group">
+                    <label className="compras-form-label">Categoría del Insumo *</label>
+                    <select
+                      value={formInsumoCategoria}
+                      onChange={(e) => setFormInsumoCategoria(Number(e.target.value))}
+                      className="compras-form-select"
+                    >
+                      {(catalogos?.categorias || []).map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="compras-grid-2">
+                  <div className="compras-form-group">
+                    <label className="compras-form-label">Unidad de Medida Base *</label>
+                    <select
+                      value={formInsumoUnidad}
+                      onChange={(e) => setFormInsumoUnidad(Number(e.target.value))}
+                      className="compras-form-select"
+                    >
+                      {(catalogos?.unidadesMedida || []).map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.codigo} - {u.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="compras-form-group">
+                    <label className="compras-form-label">Costo Unitario Facturado ($ MXN)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formInsumoCosto}
+                      onChange={(e) => setFormInsumoCosto(parseFloat(e.target.value) || 0)}
+                      className="compras-form-input"
+                    />
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "var(--color-text-muted)",
+                    backgroundColor: "var(--color-surface-raised, #f9fafb)",
+                    padding: "0.75rem",
+                    borderRadius: "0.375rem",
+                    border: "1px solid var(--color-surface-sunken, #e5e7eb)",
+                  }}
+                >
+                  💡 Este insumo se registrará en el almacén destino y se asignará automáticamente a esta partida y a cualquier otra partida del CFDI con la misma descripción.
+                </div>
+              </div>
+
+              <footer className="compras-modal-footer">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsCrearInsumoModalOpen(false)}
+                  disabled={isCreandoInsumo}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  isLoading={isCreandoInsumo}
+                  leftIcon={<CheckCircle2 size={16} />}
+                >
+                  Guardar y Asignar Insumo
+                </Button>
+              </footer>
+            </form>
           </div>
         </div>
       )}

@@ -980,3 +980,69 @@
     justify-content: space-between;
   }
 }
+
+/* Modal y selector de alertas para Partidas CFDI */
+.compras-cell-select--warning {
+  border-color: #f59e0b !important;
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+  font-weight: 600;
+}
+
+.compras-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.compras-modal {
+  background: var(--color-surface, #ffffff);
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--color-surface-sunken, #e5e7eb);
+  box-shadow: var(--shadow-lg, 0 10px 25px rgba(0, 0, 0, 0.15));
+  width: 100%;
+  max-width: 560px;
+  overflow: hidden;
+  animation: fadeInCompras 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.compras-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--color-surface-sunken, #e5e7eb);
+}
+
+.compras-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text, #1f1f1f);
+}
+
+.compras-modal-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.compras-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--color-surface-sunken, #e5e7eb);
+  background: var(--color-surface-raised, #f9fafb);
+}
+
