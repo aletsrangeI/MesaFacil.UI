@@ -27,9 +27,40 @@ export const QRDevicePairingModal: React.FC<QRDevicePairingModalProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [destino, setDestino] = useState<"pos" | "comandero">("pos");
 
-  const resolvedUrl =
-    pairingUrl || (typeof window !== "undefined" ? window.location.origin : "");
+  const buildResolvedUrl = () => {
+    if (pairingUrl) return pairingUrl;
+    if (typeof window === "undefined") return "";
+
+    const basePath = destino === "comandero" ? "/operacion/comandero" : "/ventas/pos";
+    const rawAuth = localStorage.getItem("mf_auth");
+    if (rawAuth) {
+      try {
+        const parsed = JSON.parse(rawAuth);
+        // Empacar únicamente los campos esenciales para mantener el QR compacto y legible
+        const minAuth = {
+          accessToken: parsed.accessToken,
+          refreshToken: parsed.refreshToken,
+          expiresAt: parsed.expiresAt,
+          usuarioId: parsed.usuarioId,
+          idEmpresa: parsed.idEmpresa,
+          idEstacion: parsed.idEstacion,
+          correo: parsed.correo,
+          nombreCompleto: parsed.nombreCompleto,
+          roles: parsed.roles || ["waiter"],
+          accesos: ["/", "/ventas/pos", "/operacion/comandero", "/mesas", "/pedidos", "/delivery"],
+        };
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(minAuth))));
+        return `${window.location.origin}${basePath}?pair_auth=${encodeURIComponent(encoded)}`;
+      } catch {
+        return `${window.location.origin}${basePath}`;
+      }
+    }
+    return `${window.location.origin}${basePath}`;
+  };
+
+  const resolvedUrl = buildResolvedUrl();
 
   useEffect(() => {
     if (!open || !resolvedUrl) return;
@@ -40,12 +71,13 @@ export const QRDevicePairingModal: React.FC<QRDevicePairingModalProps> = ({
     QRCode.toCanvas(canvas, resolvedUrl, {
       width: 220,
       margin: 1,
+      errorCorrectionLevel: "L",
       color: {
         dark: "#1F1F1F",
         light: "#FFFFFF",
       },
-    }).catch(() => {
-      setError("No se pudo generar el código QR.");
+    }).catch((err) => {
+      setError(`No se pudo generar el código QR: ${err?.message || "datos exceden límite"}`);
     });
   }, [open, resolvedUrl]);
 
@@ -53,8 +85,8 @@ export const QRDevicePairingModal: React.FC<QRDevicePairingModalProps> = ({
     <Modal
       open={open}
       onClose={onClose}
-      title="Emparejar dispositivo"
-      description="Escanea este código desde otro dispositivo en la misma red local para conectarlo a esta sucursal."
+      title="Emparejar dispositivo (LAN)"
+      description="Escanea este código desde un smartphone o tablet en la misma red Wi-Fi para iniciar sesión automáticamente y comenzar a operar."
       size="sm"
     >
       <div
@@ -65,6 +97,41 @@ export const QRDevicePairingModal: React.FC<QRDevicePairingModalProps> = ({
           gap: "var(--space-3, 12px)",
         }}
       >
+        <div style={{ display: "flex", gap: "8px", width: "100%", justifyContent: "center" }}>
+          <button
+            type="button"
+            onClick={() => setDestino("pos")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "6px",
+              border: destino === "pos" ? "2px solid #3b82f6" : "1px solid #d1d5db",
+              background: destino === "pos" ? "#eff6ff" : "#ffffff",
+              fontWeight: destino === "pos" ? 600 : 400,
+              color: destino === "pos" ? "#1d4ed8" : "#374151",
+              cursor: "pointer",
+              fontSize: "0.82rem"
+            }}
+          >
+            Punto de Venta (POS)
+          </button>
+          <button
+            type="button"
+            onClick={() => setDestino("comandero")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "6px",
+              border: destino === "comandero" ? "2px solid #3b82f6" : "1px solid #d1d5db",
+              background: destino === "comandero" ? "#eff6ff" : "#ffffff",
+              fontWeight: destino === "comandero" ? 600 : 400,
+              color: destino === "comandero" ? "#1d4ed8" : "#374151",
+              cursor: "pointer",
+              fontSize: "0.82rem"
+            }}
+          >
+            Comandero Móvil
+          </button>
+        </div>
+
         <div
           style={{
             padding: "var(--space-3, 12px)",
@@ -82,12 +149,20 @@ export const QRDevicePairingModal: React.FC<QRDevicePairingModalProps> = ({
           </span>
         )}
 
+        <div style={{ textAlign: "center", fontSize: "0.8rem", color: "#16a34a", fontWeight: 500 }}>
+          ✓ Incluye credenciales de estación para acceso inmediato
+        </div>
+
         <code
           style={{
-            fontSize: "0.85rem",
+            fontSize: "0.75rem",
             color: "var(--color-text-muted, #6B7280)",
             wordBreak: "break-all",
             textAlign: "center",
+            maxWidth: "100%",
+            maxHeight: "44px",
+            overflow: "hidden",
+            textOverflow: "ellipsis"
           }}
         >
           {resolvedUrl}

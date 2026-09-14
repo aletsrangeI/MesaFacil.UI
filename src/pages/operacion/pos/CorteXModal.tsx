@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useGetResumenCorteQuery } from './CorteCajaModal';
 import { DollarSign, CreditCard, X, Printer, Activity, Bike } from 'lucide-react';
 
@@ -10,8 +10,14 @@ interface CorteXModalProps {
 }
 
 export function CorteXModal({ isOpen, onClose, idSucursal = 1, idTurno }: CorteXModalProps) {
-  const { data: resumenData, isLoading } = useGetResumenCorteQuery({ idSucursal, idTurno }, { skip: !isOpen });
+  const { data: resumenData, isLoading, refetch } = useGetResumenCorteQuery({ idSucursal, idTurno }, { skip: !isOpen });
   const printRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      refetch();
+    }
+  }, [isOpen, refetch]);
 
   if (!isOpen) return null;
 

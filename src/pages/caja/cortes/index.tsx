@@ -76,7 +76,7 @@ export default function CortesPage() {
 
   // Consulta de Turno Activo (en vivo)
   const { data: turnoActivoData } = useGetResumenCorteQuery({
-    idSucursal: sucursalSeleccionada || 1
+    idSucursal: sucursalSeleccionada
   });
 
   const resumen = data?.data;
@@ -615,6 +615,7 @@ export default function CortesPage() {
       <CorteXModal
         isOpen={showCorteX}
         onClose={() => setShowCorteX(false)}
+        idSucursal={sucursalSeleccionada}
       />
     </Container>
   );

@@ -19,12 +19,7 @@ const PING_TIMEOUT_MS = 4000;
  * la caché/reintentos de la capa de datos de la aplicación.
  */
 export function useNetworkStatus(): NetworkStatus {
-  const [status, setStatus] = useState<NetworkStatus>(() =>
-    typeof navigator !== "undefined" && navigator.onLine === false
-      ? "offline"
-      : "online"
-  );
-
+  const [status, setStatus] = useState<NetworkStatus>("online");
   const inFlightRef = useRef(false);
 
   useEffect(() => {
@@ -32,11 +27,6 @@ export function useNetworkStatus(): NetworkStatus {
     let intervalId: number | undefined;
 
     const checkBackend = async () => {
-      if (typeof navigator !== "undefined" && !navigator.onLine) {
-        if (!cancelled) setStatus("offline");
-        return;
-      }
-
       if (inFlightRef.current) return;
       inFlightRef.current = true;
 
@@ -49,27 +39,37 @@ export function useNetworkStatus(): NetworkStatus {
           cache: "no-store",
           signal: controller.signal,
         });
+
         if (!cancelled) {
-          setStatus(res.ok ? "online" : "local");
+          if (res.ok) {
+            // Si el backend local responde OK:
+            // Si el navegador reporta estar sin internet WAN (navigator.onLine === false),
+            // estamos en "local" (operación LAN autónoma). De lo contrario, "online".
+            const isWanOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+            setStatus(isWanOffline ? "local" : "online");
+          } else {
+            // El backend local respondió con código de error (ej. 500)
+            setStatus("local");
+          }
         }
       } catch {
-        if (!cancelled) setStatus("local");
+        // No se pudo contactar al backend local en la LAN
+        if (!cancelled) {
+          setStatus("offline");
+        }
       } finally {
         window.clearTimeout(timeoutId);
         inFlightRef.current = false;
       }
     };
 
-    const handleOnline = () => {
-      // Recupera conexión de red: verifica de inmediato si el backend responde.
+    const handleNetworkChange = () => {
+      // Re-verificar contra el backend inmediatamente ante cualquier cambio de estado
       checkBackend();
     };
-    const handleOffline = () => {
-      setStatus("offline");
-    };
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleNetworkChange);
+    window.addEventListener("offline", handleNetworkChange);
 
     // Chequeo inicial + ping periódico.
     checkBackend();
@@ -77,8 +77,8 @@ export function useNetworkStatus(): NetworkStatus {
 
     return () => {
       cancelled = true;
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleNetworkChange);
+      window.removeEventListener("offline", handleNetworkChange);
       if (intervalId) window.clearInterval(intervalId);
     };
   }, []);

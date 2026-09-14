@@ -134,8 +134,8 @@ const KdsPage = () => {
   };
 
   // Queries
-  const { data: boardRes, isLoading: isLoadingBoard } = useGetKdsBoardQuery(selectedEstacion);
-  const { data: historyRes, isLoading: isLoadingHistory } = useGetKdsHistoryQuery(selectedEstacion);
+  const { data: boardRes, isLoading: isLoadingBoard, refetch: refetchBoard } = useGetKdsBoardQuery(selectedEstacion);
+  const { data: historyRes, isLoading: isLoadingHistory, refetch: refetchHistory } = useGetKdsHistoryQuery(selectedEstacion);
   const { data: estacionesRes } = useEstacionesCocinaGetAllAsyncQuery();
   const { data: ticketStatesRes } = useCatalogosGetAllQuery({ catalog: 'estados-ticket-cocina' });
   const { data: itemStatesRes } = useCatalogosGetAllQuery({ catalog: 'estados-item-kds' });
@@ -165,20 +165,28 @@ const KdsPage = () => {
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 10000);
     
+    // Conectar a /hubs/kds a través del proxy de Vite o el host actual (LAN o localhost)
+    const hubUrl = "/hubs/kds";
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5286/hubs/kds")
+      .withUrl(hubUrl)
       .withAutomaticReconnect()
       .build();
+
+    const refreshData = () => {
+      refetchBoard();
+      refetchHistory();
+      dispatch(api.util.invalidateTags(["TicketCocina", "TicketDetalle"]));
+    };
 
     connection.on("ReceiveNewTicket", (ticketId) => {
       console.log("Nuevo ticket recibido via SignalR:", ticketId);
       playChime();
-      dispatch(api.util.invalidateTags(["TicketCocina", "TicketDetalle"]));
+      refreshData();
     });
 
     connection.onreconnected(() => {
       console.log("SignalR reconectado. Refrescando datos del KDS...");
-      dispatch(api.util.invalidateTags(["TicketCocina", "TicketDetalle"]));
+      refreshData();
     });
 
     const empresaId = profile?.idEmpresa || 1;
@@ -198,7 +206,7 @@ const KdsPage = () => {
       clearInterval(timer);
       connection.stop();
     };
-  }, [dispatch, selectedEstacion, profile]);
+  }, [dispatch, selectedEstacion, profile, refetchBoard, refetchHistory]);
 
   const activeTickets = boardRes?.data || [];
   const historyTickets = historyRes?.data || [];

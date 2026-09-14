@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '../../../components/ui/toast';
 import { DollarSign, CreditCard, Coins, AlertCircle, CheckCircle2, ArrowRight, X, Calculator, Bike } from 'lucide-react';
 import { CalculadoraDenominaciones } from './CalculadoraDenominaciones';
@@ -15,9 +15,15 @@ interface CorteCajaModalProps {
 }
 
 export function CorteCajaModal({ isOpen, onClose, idSucursal = 1, idTurno, onCorteSuccess }: CorteCajaModalProps) {
-  const { data: resumenData, isLoading } = useGetResumenCorteQuery({ idSucursal, idTurno }, { skip: !isOpen });
+  const { data: resumenData, isLoading, refetch } = useGetResumenCorteQuery({ idSucursal, idTurno }, { skip: !isOpen });
   const [realizarCorte, { isLoading: isSubmitting }] = useRealizarCorteMutation();
   const { addToast } = useToast();
+
+  useEffect(() => {
+    if (isOpen) {
+      refetch();
+    }
+  }, [isOpen, refetch]);
 
   const [declarado, setDeclarado] = useState('');
   const [observaciones, setObservaciones] = useState('');

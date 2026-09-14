@@ -46,6 +46,49 @@
   margin: var(--space-1) 0 0 0;
 }
 
+.planes-page__demo-banner {
+  background: linear-gradient(135deg, rgba(226, 167, 46, 0.12), rgba(226, 167, 46, 0.04));
+  border: 1px solid rgba(226, 167, 46, 0.35);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.planes-page__demo-banner-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.planes-page__demo-banner-tag {
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--color-secondary, #e2a72e);
+  color: #1a1a1a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm, 4px);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.planes-page__demo-banner p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.planes-page__demo-banner code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.82rem;
+}
+
 .planes-page__state {
   padding: var(--space-6);
   text-align: center;

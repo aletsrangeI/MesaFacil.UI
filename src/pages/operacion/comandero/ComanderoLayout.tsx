@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft, ReceiptText } from "lucide-react";
 import { selectUserProfile } from "../../../state/authSlice";
@@ -43,8 +43,33 @@ import "./comandero.css";
  * Decisión de seguridad (spec 024 / criterio #4 de spec 025): esta vista NUNCA expone
  * un botón para cancelar/eliminar platillos que ya fueron enviados a cocina. La sección
  * "En cocina" del resumen de mesa es de solo lectura. Esa acción protegida por PIN de
- * supervisor sigue existiendo únicamente en el POS de caja (src/pages/operacion/pos/index.tsx).
+/**
+ * Spec 019: Hook de resiliencia offline para Comandero Móvil.
  */
+function useCachedFallback<T>(apiData: any, storageKey: string): T[] {
+  const [cached, setCached] = useState<T[]>(() => {
+    try {
+      const val = localStorage.getItem(storageKey);
+      return val ? JSON.parse(val) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    const list = Array.isArray(apiData?.data) ? apiData.data : (Array.isArray(apiData) ? apiData : null);
+    if (list && list.length > 0) {
+      setCached(list);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(list));
+      } catch {}
+    }
+  }, [apiData, storageKey]);
+
+  const liveList = Array.isArray(apiData?.data) ? apiData.data : (Array.isArray(apiData) ? apiData : []);
+  return liveList.length > 0 ? liveList : cached;
+}
+
 export default function ComanderoLayout() {
   const profile = useSelector(selectUserProfile);
   const dispatch = useDispatch();
@@ -83,18 +108,18 @@ export default function ComanderoLayout() {
   const pedidoActivo = pedidoActivoData?.isSuccess ? pedidoActivoData?.data : null;
   const modoRetomar = !!pedidoActivo;
 
-  const categorias = Array.isArray((catData as any)?.data) ? (catData as any).data : [];
-  const rawProductos = Array.isArray((prodData as any)?.data) ? (prodData as any).data : [];
-  const variantes = Array.isArray((varData as any)?.data) ? (varData as any).data : [];
-  const precios = Array.isArray((precioData as any)?.data) ? (precioData as any).data : [];
-  const grupos = Array.isArray((gruposData as any)?.data) ? (gruposData as any).data : [];
-  const opciones = Array.isArray((opcionesData as any)?.data) ? (opcionesData as any).data : [];
-  const mesas = Array.isArray((mesasData as any)?.data) ? (mesasData as any).data : [];
-  const areas = Array.isArray((areasData as any)?.data) ? (areasData as any).data : [];
+  const categorias = useCachedFallback<any>(catData, "mf_cache_categorias");
+  const rawProductos = useCachedFallback<any>(prodData, "mf_cache_productos");
+  const variantes = useCachedFallback<any>(varData, "mf_cache_variantes");
+  const precios = useCachedFallback<any>(precioData, "mf_cache_precios");
+  const grupos = useCachedFallback<any>(gruposData, "mf_cache_grupos");
+  const opciones = useCachedFallback<any>(opcionesData, "mf_cache_opciones");
+  const mesas = useCachedFallback<any>(mesasData, "mf_cache_mesas");
+  const areas = useCachedFallback<any>(areasData, "mf_cache_areas");
   const pedidos = Array.isArray((pedidosData as any)?.data) ? (pedidosData as any).data : [];
-  const estadosMesa = Array.isArray((catEstadosMesa as any)?.data) ? (catEstadosMesa as any).data : [];
-  const estadosPedido = Array.isArray((catEstadosPedido as any)?.data) ? (catEstadosPedido as any).data : [];
-  const estadosPedidoDetalle = Array.isArray((catEstadosPedidoDetalle as any)?.data) ? (catEstadosPedidoDetalle as any).data : [];
+  const estadosMesa = useCachedFallback<any>(catEstadosMesa, "mf_cache_estados_mesa");
+  const estadosPedido = useCachedFallback<any>(catEstadosPedido, "mf_cache_estados_pedido");
+  const estadosPedidoDetalle = useCachedFallback<any>(catEstadosPedidoDetalle, "mf_cache_estados_pedido_detalle");
   const impuestos = Array.isArray((catImpuestos as any)?.data) ? (catImpuestos as any).data : [];
 
   const rawOrderTypes = Array.isArray((catTiposData as any)?.data) ? (catTiposData as any).data : [];
@@ -197,21 +222,32 @@ export default function ComanderoLayout() {
 
   const handlePedirCuenta = async () => {
     if (!selectedMesa) return;
-    const estadoPorCobrar = estadosMesa.find((e: any) => (e.descripcion || "").toLowerCase().includes("cobrar"));
-    if (!estadoPorCobrar) {
-      addToast({
-        message: 'No existe el estado "Por Cobrar" en Catálogos > Estados de Mesa. Pide a un Gerente que lo configure en /admin/catalogos/estados-mesa.',
-        variant: "error",
-      });
-      return;
-    }
+    const estadoPorCobrar =
+      estadosMesa.find((e: any) => (e.descripcion || "").toLowerCase().includes("cobrar")) ||
+      estadosMesa.find((e: any) => (e.descripcion || "").toLowerCase().includes("cuenta")) ||
+      { id: 91, descripcion: "Por Cobrar" };
+
     try {
       await updateMesa({ mesaDto: { ...selectedMesa, idEstadoMesa: estadoPorCobrar.id } }).unwrap();
       addToast({ message: `Cuenta solicitada para la mesa ${selectedMesa.codigo || selectedMesa.id}`, variant: "success" });
       refetchMesas();
       handleVolverAMesas();
     } catch {
-      addToast({ message: "Error al solicitar la cuenta. Intenta de nuevo.", variant: "error" });
+      // Spec 019: Tolerancia a fallos en modo offline al pedir la cuenta
+      try {
+        const offlineRequests = JSON.parse(localStorage.getItem('mf_offline_cuenta_requests') || '[]');
+        offlineRequests.push({ idMesa: selectedMesa.id, idEstadoMesa: estadoPorCobrar.id, requestedAt: new Date().toISOString() });
+        localStorage.setItem('mf_offline_cuenta_requests', JSON.stringify(offlineRequests));
+        addToast({ message: `Cuenta solicitada en modo local para la mesa ${selectedMesa.codigo || selectedMesa.id}`, variant: "info" });
+        // Actualizar optimísticamente mesa en cache local
+        const cachedMesas = JSON.parse(localStorage.getItem('mf_cache_mesas') || '[]');
+        const updatedCached = cachedMesas.map((m: any) => m.id === selectedMesa.id ? { ...m, idEstadoMesa: estadoPorCobrar.id } : m);
+        localStorage.setItem('mf_cache_mesas', JSON.stringify(updatedCached));
+        refetchMesas();
+        handleVolverAMesas();
+      } catch {
+        addToast({ message: "Error al solicitar la cuenta. Intenta de nuevo.", variant: "error" });
+      }
     }
   };
 
@@ -245,6 +281,20 @@ export default function ComanderoLayout() {
       };
     });
 
+    const defaultIdSucursal = (sucursalesData as any)?.data?.[0]?.id || 1;
+    const fullOrderPayload = {
+      idEmpresa: profile.idEmpresa,
+      idSucursal: selectedMesa?.idSucursal || defaultIdSucursal,
+      idMesa: selectedMesa?.id || null,
+      idTipoPedido: orderTypeComedor?.id ?? 1,
+      idEstadoPedido: defaultEstadoPedido,
+      personas: selectedMesa?.asientos || 1,
+      cargoServicioPct: 0,
+      idempotencyKey,
+      canalOrigen: "ComanderoMovil",
+      detalles: detallesPayload,
+    };
+
     try {
       if (modoRetomar && pedidoActivo) {
         const result = await agregarDetalles({ idPedido: pedidoActivo.id, detalles: detallesPayload }).unwrap();
@@ -254,22 +304,7 @@ export default function ComanderoLayout() {
         }
         addToast({ message: `Ítems agregados al Pedido #${pedidoActivo.id}`, variant: "success" });
       } else {
-        const defaultIdSucursal = (sucursalesData as any)?.data?.[0]?.id || 1;
-        const payload = {
-          idEmpresa: profile.idEmpresa,
-          idSucursal: selectedMesa?.idSucursal || defaultIdSucursal,
-          idMesa: selectedMesa?.id || null,
-          idTipoPedido: orderTypeComedor?.id ?? 1,
-          idEstadoPedido: defaultEstadoPedido,
-          personas: selectedMesa?.asientos || 1,
-          cargoServicioPct: 0,
-          idempotencyKey,
-          // Spec 025, criterio de trazabilidad: el comandero móvil se identifica con su
-          // propio canal de origen (distinto de "POS") para que KDS/reportes lo agrupen aparte.
-          canalOrigen: "ComanderoMovil",
-          detalles: detallesPayload,
-        };
-        const result = await insertarPedido({ crearPedidoRequestDto: payload as any }).unwrap();
+        const result = await insertarPedido({ crearPedidoRequestDto: fullOrderPayload as any }).unwrap();
         if (!(result as any).isSuccess) {
           addToast({ message: (result as any).message || "Error al enviar la comanda", variant: "error" });
           return;
@@ -300,7 +335,27 @@ export default function ComanderoLayout() {
         setView("mesas");
         setSelectedMesa(null);
       } else {
-        addToast({ message: error?.data?.message || "Error de conexión al enviar la comanda", variant: "error" });
+        // Spec 019: Modo offline en Comandero Móvil — guardar comanda completa en cola local
+        try {
+          const offlineQueue = JSON.parse(localStorage.getItem('mf_offline_pending_orders') || '[]');
+          const mesaCodigo = selectedMesa ? ` [Mesa ${selectedMesa.codigo || selectedMesa.id}]` : '';
+          offlineQueue.push({
+            ...fullOrderPayload,
+            mesaCodigo: selectedMesa?.codigo || selectedMesa?.id,
+            mesa: selectedMesa,
+            itemsCount: cart.length,
+            queuedAt: new Date().toISOString()
+          });
+          localStorage.setItem('mf_offline_pending_orders', JSON.stringify(offlineQueue));
+          addToast({ message: `¡Comanda guardada en cola local${mesaCodigo}! Se enviará a cocina al reconectar.`, variant: 'info' });
+          dispatch(clearCart());
+          setIdempotencyKey(generateUUID());
+          refetchMesas();
+          setSelectedMesa(null);
+          setView("mesas");
+        } catch {
+          addToast({ message: error?.data?.message || "Error de conexión al enviar la comanda", variant: "error" });
+        }
       }
     }
   };

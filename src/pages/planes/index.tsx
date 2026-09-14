@@ -91,6 +91,15 @@ export default function PlanesPage() {
         </div>
       </div>
 
+      <div className="planes-page__demo-banner">
+        <div className="planes-page__demo-banner-content">
+          <span className="planes-page__demo-banner-tag">MODO DEMO COMERCIAL</span>
+          <p>
+            El sistema opera actualmente con <strong>todas las características desbloqueadas por defecto</strong> (<code>FeatureGating:Enabled = false</code>). Todas las pantallas y módulos (KDS, Comanderos, Recetas, Facturación XML) están disponibles para demostraciones comerciales y pruebas sin restricciones.
+          </p>
+        </div>
+      </div>
+
       {isLoading && (
         <div className="planes-page__state">Cargando planes disponibles…</div>
       )}

@@ -20,9 +20,13 @@ export default defineConfig(({ mode }) => {
           target: VITE_API_URL, // Usa la variable de entorno
           changeOrigin: true, // Necesario para evitar problemas de CORS/host
           secure: false,      // Útil si tu API de desarrollo usa un certificado self-signed
-          // Opcional: Reescribe la ruta. 
-          // Ej: /api/users -> http://.../users (sin /api)
-          // rewrite: (path) => path.replace(/^\/api/, ''),
+        },
+        // Proxy para SignalR Hubs (WebSockets y long polling)
+        '/hubs': {
+          target: VITE_API_URL,
+          changeOrigin: true,
+          ws: true,
+          secure: false,
         }
       }
     }

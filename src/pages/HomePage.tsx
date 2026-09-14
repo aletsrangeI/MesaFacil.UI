@@ -90,8 +90,18 @@ export default function HomePage() {
   const { data: mesasData, refetch: refetchMesas } = useMesasGetAllQuery();
   const { data: areasData } = useAreasGetAllQuery();
   const { data: catEstadosMesa } = useCatalogosGetAllQuery({ catalog: 'estados-mesa' });
-  const { data: resumenTurnoData, refetch: refetchTurno } = useGetResumenCorteQuery({ idSucursal: 1 }, { pollingInterval: 10000 });
   const { data: kdsBoardData, refetch: refetchKds } = useGetKdsBoardDashboardQuery(undefined, { pollingInterval: 6000 });
+
+  // Normalización 100% Defensiva de Datos
+  const pedidos: any[] = toArray(pedidosData);
+  const mesas: any[] = toArray(mesasData);
+  const areas: any[] = toArray(areasData);
+  const estadosMesa: any[] = toArray(catEstadosMesa);
+  const ticketsKds: any[] = toArray(kdsBoardData);
+
+  const activeSucursalId = mesas[0]?.idSucursal || pedidos[0]?.idSucursal || areas[0]?.idSucursal || 2;
+  const { data: resumenTurnoData, refetch: refetchTurno } = useGetResumenCorteQuery({ idSucursal: activeSucursalId }, { pollingInterval: 10000 });
+  const resumenTurno = (resumenTurnoData as any)?.data || resumenTurnoData;
 
   // Mutaciones
   const [seedDemo, { isLoading: isSeedingDemo }] = useSeedRestauranteCompletoMutation();
@@ -104,14 +114,6 @@ export default function HomePage() {
   const [showCorteModal, setShowCorteModal] = useState(false);
   const [showCorteXModal, setShowCorteXModal] = useState(false);
   const [showMovimientoModal, setShowMovimientoModal] = useState(false);
-
-  // Normalización 100% Defensiva de Datos
-  const pedidos: any[] = toArray(pedidosData);
-  const mesas: any[] = toArray(mesasData);
-  const areas: any[] = toArray(areasData);
-  const estadosMesa: any[] = toArray(catEstadosMesa);
-  const resumenTurno = (resumenTurnoData as any)?.data || resumenTurnoData;
-  const ticketsKds: any[] = toArray(kdsBoardData);
 
   // Pedidos del día por estado (5 = Cerrado/Cobrado, 6 = Cancelado)
   const pedidosCobrados = pedidos.filter((p: any) => p && p.idEstadoPedido === 5);
@@ -251,9 +253,9 @@ export default function HomePage() {
             <DashboardFastCheckout
               pedidosPorCobrar={pedidosPorCobrar}
               onCobrarPedido={(idPedido) => setSelectedPedidoToPay(idPedido)}
-              ventasEfectivo={resumenTurno?.ventasEfectivo || 0}
-              ventasTarjeta={resumenTurno?.ventasTarjeta || 0}
-              ventasTransferencia={resumenTurno?.ventasTransferencia || 0}
+              ventasEfectivo={resumenTurno?.totalEfectivo ?? resumenTurno?.ventasEfectivo ?? 0}
+              ventasTarjeta={resumenTurno?.totalTarjeta ?? resumenTurno?.ventasTarjeta ?? 0}
+              ventasTransferencia={resumenTurno?.totalOtros ?? resumenTurno?.ventasTransferencia ?? 0}
             />
           </div>
         </div>
@@ -289,7 +291,7 @@ export default function HomePage() {
         <AperturaTurnoModal
           isOpen={showAperturaModal}
           onClose={() => setShowAperturaModal(false)}
-          idSucursal={1}
+          idSucursal={activeSucursalId}
           onTurnoAbierto={() => {
             refetchTurno();
             addToast({ message: "Turno de caja abierto correctamente", variant: "success" });
@@ -300,21 +302,21 @@ export default function HomePage() {
         <CorteXModal
           isOpen={showCorteXModal}
           onClose={() => setShowCorteXModal(false)}
-          idSucursal={1}
+          idSucursal={activeSucursalId}
         />
 
         {/* Modal de Movimiento de Caja (Ingreso / Egreso) */}
         <MovimientoCajaModal
           isOpen={showMovimientoModal}
           onClose={() => setShowMovimientoModal(false)}
-          idSucursal={1}
+          idSucursal={activeSucursalId}
         />
 
         {/* Modal de Corte Definitivo de Turno */}
         <CorteCajaModal
           isOpen={showCorteModal}
           onClose={() => setShowCorteModal(false)}
-          idSucursal={1}
+          idSucursal={activeSucursalId}
           onCorteSuccess={() => {
             refetchTurno();
             refetchPedidos();

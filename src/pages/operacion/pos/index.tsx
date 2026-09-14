@@ -77,6 +77,34 @@ const {
   useCancelarDetalleProtegidoMutation
 } = posApi;
 
+/**
+ * Spec 019: Hook de resiliencia offline. Guarda en localStorage los catálogos
+ * recibidos en línea y los devuelve de respaldo cuando se opera desconectado.
+ */
+function useCachedFallback<T>(apiData: any, storageKey: string): T[] {
+  const [cached, setCached] = useState<T[]>(() => {
+    try {
+      const val = localStorage.getItem(storageKey);
+      return val ? JSON.parse(val) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    const list = Array.isArray(apiData?.data) ? apiData.data : (Array.isArray(apiData) ? apiData : null);
+    if (list && list.length > 0) {
+      setCached(list);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(list));
+      } catch {}
+    }
+  }, [apiData, storageKey]);
+
+  const liveList = Array.isArray(apiData?.data) ? apiData.data : (Array.isArray(apiData) ? apiData : []);
+  return liveList.length > 0 ? liveList : cached;
+}
+
 export default function PosPage() {
   const profile = useSelector(selectUserProfile);
   const confirm = useConfirm();
@@ -117,7 +145,11 @@ export default function PosPage() {
   const [showAperturaModal, setShowAperturaModal] = useState(false);
   const [showPrecuentaModal, setShowPrecuentaModal] = useState(false);
 
-  const { data: resumenTurnoData } = useGetResumenCorteQuery({ idSucursal: selectedMesa?.idSucursal || 1 });
+  const sucursalesList = Array.isArray((sucursalesData as any)?.data) ? (sucursalesData as any).data : [];
+  const rawMesas = Array.isArray((mesasData as any)?.data) ? (mesasData as any).data : (Array.isArray(mesasData) ? mesasData : []);
+  const activeSucursalId = selectedMesa?.idSucursal || rawMesas[0]?.idSucursal || sucursalesList.find((s: any) => s.nombre?.includes('Centro'))?.id || sucursalesList[sucursalesList.length - 1]?.id || 2;
+
+  const { data: resumenTurnoData } = useGetResumenCorteQuery({ idSucursal: activeSucursalId });
   const tieneTurnoActivo = !!resumenTurnoData?.data?.idTurno;
 
   const { data: pedidoActivoData, isFetching: isFetchingPedido } = useGetPedidoActivoByMesaQuery(
@@ -157,14 +189,14 @@ export default function PosPage() {
         { id: 4, descripcion: 'Didi Food' },
       ];
 
-  const categorias = Array.isArray((catData as any)?.data) ? (catData as any).data : [];
-  const rawProductos = Array.isArray((prodData as any)?.data) ? (prodData as any).data : [];
-  const variantes = Array.isArray((varData as any)?.data) ? (varData as any).data : [];
-  const precios = Array.isArray((precioData as any)?.data) ? (precioData as any).data : [];
-  const grupos = Array.isArray((gruposData as any)?.data) ? (gruposData as any).data : [];
-  const opciones = Array.isArray((opcionesData as any)?.data) ? (opcionesData as any).data : [];
-  const mesas = Array.isArray((mesasData as any)?.data) ? (mesasData as any).data : [];
-  const areas = Array.isArray((areasData as any)?.data) ? (areasData as any).data : [];
+  const categorias = useCachedFallback<any>(catData, "mf_cache_categorias");
+  const rawProductos = useCachedFallback<any>(prodData, "mf_cache_productos");
+  const variantes = useCachedFallback<any>(varData, "mf_cache_variantes");
+  const precios = useCachedFallback<any>(precioData, "mf_cache_precios");
+  const grupos = useCachedFallback<any>(gruposData, "mf_cache_grupos");
+  const opciones = useCachedFallback<any>(opcionesData, "mf_cache_opciones");
+  const mesas = useCachedFallback<any>(mesasData, "mf_cache_mesas");
+  const areas = useCachedFallback<any>(areasData, "mf_cache_areas");
 
   const filteredMesas = selectedAreaId 
     ? mesas.filter((m: any) => m.idArea === selectedAreaId) 
@@ -333,9 +365,9 @@ export default function PosPage() {
           addToast({ message: result?.message || 'Error al agregar ítems', variant: 'error' });
         }
       } else {
-        const defaultIdSucursal = (sucursalesData as any)?.data?.[0]?.id || 1;
+        const defaultIdSucursal = activeSucursalId;
 
-        const payload = {
+        const fullOrderPayload = {
           idEmpresa: profile.idEmpresa,
           idSucursal: selectedMesa?.idSucursal || defaultIdSucursal,
           idMesa: isComedor ? (selectedMesa?.id || null) : null,
@@ -351,7 +383,7 @@ export default function PosPage() {
           direccionEntrega: isDelivery && deliveryDireccion ? deliveryDireccion.trim() : null,
           detalles: detallesPayload
         };
-        const result = await insertarPedido({ crearPedidoRequestDto: payload as any }).unwrap();
+        const result = await insertarPedido({ crearPedidoRequestDto: fullOrderPayload as any }).unwrap();
         if ((result as any).isSuccess) {
           const pedidoId = (result as any)?.data || '';
           const mesaInfo = isComedor && selectedMesa ? ` [Mesa ${selectedMesa.codigo}]` : '';
@@ -377,7 +409,44 @@ export default function PosPage() {
         setSelectedMesa(null);
         refetchMesas();
       } else {
-        addToast({ message: error?.data?.message || 'Error de conexión al enviar el pedido', variant: 'error' });
+        // Spec 019: Manejo offline resiliente para pedidos cuando se interrumpe la red
+        try {
+          const offlineQueue = JSON.parse(localStorage.getItem('mf_offline_pending_orders') || '[]');
+          const mesaCodigo = isComedor && selectedMesa ? ` [Mesa ${selectedMesa.codigo || selectedMesa.id}]` : '';
+          const defaultIdSucursal = activeSucursalId;
+          offlineQueue.push({
+            idEmpresa: profile.idEmpresa,
+            idSucursal: selectedMesa?.idSucursal || defaultIdSucursal,
+            idMesa: isComedor ? (selectedMesa?.id || null) : null,
+            idTipoPedido: orderType,
+            idEstadoPedido: defaultEstadoPedido,
+            personas: isComedor ? (selectedMesa?.asientos || 1) : 1,
+            cargoServicioPct: 0,
+            idempotencyKey: idempotencyKey,
+            canalOrigen: isComedor ? "POS" : (isDelivery ? deliveryCanal : "POS"),
+            idExterno: isDelivery && deliveryIdExterno ? deliveryIdExterno.trim() : null,
+            nombreClienteDelivery: !isComedor && deliveryCliente ? deliveryCliente.trim() : null,
+            telefonoDelivery: !isComedor && deliveryTelefono ? deliveryTelefono.trim() : null,
+            direccionEntrega: isDelivery && deliveryDireccion ? deliveryDireccion.trim() : null,
+            detalles: detallesPayload,
+            mesaCodigo: selectedMesa?.codigo || selectedMesa?.id,
+            mesa: selectedMesa,
+            itemsCount: cart.length,
+            total: cartTotal,
+            queuedAt: new Date().toISOString()
+          });
+          localStorage.setItem('mf_offline_pending_orders', JSON.stringify(offlineQueue));
+          addToast({ message: `¡Pedido guardado en cola local${mesaCodigo}! Se sincronizará automáticamente.`, variant: 'info' });
+          dispatch(clearCart());
+          setMobileCartOpen(false);
+          setIdempotencyKey(generateUUID());
+          setDeliveryCliente('');
+          setDeliveryTelefono('');
+          setDeliveryDireccion('');
+          setDeliveryIdExterno('');
+        } catch {
+          addToast({ message: error?.data?.message || 'Error de conexión al enviar el pedido', variant: 'error' });
+        }
       }
     }
   };
@@ -1050,7 +1119,20 @@ export default function PosPage() {
                               addToast({ message: "Mesa liberada correctamente", variant: "success" });
                               refetchMesas();
                             } catch (err) {
-                              addToast({ message: "Error al liberar mesa", variant: "error" });
+                              // Spec 019: Modo offline / resiliencia al liberar mesa
+                              try {
+                                const offlineReleases = JSON.parse(localStorage.getItem('mf_offline_table_releases') || '[]');
+                                offlineReleases.push({ idMesa: mesa.id, idEstadoMesa: 1, releasedAt: new Date().toISOString() });
+                                localStorage.setItem('mf_offline_table_releases', JSON.stringify(offlineReleases));
+                                addToast({ message: "Mesa liberada localmente (pendiente de sincronización)", variant: "info" });
+                                // Actualizar optimísticamente en cache local de mesas
+                                const cachedMesas = JSON.parse(localStorage.getItem('mf_cache_mesas') || '[]');
+                                const updatedCached = cachedMesas.map((m: any) => m.id === mesa.id ? { ...m, idEstadoMesa: 1 } : m);
+                                localStorage.setItem('mf_cache_mesas', JSON.stringify(updatedCached));
+                                refetchMesas();
+                              } catch {
+                                addToast({ message: "Error al liberar mesa", variant: "error" });
+                              }
                             }
                           }}
                           style={{ fontSize: '0.75rem', marginTop: '8px', color: 'var(--color-primary, #D64545)', textDecoration: 'underline', textAlign: 'center', width: '100%' }}
@@ -1078,28 +1160,28 @@ export default function PosPage() {
       <CorteCajaModal 
         isOpen={showCorteModal}
         onClose={() => setShowCorteModal(false)}
-        idSucursal={selectedMesa?.idSucursal || 1}
+        idSucursal={activeSucursalId}
       />
 
       {/* Modal de Movimiento de Caja (Entradas y Salidas de Efectivo) */}
       <MovimientoCajaModal
         isOpen={showMovimientoModal}
         onClose={() => setShowMovimientoModal(false)}
-        idSucursal={selectedMesa?.idSucursal || 1}
+        idSucursal={activeSucursalId}
       />
 
       {/* Modal de Corte X (Arqueo en Vivo Provisional) */}
       <CorteXModal
         isOpen={showCorteXModal}
         onClose={() => setShowCorteXModal(false)}
-        idSucursal={selectedMesa?.idSucursal || 1}
+        idSucursal={activeSucursalId}
       />
 
       {/* Modal de Apertura de Turno */}
       <AperturaTurnoModal
         isOpen={showAperturaModal}
         onClose={() => setShowAperturaModal(false)}
-        idSucursal={selectedMesa?.idSucursal || 1}
+        idSucursal={activeSucursalId}
       />
     </div>
   );

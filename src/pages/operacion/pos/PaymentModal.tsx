@@ -26,7 +26,7 @@ const paymentApi = api.injectEndpoints({
         method: 'POST',
         body
       }),
-      invalidatesTags: ['Pedido', 'Mesa']
+      invalidatesTags: ['Pedido', 'Mesa', 'Turno', 'MovimientoCaja']
     })
   })
 });
@@ -200,12 +200,14 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
             pagosRealizados: nuevosPagos
           });
           setShowFinalTicket(true);
+          if (onPaymentSuccess) onPaymentSuccess();
         } else {
           const nuevoSaldo = Math.max(0, saldo - monto);
           addToast({ 
             message: `Abono de $${monto.toFixed(2)} registrado. Saldo pendiente: $${nuevoSaldo.toFixed(2)}`, 
             variant: 'success' 
           });
+          if (onPaymentSuccess) onPaymentSuccess();
           // Recargar cuenta para el siguiente abono
           cargarCuenta(idPedido);
         }
@@ -478,7 +480,8 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
         isOpen={showFinalTicket}
         onClose={() => {
           setShowFinalTicket(false);
-          onPaymentSuccess();
+          if (onPaymentSuccess) onPaymentSuccess();
+          onClose();
         }}
         idPedido={idPedido}
         tipo="ticket-final"
