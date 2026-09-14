@@ -21,6 +21,7 @@ import { DashboardKpiCards } from "./DashboardKpiCards";
 import { DashboardFloorPlan } from "./DashboardFloorPlan";
 import { DashboardKdsPulse } from "./DashboardKdsPulse";
 import { DashboardFastCheckout } from "./DashboardFastCheckout";
+import { DashboardCancelacionesAlert } from "./DashboardCancelacionesAlert";
 import "./dashboard.css";
 
 // Modales Operativos
@@ -98,8 +99,8 @@ export default function DashboardPage() {
   const [updateMesa] = useMesasUpdateAsyncMutation();
 
   // Estados de Modales
-  const [selectedPedidoToPay, setSelectedPedidoToPay] = useState<number | null>(null);
-  const [selectedPedidoPrecuenta, setSelectedPedidoPrecuenta] = useState<number | null>(null);
+  const [selectedPedidoToPay, setSelectedPedidoToPay] = useState<string | null>(null);
+  const [selectedPedidoPrecuenta, setSelectedPedidoPrecuenta] = useState<string | null>(null);
   const [showAperturaModal, setShowAperturaModal] = useState(false);
   const [showCorteModal, setShowCorteModal] = useState(false);
   const [showCorteXModal, setShowCorteXModal] = useState(false);
@@ -247,6 +248,9 @@ export default function DashboardPage() {
               pedidosActivos={pedidos}
               topPlatillos={topPlatillos}
             />
+
+            {/* Spec 024: Monitor y Alerta de Cancelaciones Sospechosas (umbral 2%) */}
+            <DashboardCancelacionesAlert idTurno={resumenTurno?.idTurno ?? null} />
 
             <DashboardFastCheckout
               pedidosPorCobrar={pedidosPorCobrar}

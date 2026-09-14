@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import {
   Sidebar,
   type SidebarSection,
@@ -13,10 +13,12 @@ import {
 import { useAppDispatch } from "../app/hooks";
 import { logout } from "../state/authSlice";
 import Icon from "../components/ui/icons/Icon";
+import { NetworkStatusBanner } from "../components/ui/network-status-banner/NetworkStatusBanner";
+import { PrinterStatusBadge } from "../components/impresoras/PrinterStatusBadge";
 
-import "../styles/tokens.css"; // asegúrate que esté cargado globalmente
-import "../components/navigation/sidebar/sidebar.css"; // estilos del Sidebar
-import "./app-shell.css"; // estilos del layout (abajo)
+import "../styles/tokens.css";
+import "../components/navigation/sidebar/sidebar.css";
+import "./app-shell.css";
 import Topbar from "../components/navigation/topbar/Topbar";
 
 export type AppLayoutProps = {
@@ -26,7 +28,7 @@ export type AppLayoutProps = {
   accesos?: string[] | null;
   /** Contexto para badges dinámicos (p.ej. { pedidosPendientes: 3 }) */
   badgesCtx?: BadgeContext;
-  /** Mostrar Topbar (cuando lo integremos en el siguiente paso) */
+  /** Mostrar Topbar */
   showTopbar?: boolean;
   /** Slot opcional si ya tienes un Topbar *temporal* */
   topbar?: React.ReactNode;
@@ -43,10 +45,10 @@ function toSidebarSections(src: NavSectionConfig[]): SidebarSection[] {
     icon: sec.icon,
     items: sec.items.map((it) => ({
       key: it.key,
-      to: it.path, // <-- mapea path -> to
+      to: it.path,
       label: it.label,
       icon: it.icon,
-      badge: it.badge, // si SidebarItem tiene badge (lo añadiste)
+      badge: it.badge,
     })),
   }));
 }
@@ -55,13 +57,49 @@ export default function AppLayout({
   roles = ["guest"],
   accesos = null,
   badgesCtx,
-  showTopbar = false,
+  showTopbar = true,
   topbar,
   density = "comfortable",
 }: AppLayoutProps) {
-  const [collapsed, setCollapsed] = React.useState(false);
+  // Auto-collapse sidebar on intermediate desktop/tablet screens (769px to 1024px) when height is not mobile
+  // On mobile devices (<= 768px wide OR mobile landscape with <= 500px height), it operates as an overlay drawer,
+  // so it must NEVER be collapsed (labels and text must always be visible).
+  const [collapsed, setCollapsed] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      const isMobileDevice = window.innerWidth <= 768 || window.innerHeight <= 500;
+      if (isMobileDevice) return false;
+      return window.innerWidth <= 1024;
+    }
+    return false;
+  });
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const dispatch = useAppDispatch();
+  const location = useLocation();
+
+  // Route-aware flush mode: POS and KDS are full-bleed operational views
+  const isFlushRoute = React.useMemo(() => {
+    const p = location.pathname.toLowerCase();
+    return p.startsWith("/ventas/pos") || p.startsWith("/ventas/kds") || p.startsWith("/cocina");
+  }, [location.pathname]);
+
+  // Close mobile drawer when route changes
+  React.useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  // Listen to window resize to handle collapse between desktop and mobile/landscape
+  React.useEffect(() => {
+    const handleResize = () => {
+      const isMobileDevice = window.innerWidth <= 768 || window.innerHeight <= 500;
+      if (isMobileDevice) {
+        if (collapsed) setCollapsed(false);
+      } else if (window.innerWidth <= 1024) {
+        if (!collapsed) setCollapsed(true);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [collapsed]);
 
   const handleLogout = React.useCallback(() => {
     dispatch(logout());
@@ -78,11 +116,13 @@ export default function AppLayout({
   );
 
   return (
-    <div className={`app-shell ${collapsed ? "is-collapsed" : ""} ${mobileOpen ? "is-mobile-open" : ""}`}>
+    <div
+      className={`app-shell ${collapsed ? "is-collapsed" : ""} ${mobileOpen ? "is-mobile-open" : ""} ${isFlushRoute ? "has-flush-content" : ""}`}
+    >
       {/* Overlay para móviles */}
       {mobileOpen && (
-        <div 
-          className="app-shell__overlay" 
+        <div
+          className="app-shell__overlay"
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         />
@@ -91,7 +131,7 @@ export default function AppLayout({
       <aside className={`app-shell__side ${mobileOpen ? "is-mobile-open" : ""}`}>
         <Sidebar
           sections={sections}
-          collapsed={collapsed}
+          collapsed={mobileOpen ? false : collapsed}
           onToggle={() => setCollapsed((v) => !v)}
           onMobileClose={() => setMobileOpen(false)}
           density={density}
@@ -103,22 +143,24 @@ export default function AppLayout({
               title="Cerrar sesión"
             >
               <Icon name="LogOut" size={18} />
-              {!collapsed && <span>Cerrar sesión</span>}
+              {(!collapsed || mobileOpen) && <span>Cerrar sesión</span>}
             </button>
           }
         />
       </aside>
 
       <div className="app-shell__main">
-        {showTopbar &&
+        <NetworkStatusBanner />
+        {showTopbar && !isFlushRoute &&
           (topbar ?? (
-            <Topbar 
-              showBrand={false} 
-              subtitle="Backoffice" 
+            <Topbar
+              showBrand={false}
+              subtitle="Backoffice"
               onMenuClick={() => setMobileOpen(true)}
+              actions={<PrinterStatusBadge />}
             />
           ))}
-        <main className="app-shell__content">
+        <main className={`app-shell__content ${isFlushRoute ? "is-flush" : ""}`}>
           <Outlet />
         </main>
       </div>

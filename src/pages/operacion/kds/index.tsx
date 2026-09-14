@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { emptySplitApi as api } from "../../../services/baseApi";
 import { useCatalogosGetAllQuery, useEstacionesCocinaGetAllAsyncQuery } from "../../../services/generated/api";
@@ -20,7 +21,8 @@ import {
   Sparkles,
   RefreshCw,
   History,
-  ListOrdered
+  ListOrdered,
+  ChevronLeft
 } from "lucide-react";
 import * as signalR from "@microsoft/signalr";
 import "./kds.css";
@@ -42,7 +44,7 @@ const kdsApi = api.injectEndpoints({
       }),
       providesTags: ['TicketCocina', 'TicketDetalle']
     }),
-    changeTicketStatus: build.mutation<void, { id: number, status: number }>({
+    changeTicketStatus: build.mutation<void, { id: string, status: number }>({
       query: ({ id, status }) => ({
         url: `/api/TicketsCocina/ChangeTicketStatus/${id}/${status}`,
         method: 'PUT'
@@ -56,7 +58,7 @@ const kdsApi = api.injectEndpoints({
       }),
       invalidatesTags: ['TicketDetalle']
     }),
-    recuperarTicket: build.mutation<void, number>({
+    recuperarTicket: build.mutation<void, string>({
       query: (id) => ({
         url: `/api/TicketsCocina/RecuperarTicket/${id}`,
         method: 'PUT'
@@ -430,9 +432,30 @@ const KdsPage = () => {
   return (
     <div className="kds-container" data-theme="kds-dark">
       {/* Header KDS */}
-      <header className="kds-header" style={{ flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <h1 style={{ fontSize: '20px', margin: 0 }}>Kitchen Display System</h1>
+      <header className="kds-header" style={{ flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Link 
+            to="/" 
+            className="kds-back-btn" 
+            title="Volver al Dashboard"
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '4px', 
+              color: 'var(--color-text)', 
+              textDecoration: 'none', 
+              padding: '6px 10px', 
+              borderRadius: 'var(--radius-sm, 6px)', 
+              backgroundColor: 'var(--color-surface-raised)', 
+              fontSize: '13px',
+              fontWeight: 600,
+              border: '1px solid var(--color-border)'
+            }}
+          >
+            <ChevronLeft size={18} />
+            <span>Volver</span>
+          </Link>
+          <h1 style={{ fontSize: '1.15rem', margin: 0 }}>KDS Cocina</h1>
           
           <select 
             value={selectedEstacion} 

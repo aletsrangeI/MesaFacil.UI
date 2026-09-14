@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
 import { emptySplitApi as api } from '../../../services/baseApi';
 import { useToast } from '../../../components/ui/toast';
 import { useCatalogosGetAllQuery } from '../../../services/generated/api';
 import { ThermalTicketModal } from './ThermalTicketModal';
+import { useTimbrarPedidoMutation } from '../../../services/facturacionApi';
+import {
+  DatosFiscalesForm,
+  datosFiscalesCompletos,
+  DATOS_FISCALES_VACIOS,
+  type DatosFiscalesReceptor,
+} from '../../../components/facturacion/DatosFiscalesForm';
 
 const paymentApi = api.injectEndpoints({
   endpoints: (build) => ({
-    generarCuenta: build.mutation<any, number>({
+    generarCuenta: build.mutation<any, string>({
       query: (idPedido) => ({
         url: `/api/Cuentas/Generar/${idPedido}`,
         method: 'POST'
@@ -29,6 +36,7 @@ export const { useGenerarCuentaMutation, useRegistrarPagoMutation } = paymentApi
 export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: any) {
   const [generarCuenta, { isLoading: isGenerating }] = useGenerarCuentaMutation();
   const [registrarPago, { isLoading: isPaying }] = useRegistrarPagoMutation();
+  const [timbrarPedido, { isLoading: isTimbrando }] = useTimbrarPedidoMutation();
   const { data: metodosData } = useCatalogosGetAllQuery({ catalog: 'metodos-pago' });
   const { addToast } = useToast();
 
@@ -41,9 +49,13 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
   const [showFinalTicket, setShowFinalTicket] = useState(false);
   const [finalTicketData, setFinalTicketData] = useState<any>(null);
 
+  // --- Facturación fiscal (spec 020) ---
+  const [solicitaFactura, setSolicitaFactura] = useState(false);
+  const [datosFiscales, setDatosFiscales] = useState<DatosFiscalesReceptor>(DATOS_FISCALES_VACIOS);
+
   const metodos = Array.isArray((metodosData as any)?.data) ? (metodosData as any).data : [];
 
-  const cargarCuenta = (id: number) => {
+  const cargarCuenta = (id: string) => {
     generarCuenta(id).unwrap()
       .then(res => {
         if (res?.isSuccess) {
@@ -72,6 +84,8 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
       setPropina('0');
       setSelectedPercentage(null);
       setSelectedSplit(1);
+      setSolicitaFactura(false);
+      setDatosFiscales(DATOS_FISCALES_VACIOS);
       cargarCuenta(idPedido);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,6 +144,11 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
     const saldo = cuenta.saldoRestante !== undefined ? cuenta.saldoRestante : cuenta.total;
     const esPagoFinal = monto >= (saldo - 0.01);
 
+    if (solicitaFactura && esPagoFinal && !datosFiscalesCompletos(datosFiscales)) {
+      addToast({ message: 'Completa los datos fiscales (RFC, Régimen, CP y Uso de CFDI) o desactiva la Factura Fiscal', variant: 'error' });
+      return;
+    }
+
     try {
       const res = await registrarPago({
         idCuenta: cuenta.id,
@@ -141,6 +160,26 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
       if (res?.isSuccess) {
         if (esPagoFinal) {
           addToast({ message: 'Cuenta liquidada exitosamente. Mesa liberada.', variant: 'success' });
+
+          if (solicitaFactura) {
+            try {
+              const facturaRes = await timbrarPedido({
+                pedidoId: idPedido,
+                ...datosFiscales,
+              }).unwrap();
+              if (facturaRes?.isSuccess) {
+                addToast({
+                  message: `Factura CFDI generada (Folio ${facturaRes.data?.folio ?? ''})`,
+                  variant: 'success',
+                });
+              } else {
+                addToast({ message: facturaRes?.message || 'No se pudo timbrar la factura', variant: 'error' });
+              }
+            } catch {
+              addToast({ message: 'Error de conexión al timbrar la factura. El cobro ya quedó registrado.', variant: 'error' });
+            }
+          }
+
           // Preparar datos para el Ticket Final
           const metodoNombre = metodos.find((m: any) => m.id === idMetodo)?.descripcion || 'Efectivo';
           const nuevosPagos = [
@@ -183,23 +222,26 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
       <div 
         className="pos-modal-content" 
         style={{ 
-          width: '90%',
-          maxWidth: 550, 
+          width: '95%',
+          maxWidth: 540, 
+          maxHeight: '90dvh',
           padding: 0, 
           overflow: 'hidden',
           borderRadius: 'var(--radius-lg, 20px)',
-          boxShadow: 'var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08))',
-          backgroundColor: 'var(--color-bg, #FFFFFF)'
+          boxShadow: 'var(--shadow-lg, 0 10px 25px rgba(0,0,0,0.15))',
+          backgroundColor: 'var(--color-surface, #FFFFFF)',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
-        <div style={{ padding: 'var(--space-6, 24px)', borderBottom: '1px solid var(--color-border, rgba(0,0,0,0.12))', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ margin: 0, color: 'var(--color-text, #1F1F1F)', fontFamily: 'var(--font-h2)' }}>Cobrar Pedido #{idPedido}</h2>
-          <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--color-text-muted, #6B7280)', display: 'flex', alignItems: 'center' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border, rgba(0,0,0,0.12))', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-text, #1F1F1F)', fontFamily: 'var(--font-h2)' }}>Cobrar Pedido #{idPedido}</h2>
+          <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--color-text-muted, #6B7280)', display: 'flex', alignItems: 'center', padding: '6px' }}>
             <X size={22} />
           </button>
         </div>
         
-        <div style={{ padding: 'var(--space-6, 24px)' }}>
+        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1, minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
           {isGenerating || !cuenta ? (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted, #6B7280)' }}>Calculando totales...</div>
           ) : (
@@ -360,38 +402,76 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
                   })}
                 </div>
 
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   step="0.01"
                   placeholder="Monto personalizado"
-                  value={propina} 
+                  value={propina}
                   onChange={handlePropinaChange}
                   style={{ width: '100%', boxSizing: 'border-box', padding: 'var(--space-3, 12px)', borderRadius: 'var(--radius-md, 12px)', border: '1px solid var(--color-border, rgba(0,0,0,0.12))', color: 'var(--color-text, #1F1F1F)', outlineColor: 'var(--color-primary, #D64545)' }}
                 />
               </div>
 
-              <button 
-                onClick={handlePay}
-                disabled={isPaying || !montoRecibido || montoActual <= 0}
-                style={{
-                  background: 'var(--color-primary, #D64545)',
-                  color: 'white',
-                  padding: '16px',
-                  border: 'none',
-                  borderRadius: 'var(--radius-md, 12px)',
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  cursor: (isPaying || !montoRecibido || montoActual <= 0) ? 'not-allowed' : 'pointer',
-                  opacity: (isPaying || !montoRecibido || montoActual <= 0) ? 0.6 : 1,
-                  marginTop: 'var(--space-2, 8px)',
-                  boxShadow: 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.06))'
-                }}
-              >
-                {isPaying ? 'Procesando...' : (montoActual >= (saldoActual - 0.01) ? 'Confirmar Pago y Liquidar' : `Registrar Abono ($${montoActual.toFixed(2)})`)}
-              </button>
+              {/* Facturación Fiscal CFDI (spec 020) */}
+              <div style={{ borderTop: '1px solid var(--color-border, rgba(0,0,0,0.12))', paddingTop: 'var(--space-3, 12px)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14, color: 'var(--color-text, #1F1F1F)' }}>
+                  <input
+                    type="checkbox"
+                    checked={solicitaFactura}
+                    onChange={(e) => setSolicitaFactura(e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: 'var(--color-primary, #D64545)' }}
+                  />
+                  <FileText size={16} />
+                  Solicitar Factura Fiscal (CFDI)
+                </label>
+
+                {solicitaFactura && (
+                  <div style={{ marginTop: 'var(--space-3, 12px)' }}>
+                    <DatosFiscalesForm value={datosFiscales} onChange={setDatosFiscales} showEmail />
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
+
+        {/* Modal Footer con botón de pago siempre visible */}
+        {cuenta && !isGenerating && (
+          <div style={{
+            padding: '12px 20px',
+            borderTop: '1px solid var(--color-border, rgba(0,0,0,0.12))',
+            background: 'var(--color-surface, #FFFFFF)',
+            flexShrink: 0,
+            paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))'
+          }}>
+            <button
+              onClick={handlePay}
+              disabled={isPaying || isTimbrando || !montoRecibido || montoActual <= 0}
+              style={{
+                width: '100%',
+                background: 'var(--color-primary, #D64545)',
+                color: 'white',
+                padding: '14px',
+                border: 'none',
+                borderRadius: 'var(--radius-md, 12px)',
+                fontSize: '1.05rem',
+                fontWeight: 700,
+                cursor: (isPaying || isTimbrando || !montoRecibido || montoActual <= 0) ? 'not-allowed' : 'pointer',
+                opacity: (isPaying || isTimbrando || !montoRecibido || montoActual <= 0) ? 0.6 : 1,
+                boxShadow: '0 4px 12px rgba(214, 69, 69, 0.25)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {isPaying
+                ? 'Procesando...'
+                : isTimbrando
+                ? 'Timbrando factura...'
+                : montoActual >= (saldoActual - 0.01)
+                ? 'Confirmar Pago y Liquidar'
+                : `Registrar Abono ($${montoActual.toFixed(2)})`}
+            </button>
+          </div>
+        )}
       </div>
 
       <ThermalTicketModal

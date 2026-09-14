@@ -4,7 +4,7 @@ import Icon from '../../components/ui/icons/Icon';
 
 interface DashboardFastCheckoutProps {
   pedidosPorCobrar?: any[];
-  onCobrarPedido: (idPedido: number) => void;
+  onCobrarPedido: (idPedido: string) => void;
   ventasEfectivo?: number;
   ventasTarjeta?: number;
   ventasTransferencia?: number;
@@ -55,7 +55,7 @@ export const DashboardFastCheckout: React.FC<DashboardFastCheckoutProps> = ({
               <div key={pedido.id} className="dash-order-item">
                 <div className="dash-order-info">
                   <div className="dash-order-mesa">
-                    Orden #{pedido.id} • {pedido.idMesa ? `Mesa ${pedido.idMesa}` : 'Para Llevar / Mostrador'}
+                    Orden #{pedido.folioDiario ?? pedido.id} • {pedido.idMesa ? `Mesa ${pedido.idMesa}` : 'Para Llevar / Mostrador'}
                   </div>
                   <div className="dash-order-meta">
                     {pedido.personas || 1} personas • Abierto: {pedido.abiertoEn ? new Date(pedido.abiertoEn).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : 'Hoy'}
@@ -94,17 +94,17 @@ export const DashboardFastCheckout: React.FC<DashboardFastCheckoutProps> = ({
           <div style={{ width: `${pctTransf}%`, background: 'var(--color-secondary, #e2a72e)' }} title={`Transferencia: ${pctTransf}%`} />
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: 6, color: 'var(--color-text-muted, #64748b)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-success, #3c8d40)' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px 12px', fontSize: '0.75rem', marginTop: 8, color: 'var(--color-text-muted, #64748b)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-success, #3c8d40)', flexShrink: 0 }} />
             Efectivo ({pctEfectivo}%)
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-info, #3b82f6)' }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-info, #3b82f6)', flexShrink: 0 }} />
             Tarjetas ({pctTarjeta}%)
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-secondary, #e2a72e)' }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-secondary, #e2a72e)', flexShrink: 0 }} />
             Transf. ({pctTransf}%)
           </span>
         </div>

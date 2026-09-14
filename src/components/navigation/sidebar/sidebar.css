@@ -483,11 +483,28 @@
   }
 }
 
-/* Responsive: Móviles (hasta 768px) - Drawer completo */
-@media (max-width: 768px) {
+/* Responsive: Móviles (hasta 768px o móviles landscape <= 500px altura) - Drawer completo */
+@media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
   .mf-sidebar {
-    width: var(--sidebar-w) !important;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.1); /* Sombra extra para modo drawer */
+    width: min(var(--sidebar-w), 85vw) !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.25);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mf-sidebar .mf-nav__section-label,
+  .mf-sidebar .mf-nav__label,
+  .mf-sidebar .mf-nav__badge,
+  .mf-sidebar .mf-brand__textwrap {
+    display: block !important;
+  }
+  .mf-sidebar .mf-brand__textwrap {
+    display: flex !important;
+  }
+  .mf-sidebar .mf-sidebar__brand {
+    justify-content: flex-start !important;
+  }
+  .mf-sidebar .mf-nav__link {
+    justify-content: flex-start !important;
+    padding: 10px 14px !important;
   }
   .mf-sidebar__collapse {
     display: none !important; /* No permitir colapsar en móvil, se cierra con el overlay */

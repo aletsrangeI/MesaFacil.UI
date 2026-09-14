@@ -8,7 +8,7 @@ export interface RegistrarMovimientoRequest {
 }
 
 export interface MovimientoCajaItem {
-  id: number;
+  id: string;
   idTurno: number;
   idSucursal: number;
   nombreSucursal: string;

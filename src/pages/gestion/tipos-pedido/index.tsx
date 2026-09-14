@@ -124,7 +124,7 @@ export default function TiposPedidoPage() {
         />
       </div>
 
-      <dialog ref={dialogRef} style={{ border: 'none', borderRadius: '8px', padding: 0, minWidth: '400px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+      <dialog ref={dialogRef} style={{ border: 'none', borderRadius: '8px', padding: 0, width: '92vw', maxWidth: '440px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <header style={{ padding: '16px 24px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
             <h2 style={{ margin: 0, fontSize: '18px' }}>{editingItem ? "Editar Tipo de Pedido" : "Nuevo Tipo de Pedido"}</h2>

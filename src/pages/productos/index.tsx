@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "../../components/ui/button/Button";
 import Icon from "../../components/ui/icons/Icon";
@@ -7,10 +7,12 @@ import { FormGenerator } from "../../forms/FormGenerator";
 import { mesaFacilFields } from "../../components/ui/adapters";
 import { DataTable } from "../../components/data-table/DataTable";
 import { useProductos } from "./useProductos";
+import ImportadorMenuWizard from "../catalogos/ImportadorMenuWizard";
 
 import "./productos.css";
 
 export default function ProductosPage() {
+  const [isImportadorOpen, setIsImportadorOpen] = useState(false);
   const {
     productos,
     isLoadingList,
@@ -50,13 +52,22 @@ export default function ProductosPage() {
             Crea, edita y administra el catálogo de productos y platillos en el sistema.
           </p>
         </div>
-        <Button
-          variant="primary"
-          leftIcon={<Icon name="Plus" />}
-          onClick={() => openModal()}
-        >
-          Crear Producto
-        </Button>
+        <div className="productos-page__header-actions" style={{ display: "flex", gap: 8 }}>
+          <Button
+            variant="secondary"
+            leftIcon={<Icon name="FileSpreadsheet" />}
+            onClick={() => setIsImportadorOpen(true)}
+          >
+            Importar Menú desde Excel
+          </Button>
+          <Button
+            variant="primary"
+            leftIcon={<Icon name="Plus" />}
+            onClick={() => openModal()}
+          >
+            Crear Producto
+          </Button>
+        </div>
       </header>
 
       <div className="productos-page__content">
@@ -158,6 +169,11 @@ export default function ProductosPage() {
           </footer>
         </div>
       </dialog>
+
+      <ImportadorMenuWizard
+        open={isImportadorOpen}
+        onClose={() => setIsImportadorOpen(false)}
+      />
     </Container>
   );
 }

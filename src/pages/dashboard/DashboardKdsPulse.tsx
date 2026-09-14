@@ -79,7 +79,7 @@ export const DashboardKdsPulse: React.FC<DashboardKdsPulseProps> = ({
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--color-text, #0f172a)' }}>
-                      Ticket #{ticket.id}
+                      Ticket #{pedido?.folioDiario ?? ticket.id}
                     </strong>
                     {pedido && (
                       <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #64748b)' }}>

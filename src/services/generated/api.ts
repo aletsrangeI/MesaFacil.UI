@@ -4170,7 +4170,7 @@ export type PedidosGetAllApiArg = void;
 export type PedidosGetByIdApiResponse =
   /** status 200 OK */ ResponseOfPedidoDto;
 export type PedidosGetByIdApiArg = {
-  id: number;
+  id: string;
 };
 export type PedidosUpdateApiResponse = /** status 200 OK */ ResponseOfboolean;
 export type PedidosUpdateApiArg = {
@@ -4178,7 +4178,7 @@ export type PedidosUpdateApiArg = {
 };
 export type PedidosDeleteApiResponse = /** status 200 OK */ ResponseOfboolean;
 export type PedidosDeleteApiArg = {
-  id: number;
+  id: string;
 };
 export type PedidosGetAllWithPaginationApiResponse =
   /** status 200 OK */ ResponsePaginationOfIEnumerableOfPedidoDto;
@@ -4194,7 +4194,7 @@ export type PedidosInsertAsyncApiArg = {
   pedidoDto: PedidoDto;
 };
 export type PedidosInsertConDetallesAsyncApiResponse =
-  /** status 200 OK */ ResponseOfint;
+  /** status 200 OK */ ResponseOfstring;
 export type PedidosInsertConDetallesAsyncApiArg = {
   crearPedidoRequestDto: CrearPedidoRequestDto;
 };
@@ -4204,7 +4204,7 @@ export type PedidosGetAllAsyncApiArg = void;
 export type PedidosGetByIdAsyncApiResponse =
   /** status 200 OK */ ResponseOfPedidoDto;
 export type PedidosGetByIdAsyncApiArg = {
-  id: number;
+  id: string;
 };
 export type PedidosUpdateAsyncApiResponse =
   /** status 200 OK */ ResponseOfboolean;
@@ -4214,7 +4214,7 @@ export type PedidosUpdateAsyncApiArg = {
 export type PedidosDeleteAsyncApiResponse =
   /** status 200 OK */ ResponseOfboolean;
 export type PedidosDeleteAsyncApiArg = {
-  id: number;
+  id: string;
 };
 export type PedidosGetAllWithPaginationAsyncApiResponse =
   /** status 200 OK */ ResponsePaginationOfIEnumerableOfPedidoDto;
@@ -4532,7 +4532,7 @@ export type TicketsCocinaGetAllApiArg = void;
 export type TicketsCocinaGetByIdApiResponse =
   /** status 200 OK */ ResponseOfTicketCocinaDto;
 export type TicketsCocinaGetByIdApiArg = {
-  id: number;
+  id: string;
 };
 export type TicketsCocinaUpdateApiResponse =
   /** status 200 OK */ ResponseOfboolean;
@@ -4542,7 +4542,7 @@ export type TicketsCocinaUpdateApiArg = {
 export type TicketsCocinaDeleteApiResponse =
   /** status 200 OK */ ResponseOfboolean;
 export type TicketsCocinaDeleteApiArg = {
-  id: number;
+  id: string;
 };
 export type TicketsCocinaGetAllWithPaginationApiResponse =
   /** status 200 OK */ ResponsePaginationOfIEnumerableOfTicketCocinaDto;
@@ -4556,7 +4556,7 @@ export type TicketsCocinaGetKdsBoardApiResponse = unknown;
 export type TicketsCocinaGetKdsBoardApiArg = void;
 export type TicketsCocinaChangeTicketStatusApiResponse = unknown;
 export type TicketsCocinaChangeTicketStatusApiArg = {
-  id: number;
+  id: string;
   status: number;
 };
 export type TicketsCocinaChangeItemStatusApiResponse = unknown;
@@ -4575,7 +4575,7 @@ export type TicketsCocinaGetAllAsyncApiArg = void;
 export type TicketsCocinaGetByIdAsyncApiResponse =
   /** status 200 OK */ ResponseOfTicketCocinaDto;
 export type TicketsCocinaGetByIdAsyncApiArg = {
-  id: number;
+  id: string;
 };
 export type TicketsCocinaUpdateAsyncApiResponse =
   /** status 200 OK */ ResponseOfboolean;
@@ -4585,7 +4585,7 @@ export type TicketsCocinaUpdateAsyncApiArg = {
 export type TicketsCocinaDeleteAsyncApiResponse =
   /** status 200 OK */ ResponseOfboolean;
 export type TicketsCocinaDeleteAsyncApiArg = {
-  id: number;
+  id: string;
 };
 export type TicketsCocinaGetAllWithPaginationAsyncApiResponse =
   /** status 200 OK */ ResponsePaginationOfIEnumerableOfTicketCocinaDto;
@@ -5334,7 +5334,8 @@ export type ResponsePaginationOfIEnumerableOfOpcionModificadorDto = {
   errors?: ValidationFailure[];
 };
 export type PedidoDto = {
-  id?: number;
+  id?: string;
+  folioDiario?: number;
   idEmpresa?: number;
   idSucursal?: number;
   idMesa?: number | null;
@@ -5355,7 +5356,8 @@ export type ResponseOfIEnumerableOfPedidoDto = {
   errors?: ValidationFailure[];
 };
 export type PedidoDto2 = {
-  id?: number;
+  id?: string;
+  folioDiario?: number;
   idEmpresa?: number;
   idSucursal?: number;
   idMesa?: number | null;
@@ -5582,8 +5584,8 @@ export type ResponsePaginationOfIEnumerableOfSucursalDto = {
 };
 export type TicketDetalleDto = {
   id?: number;
-  idTicket?: number;
-  idDetalle?: number;
+  idTicket?: string;
+  idDetalle?: string;
   idEstadoItemKDS?: number;
   activo?: boolean;
 };
@@ -5595,8 +5597,8 @@ export type ResponseOfIEnumerableOfTicketDetalleDto = {
 };
 export type TicketDetalleDto2 = {
   id?: number;
-  idTicket?: number;
-  idDetalle?: number;
+  idTicket?: string;
+  idDetalle?: string;
   idEstadoItemKDS?: number;
   activo?: boolean;
 } | null;
@@ -5618,9 +5620,9 @@ export type ResponsePaginationOfIEnumerableOfTicketDetalleDto = {
   errors?: ValidationFailure[];
 };
 export type TicketCocinaDto = {
-  id?: number;
+  id?: string;
   idEstacion?: number;
-  idPedido?: number;
+  idPedido?: string;
   idEstadoTicketCocina?: number;
   completadoEn?: string | null;
   activo?: boolean;
@@ -5632,9 +5634,9 @@ export type ResponseOfIEnumerableOfTicketCocinaDto = {
   errors?: ValidationFailure[];
 };
 export type TicketCocinaDto2 = {
-  id?: number;
+  id?: string;
   idEstacion?: number;
-  idPedido?: number;
+  idPedido?: string;
   idEstadoTicketCocina?: number;
   completadoEn?: string | null;
   activo?: boolean;

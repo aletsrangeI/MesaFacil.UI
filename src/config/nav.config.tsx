@@ -198,6 +198,14 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         sortOrder: 40,
         allowedRoles: ["admin", "manager", "cashier"],
       },
+      {
+        key: "facturacion",
+        label: "Facturación CFDI",
+        path: "/facturacion",
+        icon: <Icon name="FileText" />,
+        sortOrder: 50,
+        allowedRoles: ["admin", "manager", "cashier"],
+      },
     ],
   },
   {
@@ -405,6 +413,24 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         acceso: "/",
         icon: <Icon name="Grid" />,
         sortOrder: 40,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "impresoras",
+        label: "Impresoras",
+        path: "/gestion/impresoras",
+        acceso: "/",
+        icon: <Icon name="Printer" />,
+        sortOrder: 45,
+        allowedRoles: ["admin", "manager"],
+      },
+      {
+        key: "planes",
+        label: "Planes y Suscripción",
+        path: "/gestion/planes",
+        acceso: "/",
+        icon: <Icon name="Sparkles" />,
+        sortOrder: 50,
         allowedRoles: ["admin", "manager"],
       },
     ],
@@ -677,6 +703,8 @@ function filterByAccesos(
         if ((roles?.includes("manager") || roles?.includes("kitchen")) && (pathNorm === "/inventario" || pathNorm === "/admin/inventory" || pathNorm.startsWith("/compras"))) return true;
         // Respaldo para cuentas por pagar
         if ((roles?.includes("manager") || roles?.includes("cashier")) && (pathNorm === "/cxp" || pathNorm.startsWith("/cxp"))) return true;
+        // Respaldo para facturación CFDI
+        if ((roles?.includes("manager") || roles?.includes("cashier")) && pathNorm === "/facturacion") return true;
         return false;
       }),
     }))

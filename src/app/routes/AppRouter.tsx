@@ -23,6 +23,7 @@ import PreciosPage from "../../pages/precios";
 import ModificadoresPage from "../../pages/modificadores";
 import EmpresaPage from "../../pages/gestion/empresa";
 import SucursalesPage from "../../pages/gestion/sucursales";
+import ImpresorasPage from "../../pages/gestion/impresoras";
 import AreasPage from "../../pages/gestion/areas";
 import MesasPage from "../../pages/gestion/mesas";
 import TiposPedidoPage from "../../pages/gestion/tipos-pedido";
@@ -34,6 +35,10 @@ import DeliveryHistorialPage from "../../pages/operacion/delivery/historial";
 import InventarioPage from "../../pages/inventario";
 import ComprasPage from "../../pages/compras";
 import CxPPage from "../../pages/cxp";
+import PlanesPage from "../../pages/planes";
+import FacturacionPage from "../../pages/facturacion";
+import AutofacturacionPage from "../../pages/public/AutofacturacionPage";
+import ComanderoPage from "../../pages/operacion/comandero";
 
 import { useEffect } from "react";
 import { useToast } from "../../components/ui/toast";
@@ -80,6 +85,24 @@ export default function AppRouter() {
       {/* Público */}
       <Route path="/login" element={<RegistroUsuario />} />
       <Route path="/login-pin" element={<LoginPin />} />
+
+      {/* Portal Público de Autofacturación (spec 020) — sin login, standalone */}
+      <Route path="/facturar" element={<AutofacturacionPage />} />
+      <Route path="/facturar/:ticketId" element={<AutofacturacionPage />} />
+
+      {/* Modo Comandero Móvil (spec 025) — requiere sesión (PrivateRoute) pero se renderiza
+          FUERA de <AppLayout> a propósito: es una vista a pantalla completa, sin el sidebar
+          denso del backoffice, pensada para tablets de 8.4"/smartphones de meseros. */}
+      <Route
+        path="/operacion/comandero"
+        element={
+          <PrivateRoute>
+            <RequireAccess path="/operacion/comandero">
+              <ComanderoPage />
+            </RequireAccess>
+          </PrivateRoute>
+        }
+      />
 
       {/* Privado */}
       <Route
@@ -336,6 +359,14 @@ export default function AppRouter() {
           }
         />
         <Route
+          path="/gestion/impresoras"
+          element={
+            <RequireAccess path="/">
+              <ImpresorasPage />
+            </RequireAccess>
+          }
+        />
+        <Route
           path="/gestion/areas"
           element={
             <RequireAccess path="/">
@@ -356,6 +387,14 @@ export default function AppRouter() {
           element={
             <RequireAccess path="/">
               <TiposPedidoPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/gestion/planes"
+          element={
+            <RequireAccess path="/">
+              <PlanesPage />
             </RequireAccess>
           }
         />
@@ -443,6 +482,14 @@ export default function AppRouter() {
           element={
             <RequireAccess path="/cxp">
               <CxPPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/facturacion"
+          element={
+            <RequireAccess path="/facturacion">
+              <FacturacionPage />
             </RequireAccess>
           }
         />

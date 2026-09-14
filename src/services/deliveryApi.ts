@@ -1,7 +1,7 @@
 import { emptySplitApi as api } from './baseApi';
 
 export interface DeliveryItemDetalle {
-  idDetalle: number;
+  idDetalle: string;
   productoNombre: string;
   varianteNombre?: string;
   cantidad: number;
@@ -11,7 +11,7 @@ export interface DeliveryItemDetalle {
 }
 
 export interface DeliveryQueueItem {
-  idPedido: number;
+  idPedido: string;
   folio: string;
   tipoPedido: string;
   isComedor: boolean;
@@ -35,14 +35,14 @@ export interface DeliveryQueueItem {
 }
 
 export interface DespacharPedidoRequest {
-  id: number;
+  id: string;
   nombreRepartidor?: string;
   telefonoRepartidor?: string;
   idExterno?: string;
 }
 
 export interface RebotarPedidoRequest {
-  id: number;
+  id: string;
   motivo: string;
 }
 
@@ -56,7 +56,7 @@ export interface DeliveryEventoAuditoria {
 }
 
 export interface DeliveryHistorialItem {
-  idPedido: number;
+  idPedido: string;
   folio: string;
   tipoPedido: string;
   canalOrigen: string;
@@ -134,7 +134,7 @@ export const deliveryApi = api.injectEndpoints({
 
     marcarListoPedido: build.mutation<
       { isSuccess: boolean; message?: string; data?: boolean },
-      number
+      string
     >({
       query: (id) => ({
         url: `/api/Pedidos/${id}/MarcarListo`,
@@ -157,11 +157,11 @@ export const deliveryApi = api.injectEndpoints({
 
     entregarPedido: build.mutation<
       { isSuccess: boolean; message?: string; data?: boolean },
-      number | { id: number; idMetodoDePago?: number }
+      string | { id: string; idMetodoDePago?: number }
     >({
       query: (arg) => {
-        const id = typeof arg === 'number' ? arg : arg.id;
-        const body = typeof arg === 'number' ? {} : { idMetodoDePago: arg.idMetodoDePago };
+        const id = typeof arg === 'string' ? arg : arg.id;
+        const body = typeof arg === 'string' ? {} : { idMetodoDePago: arg.idMetodoDePago };
         return {
           url: `/api/Pedidos/${id}/Entregar`,
           method: 'PUT',

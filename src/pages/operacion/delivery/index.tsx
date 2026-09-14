@@ -43,7 +43,7 @@ export default function DeliveryPage() {
   const [pedidoACobrar, setPedidoACobrar] = useState<DeliveryQueueItem | null>(null);
 
   // Expansión de ítems
-  const [expandedOrders, setExpandedOrders] = useState<Record<number, boolean>>({});
+  const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
 
   // Sucursales
   const { data: sucursalesData } = useSucursalesGetAllQuery();
@@ -90,7 +90,7 @@ export default function DeliveryPage() {
     };
   }, [refetch, addToast]);
 
-  const toggleExpand = (id: number) => {
+  const toggleExpand = (id: string) => {
     setExpandedOrders((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 

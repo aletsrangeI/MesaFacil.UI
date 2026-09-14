@@ -1,11 +1,23 @@
 /* Viewport (posiciones) */
 .ui-toast__viewport {
   position: fixed;
-  z-index: 70;
+  z-index: 99999 !important;
   display: grid;
   gap: 10px;
   max-width: min(92vw, 420px);
   pointer-events: none; /* deja pasar clics por detrás salvo en los toasts */
+}
+
+/* En móviles, ubicar los toasts arriba al centro para nunca quedar ocultos tras barras o teclados */
+@media (max-width: 768px) {
+  .ui-toast__viewport {
+    top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: min(92vw, 380px) !important;
+  }
 }
 
 /* posiciones */

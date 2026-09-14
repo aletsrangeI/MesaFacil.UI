@@ -89,11 +89,27 @@ export function ProductModifiersModal({
 
   return (
     <div className="pos-modal-overlay">
-      <div className="pos-modal-content" style={{ maxWidth: 600, width: '100%', padding: '24px', background: 'var(--color-surface, #fff)', borderRadius: '12px' }}>
-        <h2 style={{ marginBottom: 8 }}>{product.nombre}</h2>
-        <p style={{ color: 'var(--color-text-muted, #666)', marginBottom: 24 }}>Personaliza tu pedido</p>
+      <div 
+        className="pos-modal-content" 
+        style={{ 
+          maxWidth: 560, 
+          width: '95%', 
+          maxHeight: '90dvh', 
+          padding: 0, 
+          background: 'var(--color-surface, #fff)', 
+          borderRadius: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          boxShadow: 'var(--shadow-lg)'
+        }}
+      >
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border)', flexShrink: 0 }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>{product.nombre}</h2>
+          <p style={{ color: 'var(--color-text-muted, #666)', margin: '4px 0 0 0', fontSize: '0.85rem' }}>Personaliza tu pedido</p>
+        </div>
         
-        <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1, minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
           
           {/* Variants Section */}
           {product.variantes && product.variantes.length > 1 && (
@@ -198,12 +214,21 @@ export function ProductModifiersModal({
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--color-border)' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '12px 20px',
+          borderTop: '1px solid var(--color-border)',
+          background: 'var(--color-surface, #fff)',
+          flexShrink: 0,
+          paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))'
+        }}>
           <div>
-            <span style={{ color: 'var(--color-text-muted)' }}>Extra: </span>
-            <strong style={{ fontSize: '1.2rem' }}>${extraPrice.toFixed(2)}</strong>
+            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Extra: </span>
+            <strong style={{ fontSize: '1.15rem' }}>${extraPrice.toFixed(2)}</strong>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
             <Button variant="ghost" onClick={onClose}>Cancelar</Button>
             <Button variant="primary" disabled={!isValid || !selectedVariant} onClick={handleConfirm}>
               Agregar ${((selectedVariant?.precio || 0) + extraPrice).toFixed(2)}
