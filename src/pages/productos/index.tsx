@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "../../components/ui/button/Button";
 import Icon from "../../components/ui/icons/Icon";
@@ -8,11 +9,15 @@ import { mesaFacilFields } from "../../components/ui/adapters";
 import { DataTable } from "../../components/data-table/DataTable";
 import { useProductos } from "./useProductos";
 import ImportadorMenuWizard from "../catalogos/ImportadorMenuWizard";
+import { PlatilloWizardModal } from "./PlatilloWizardModal";
 
 import "./productos.css";
 
 export default function ProductosPage() {
+  const navigate = useNavigate();
   const [isImportadorOpen, setIsImportadorOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+
   const {
     productos,
     isLoadingList,
@@ -33,6 +38,7 @@ export default function ProductosPage() {
     closeModal,
     handleFormikSubmit,
     handleDelete,
+    refetch,
   } = useProductos();
 
   const columns = useMemo<ColumnDef<any, any>[]>(() => [
@@ -52,20 +58,27 @@ export default function ProductosPage() {
             Crea, edita y administra el catálogo de productos y platillos en el sistema.
           </p>
         </div>
-        <div className="productos-page__header-actions" style={{ display: "flex", gap: 8 }}>
+        <div className="productos-page__header-actions" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <Button
             variant="secondary"
             leftIcon={<Icon name="FileSpreadsheet" />}
             onClick={() => setIsImportadorOpen(true)}
           >
-            Importar Menú desde Excel
+            Importar Menú
           </Button>
           <Button
-            variant="primary"
+            variant="secondary"
             leftIcon={<Icon name="Plus" />}
             onClick={() => openModal()}
           >
-            Crear Producto
+            Avanzado
+          </Button>
+          <Button
+            variant="primary"
+            leftIcon={<Icon name="Sparkles" />}
+            onClick={() => setIsWizardOpen(true)}
+          >
+            Nuevo Platillo (Wizard)
           </Button>
         </div>
       </header>
@@ -173,6 +186,20 @@ export default function ProductosPage() {
       <ImportadorMenuWizard
         open={isImportadorOpen}
         onClose={() => setIsImportadorOpen(false)}
+      />
+
+      <PlatilloWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        onCreated={(_result, abrirStudio) => {
+          refetch();
+          if (abrirStudio) {
+            navigate("/inventario/recetas");
+          }
+        }}
+        categorias={dataSources.categorias || []}
+        menus={dataSources.menus || []}
+        estaciones={dataSources.estaciones || []}
       />
     </Container>
   );

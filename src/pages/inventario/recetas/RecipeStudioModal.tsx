@@ -23,9 +23,13 @@ import type {
 import {
   useProductosGetAllQuery,
   useVarianteProductosGetAllQuery,
+  useCategoriasGetAllQuery,
+  useMenusGetAllQuery,
+  useCatalogosGetAllAsyncQuery,
 } from "../../../services/generated/api";
 import { CostDonutChart } from "./CostDonutChart";
 import { OmniSearchModal } from "./OmniSearchModal";
+import { PlatilloWizardModal } from "../../productos/PlatilloWizardModal";
 import { useToast } from "../../../components/ui/toast";
 
 interface RecipeStudioModalProps {
@@ -67,8 +71,11 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
   const { addToast } = useToast();
 
   // Queries para productos y variantes
-  const { data: productosResp } = useProductosGetAllQuery();
-  const { data: variantesResp } = useVarianteProductosGetAllQuery();
+  const { data: productosResp, refetch: refetchProductos } = useProductosGetAllQuery();
+  const { data: variantesResp, refetch: refetchVariantes } = useVarianteProductosGetAllQuery();
+  const { data: categoriasResp } = useCategoriasGetAllQuery();
+  const { data: menusResp } = useMenusGetAllQuery();
+  const { data: estacionesResp } = useCatalogosGetAllAsyncQuery({ catalog: "estaciones-cocina" });
 
   const productos = useMemo(() => {
     return Array.isArray(productosResp?.data) ? productosResp.data : [];
@@ -77,6 +84,20 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
   const variantes = useMemo(() => {
     return Array.isArray(variantesResp?.data) ? variantesResp.data : [];
   }, [variantesResp]);
+
+  const categorias = useMemo(() => {
+    return Array.isArray((categoriasResp as any)?.data) ? (categoriasResp as any).data : [];
+  }, [categoriasResp]);
+
+  const menus = useMemo(() => {
+    return Array.isArray((menusResp as any)?.data) ? (menusResp as any).data : [];
+  }, [menusResp]);
+
+  const estaciones = useMemo(() => {
+    return Array.isArray((estacionesResp as any)?.data)
+      ? (estacionesResp as any).data.map((e: any) => ({ id: e.id, nombre: e.descripcion }))
+      : [];
+  }, [estacionesResp]);
 
   // Estado general de la receta
   const [esSubReceta, setEsSubReceta] = useState<boolean>(modoInicial === "subreceta");
@@ -96,8 +117,9 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
   // Lista interactiva de ingredientes
   const [detalles, setDetalles] = useState<DetalleStudio[]>([]);
 
-  // Control del modal Omni-Search
+  // Modales
   const [isOmniOpen, setIsOmniOpen] = useState<boolean>(false);
+  const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
 
   // API mutations
   const [simularCosteo, { data: simulacionData }] = useSimularCosteoMutation();
@@ -274,6 +296,7 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
       idVariante: esSubReceta ? undefined : idVariante,
       rendimiento: rendimiento > 0 ? rendimiento : 1,
       idUnidadMedidaRendimiento: idUnidadRendimiento,
+      precioVentaActual: !esSubReceta && precioVenta > 0 ? precioVenta : undefined,
       detalles: detalles.map((d) => ({
         idInsumo: d.idInsumo,
         idSubReceta: d.idSubReceta,
@@ -422,9 +445,18 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
                     <select
                       className="studio-select"
                       value={idProducto || ""}
-                      onChange={(e) => handleProductoChange(Number(e.target.value))}
+                      onChange={(e) => {
+                        if (e.target.value === "__nuevo__") {
+                          setIsWizardOpen(true);
+                          return;
+                        }
+                        handleProductoChange(Number(e.target.value));
+                      }}
                     >
                       <option value="">-- Seleccionar Platillo --</option>
+                      <option value="__nuevo__" style={{ fontWeight: 600, color: "var(--color-primary, #ea580c)" }}>
+                        ✨ + Registrar nuevo platillo en menú...
+                      </option>
                       {productos.map((p: any) => (
                         <option key={p.id} value={p.id}>
                           {p.nombre}
@@ -733,6 +765,27 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
         subRecetas={subRecetas}
         onSelectInsumo={handleSelectInsumo}
         onSelectSubReceta={handleSelectSubReceta}
+      />
+
+      {/* Wizard de Platillos (Spec 026) */}
+      <PlatilloWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        onCreated={(result) => {
+          refetchProductos();
+          refetchVariantes();
+          setIdProducto(result.idProducto);
+          setIdVariante(result.idVarianteDefault);
+          if (!nombre) {
+            setNombre(`Receta ${result.nombre}`);
+          }
+          if (result.precioVentaDefault > 0) {
+            setPrecioVenta(result.precioVentaDefault);
+          }
+        }}
+        categorias={categorias}
+        menus={menus}
+        estaciones={estaciones}
       />
     </div>
   );

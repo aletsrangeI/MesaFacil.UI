@@ -156,5 +156,6 @@ export function useProductos() {
     closeModal,
     handleFormikSubmit,
     handleDelete,
+    refetch,
   };
 }
