@@ -61,6 +61,7 @@ export interface CrearRecetaPayload {
   esSubReceta: boolean;
   rendimiento: number;
   idUnidadMedidaRendimiento: number;
+  precioVentaActual?: number;
   detalles: CrearRecetaDetallePayload[];
 }
 
@@ -168,7 +169,7 @@ export const recetasApi = emptySplitApi.injectEndpoints({
         body,
       }),
       transformResponse: (response: ApiResponse<Receta>) => response.data,
-      invalidatesTags: ["Receta" as any],
+      invalidatesTags: ["Receta" as any, "Precio" as any, "VarianteProducto" as any, "Producto" as any],
     }),
 
     actualizarReceta: builder.mutation<Receta, { id: number; payload: ActualizarRecetaPayload }>({
@@ -178,7 +179,13 @@ export const recetasApi = emptySplitApi.injectEndpoints({
         body: payload,
       }),
       transformResponse: (response: ApiResponse<Receta>) => response.data,
-      invalidatesTags: (_result, _error, { id }) => ["Receta" as any, { type: "Receta" as any, id }],
+      invalidatesTags: (_result, _error, { id }) => [
+        "Receta" as any,
+        { type: "Receta" as any, id },
+        "Precio" as any,
+        "VarianteProducto" as any,
+        "Producto" as any,
+      ],
     }),
 
     eliminarReceta: builder.mutation<boolean, number>({
