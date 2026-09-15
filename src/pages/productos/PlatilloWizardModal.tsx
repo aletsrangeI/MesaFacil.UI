@@ -183,7 +183,12 @@ export const PlatilloWizardModal: React.FC<PlatilloWizardModalProps> = ({
 
   return (
     <div className="platillo-wizard__overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="platillo-wizard__modal" role="dialog" aria-modal="true">
+      <div
+        className="platillo-wizard__modal"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <header className="platillo-wizard__header">
           <div className="platillo-wizard__header-left">

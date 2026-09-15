@@ -385,8 +385,16 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
   const pvpConIva = simulacionData?.precioVentaConIva ?? Math.round(pvpSugerido * 1.16);
 
   return (
-    <div className="studio-overlay" onClick={onClose}>
-      <div className="studio-modal" onClick={(e) => e.stopPropagation()}>
+    <>
+      <div
+        className="studio-overlay"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
+      >
+        <div className="studio-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header con estilo institucional MesaFacil */}
         <div className="studio-header">
           <div className="studio-header-title">
@@ -776,6 +784,7 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
           </Button>
         </div>
       </div>
+    </div>
 
       {/* Omni-Search Modal Popover */}
       <OmniSearchModal
@@ -807,6 +816,6 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
         menus={menus}
         estaciones={estaciones}
       />
-    </div>
+    </>
   );
 };

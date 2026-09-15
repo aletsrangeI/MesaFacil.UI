@@ -65,7 +65,14 @@ export const OmniSearchModal: React.FC<OmniSearchModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="omni-modal-overlay" onClick={onClose}>
+    <div
+      className="omni-modal-overlay"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div className="omni-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header con Buscador */}
         <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
