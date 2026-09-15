@@ -37,13 +37,20 @@ jobs:
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-      # Configurar clave SSH nativa en el host
+      # Configurar clave SSH preservando saltos de línea
       - name: Configurar SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          printf "%s\n" "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HOMELAB_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      # Prueba de conexión SSH con salida informativa
+      - name: Verificar conexión SSH
+        run: |
+          ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.HOMELAB_HOST }} "echo '>> SSH conectado exitosamente al Homelab'"
 
       # Transferir con rsync nativo por Tailscale
       - name: Transferir release a Homelab
