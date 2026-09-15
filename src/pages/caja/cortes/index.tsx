@@ -1,4 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIdSucursal, selectNombreSucursal } from '../../../state/authSlice';
 import {
   useGetHistorialCortesQuery,
   useGetResumenCorteQuery,
@@ -27,11 +29,19 @@ import {
 } from 'lucide-react';
 
 export default function CortesPage() {
+  const authSucursalId = useSelector(selectIdSucursal);
+  const authNombreSucursal = useSelector(selectNombreSucursal);
   const hoyStr = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [presetFecha, setPresetFecha] = useState<'hoy' | 'ayer' | 'semana' | 'custom'>('hoy');
   const [fechaCustomInicio, setFechaCustomInicio] = useState(hoyStr);
   const [fechaCustomFin, setFechaCustomFin] = useState(hoyStr);
-  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<number | undefined>(undefined);
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<number | undefined>(authSucursalId);
+
+  useEffect(() => {
+    if (authSucursalId && sucursalSeleccionada === undefined) {
+      setSucursalSeleccionada(authSucursalId);
+    }
+  }, [authSucursalId, sucursalSeleccionada]);
 
   // Estados de modales
   const [selectedCorte, setSelectedCorte] = useState<CorteCajaHistorialItem | null>(null);
@@ -133,7 +143,7 @@ export default function CortesPage() {
       </div>
 
       {/* Widget de Turno Activo (si hay uno en curso) */}
-      {turnoActivo && turnoActivo.idTurno && (
+      {turnoActivo && turnoActivo.idTurno ? (
         <div
           style={{
             marginBottom: 24,
@@ -213,6 +223,25 @@ export default function CortesPage() {
               Corte X en Vivo
             </Button>
           </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            marginBottom: 24,
+            padding: '14px 20px',
+            borderRadius: 12,
+            background: '#fffbeb',
+            border: '1px solid #f59e0b',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            color: '#92400e'
+          }}
+        >
+          <AlertCircle size={20} color="#d97706" />
+          <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>
+            <strong>Sin turno abierto:</strong> No hay un turno activo actualmente para {sucursalSeleccionada ? (sucursales.find((s: any) => s.id === sucursalSeleccionada)?.nombre || `Sucursal #${sucursalSeleccionada}`) : (authNombreSucursal || 'tu sucursal')}.
+          </span>
         </div>
       )}
 

@@ -1,6 +1,8 @@
 import { useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIdSucursal, selectNombreSucursal } from '../../../state/authSlice';
 import { useGetResumenCorteQuery } from './CorteCajaModal';
-import { DollarSign, CreditCard, X, Printer, Activity, Bike } from 'lucide-react';
+import { DollarSign, CreditCard, X, Printer, Activity, Bike, AlertCircle } from 'lucide-react';
 
 interface CorteXModalProps {
   isOpen: boolean;
@@ -9,8 +11,16 @@ interface CorteXModalProps {
   idTurno?: number;
 }
 
-export function CorteXModal({ isOpen, onClose, idSucursal = 1, idTurno }: CorteXModalProps) {
-  const { data: resumenData, isLoading, refetch } = useGetResumenCorteQuery({ idSucursal, idTurno }, { skip: !isOpen });
+export function CorteXModal({ isOpen, onClose, idSucursal: propSucursal, idTurno }: CorteXModalProps) {
+  const authSucursalId = useSelector(selectIdSucursal);
+  const authNombreSucursal = useSelector(selectNombreSucursal);
+  const activeSucursalId = propSucursal || authSucursalId || 1;
+  const activeNombreSucursal = authNombreSucursal || `Sucursal #${activeSucursalId}`;
+
+  const { data: resumenData, isLoading, refetch } = useGetResumenCorteQuery(
+    { idSucursal: activeSucursalId, idTurno },
+    { skip: !isOpen }
+  );
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,7 +85,7 @@ export function CorteXModal({ isOpen, onClose, idSucursal = 1, idTurno }: CorteX
               </span>
             </div>
             <span style={{ fontSize: 12, color: 'var(--color-text-muted, #6B7280)' }}>
-              {resumen?.idTurno ? `Turno activo #${resumen.idTurno}` : 'Sin turno activo'} • No cierra el turno
+              {resumen?.idTurno ? `Turno activo #${resumen.idTurno}` : 'Sin turno activo'} • <strong>{activeNombreSucursal}</strong>
             </span>
           </div>
 
@@ -94,9 +104,54 @@ export function CorteXModal({ isOpen, onClose, idSucursal = 1, idTurno }: CorteX
 
         {/* Contenido scrollable */}
         <div style={{ padding: '20px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {isLoading || !resumen ? (
+          {isLoading ? (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
               Consultando corte X en vivo...
+            </div>
+          ) : !resumen?.idTurno ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '36px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 14
+            }}>
+              <div style={{
+                width: 54,
+                height: 54,
+                borderRadius: '50%',
+                background: '#fef3c7',
+                color: '#d97706',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <AlertCircle size={28} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#1f2937' }}>
+                No hay turno activo en {activeNombreSucursal}
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: '#6b7280', maxWidth: 360, lineHeight: 1.5 }}>
+                El arqueo en vivo (Corte X) requiere que la caja se encuentre aperturada. Realiza la apertura de turno para registrar y supervisar las entradas de dinero.
+              </p>
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  marginTop: 6,
+                  padding: '9px 20px',
+                  background: '#2563eb',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Cerrar
+              </button>
             </div>
           ) : (
             <>
@@ -240,7 +295,7 @@ export function CorteXModal({ isOpen, onClose, idSucursal = 1, idTurno }: CorteX
                   <div style={{ textAlign: 'center', marginBottom: 10 }}>
                     <div style={{ fontWeight: 'bold', fontSize: 15 }}>MESAFACIL RESTAURANTE</div>
                     <div style={{ fontSize: 13, fontWeight: 'bold' }}>CORTE X (ARQUEO EN VIVO)</div>
-                    <div style={{ fontSize: 11 }}>Turno #{resumen.idTurno || '-'} • Sucursal #{idSucursal}</div>
+                    <div style={{ fontSize: 11 }}>Turno #{resumen.idTurno || '-'} • {activeNombreSucursal}</div>
                     <div style={{ fontSize: 11 }}>{fechaActual.toLocaleDateString()} {fechaActual.toLocaleTimeString()}</div>
                   </div>
                   <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }} />

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIdSucursal, selectNombreSucursal } from '../../../state/authSlice';
 import { useToast } from '../../../components/ui/toast';
 import { DollarSign, CreditCard, Coins, AlertCircle, CheckCircle2, ArrowRight, X, Calculator, Bike } from 'lucide-react';
 import { CalculadoraDenominaciones } from './CalculadoraDenominaciones';
@@ -14,8 +16,16 @@ interface CorteCajaModalProps {
   onCorteSuccess?: () => void;
 }
 
-export function CorteCajaModal({ isOpen, onClose, idSucursal = 1, idTurno, onCorteSuccess }: CorteCajaModalProps) {
-  const { data: resumenData, isLoading, refetch } = useGetResumenCorteQuery({ idSucursal, idTurno }, { skip: !isOpen });
+export function CorteCajaModal({ isOpen, onClose, idSucursal: propSucursal, idTurno, onCorteSuccess }: CorteCajaModalProps) {
+  const authSucursalId = useSelector(selectIdSucursal);
+  const authNombreSucursal = useSelector(selectNombreSucursal);
+  const activeSucursalId = propSucursal || authSucursalId || 1;
+  const activeNombreSucursal = authNombreSucursal || `Sucursal #${activeSucursalId}`;
+
+  const { data: resumenData, isLoading, refetch } = useGetResumenCorteQuery(
+    { idSucursal: activeSucursalId, idTurno },
+    { skip: !isOpen }
+  );
   const [realizarCorte, { isLoading: isSubmitting }] = useRealizarCorteMutation();
   const { addToast } = useToast();
 
@@ -45,7 +55,7 @@ export function CorteCajaModal({ isOpen, onClose, idSucursal = 1, idTurno, onCor
 
     try {
       const res = await realizarCorte({
-        idSucursal,
+        idSucursal: activeSucursalId,
         idTurno: resumen?.idTurno ?? idTurno,
         declarado: declaradoNum,
         observaciones: observaciones || undefined
@@ -94,7 +104,7 @@ export function CorteCajaModal({ isOpen, onClose, idSucursal = 1, idTurno, onCor
               Corte de Caja & Arqueo
             </h2>
             <span style={{ fontSize: '12px', color: 'var(--color-text-muted, #6B7280)' }}>
-              {resumen?.fechaInicio ? `Desde: ${new Date(resumen.fechaInicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Turno actual'} • {resumen?.cantidadCuentasPagadas || 0} cuentas cobradas
+              {resumen?.idTurno ? `Turno activo #${resumen.idTurno}` : 'Sin turno activo'} • <strong>{activeNombreSucursal}</strong>
             </span>
           </div>
           <button 
@@ -107,9 +117,54 @@ export function CorteCajaModal({ isOpen, onClose, idSucursal = 1, idTurno, onCor
 
         {/* Body scrollable */}
         <div style={{ padding: '20px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {isLoading || !resumen ? (
+          {isLoading ? (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted, #6B7280)' }}>
               Calculando totales del turno...
+            </div>
+          ) : !resumen?.idTurno ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '36px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 14
+            }}>
+              <div style={{
+                width: 54,
+                height: 54,
+                borderRadius: '50%',
+                background: '#fef3c7',
+                color: '#d97706',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <AlertCircle size={28} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#1f2937' }}>
+                No hay turno activo para cerrar en {activeNombreSucursal}
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: '#6b7280', maxWidth: 360, lineHeight: 1.5 }}>
+                Esta sucursal no cuenta con un turno abierto actualmente. No es necesario realizar corte de caja.
+              </p>
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  marginTop: 6,
+                  padding: '9px 20px',
+                  background: '#2563eb',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Cerrar
+              </button>
             </div>
           ) : (
             <>

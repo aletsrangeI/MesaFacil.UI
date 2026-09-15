@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect, type FormEvent } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIdSucursal, selectNombreSucursal } from '../../../state/authSlice';
 import { useToast } from '../../../components/ui/toast';
 import { useRegistrarMovimientoMutation } from '../../../services/movimientoCajaApi';
 import { useCatalogosGetAllQuery } from '../../../services/generated/api';
 import { useGetResumenCorteQuery } from './CorteCajaModal';
-import { ArrowDownRight, ArrowUpRight, X, Check } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, X, Check, AlertCircle } from 'lucide-react';
 
 interface MovimientoCajaModalProps {
   isOpen: boolean;
@@ -30,12 +32,17 @@ const CONCEPTOS_INGRESO_FALLBACK = [
 export function MovimientoCajaModal({
   isOpen,
   onClose,
-  idSucursal = 1,
+  idSucursal: propSucursal,
   idTurno: propIdTurno,
   onMovementSuccess
 }: MovimientoCajaModalProps) {
   const { addToast } = useToast();
-  const { data: resumenData } = useGetResumenCorteQuery({ idSucursal }, { skip: !isOpen });
+  const authSucursalId = useSelector(selectIdSucursal);
+  const authNombreSucursal = useSelector(selectNombreSucursal);
+  const activeSucursalId = propSucursal || authSucursalId || 1;
+  const activeNombreSucursal = authNombreSucursal || `Sucursal #${activeSucursalId}`;
+
+  const { data: resumenData } = useGetResumenCorteQuery({ idSucursal: activeSucursalId }, { skip: !isOpen });
   const [registrarMovimiento, { isLoading }] = useRegistrarMovimientoMutation();
   const { data: conceptosRes } = useCatalogosGetAllQuery({ catalog: 'conceptos-movimiento-caja' });
 
@@ -150,7 +157,7 @@ export function MovimientoCajaModal({
               Movimiento de Efectivo
             </h2>
             <span style={{ fontSize: '12px', color: 'var(--color-text-muted, #6B7280)' }}>
-              {turnoActivoId ? `Turno activo #${turnoActivoId}` : 'Apertura de turno requerida'}
+              {turnoActivoId ? `Turno activo #${turnoActivoId}` : 'Sin turno activo'} • <strong>{activeNombreSucursal}</strong>
             </span>
           </div>
           <button
@@ -167,8 +174,54 @@ export function MovimientoCajaModal({
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+        {!turnoActivoId ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '36px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 14
+          }}>
+            <div style={{
+              width: 54,
+              height: 54,
+              borderRadius: '50%',
+              background: '#fef3c7',
+              color: '#d97706',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <AlertCircle size={28} />
+            </div>
+            <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#1f2937' }}>
+              No hay turno activo en {activeNombreSucursal}
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.88rem', color: '#6b7280', maxWidth: 360, lineHeight: 1.5 }}>
+              Para registrar entradas o salidas de efectivo, primero debes realizar la apertura de turno de caja.
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                marginTop: 6,
+                padding: '9px 20px',
+                background: '#2563eb',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: '0.88rem',
+                cursor: 'pointer'
+              }}
+            >
+              Cerrar
+            </button>
+          </div>
+        ) : (
+          /* Form */
+          <form onSubmit={handleSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
           {/* Selector de Tipo (Egreso / Ingreso) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <button
@@ -338,6 +391,7 @@ export function MovimientoCajaModal({
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

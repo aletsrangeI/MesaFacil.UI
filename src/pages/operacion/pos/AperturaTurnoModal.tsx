@@ -1,4 +1,4 @@
-﻿import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../app/store';
 import { emptySplitApi as api } from '../../../services/baseApi';
@@ -33,10 +33,12 @@ interface AperturaTurnoModalProps {
 export function AperturaTurnoModal({
   isOpen,
   onClose,
-  idSucursal = 1,
+  idSucursal: propSucursal,
   onTurnoAbierto
 }: AperturaTurnoModalProps) {
-  const { usuarioId, nombreCompleto } = useSelector((state: RootState) => state.auth);
+  const { usuarioId, nombreCompleto, idSucursal: authSucursal, nombreSucursal: authNombreSucursal } = useSelector((state: RootState) => state.auth);
+  const activeSucursalId = propSucursal || authSucursal || 1;
+  const activeNombreSucursal = authNombreSucursal || `Sucursal #${activeSucursalId}`;
   const [abrirTurno, { isLoading }] = useAbrirTurnoMutation();
   const { addToast } = useToast();
 
@@ -56,7 +58,7 @@ export function AperturaTurnoModal({
     try {
       const res = await abrirTurno({
         idUsuario: usuarioId || 1,
-        idSucursal,
+        idSucursal: activeSucursalId,
         apertura: new Date().toISOString(),
         cajaInicial: inicialNum
       }).unwrap();
@@ -123,7 +125,7 @@ export function AperturaTurnoModal({
                 Apertura de Turno
               </h2>
               <span style={{ fontSize: 12, color: 'var(--color-text-muted, #6B7280)' }}>
-                Cajero: {nombreCompleto || 'Usuario en sesión'}
+                Cajero: {nombreCompleto || 'Usuario en sesión'} • <strong>{activeNombreSucursal}</strong>
               </span>
             </div>
           </div>

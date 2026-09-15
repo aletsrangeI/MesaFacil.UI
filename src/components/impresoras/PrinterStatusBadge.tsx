@@ -1,5 +1,7 @@
 // src/components/impresoras/PrinterStatusBadge.tsx
 import React, { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectIdSucursal } from "../../state/authSlice";
 import Icon from "../ui/icons/Icon";
 import {
   useGetImpresorasBySucursalQuery,
@@ -27,11 +29,13 @@ const SEVERIDAD_UI: Record<Severidad, { emoji: string; label: string; color: str
 };
 
 export interface PrinterStatusBadgeProps {
-  /** Sucursal actual. Por convención en la app (ver HomePage) se usa 1 por defecto. */
+  /** Sucursal actual. Si no se pasa, toma la sucursal activa del usuario. */
   idSucursal?: number;
 }
 
-export const PrinterStatusBadge: React.FC<PrinterStatusBadgeProps> = ({ idSucursal = 1 }) => {
+export const PrinterStatusBadge: React.FC<PrinterStatusBadgeProps> = ({ idSucursal: propSucursal }) => {
+  const authSucursalId = useSelector(selectIdSucursal);
+  const idSucursal = propSucursal || authSucursalId || 1;
   const { data: impresorasResp } = useGetImpresorasBySucursalQuery(idSucursal, {
     pollingInterval: REFRESH_INTERVAL_MS,
   });

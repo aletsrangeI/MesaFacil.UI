@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { selectUserProfile } from "../../../state/authSlice";
+import { selectUserProfile, selectIdSucursal, selectNombreSucursal } from "../../../state/authSlice";
 import { addToCart, updateQuantity, removeFromCart, clearCart, updateItemNote, selectCart } from "../../../state/cartSlice";
 import { useToast } from "../../../components/ui/toast";
 import { useConfirm } from "../../../components/ui/confirm-dialog";
@@ -22,7 +22,7 @@ import {
   useSucursalesGetAllQuery,
   useMesasUpdateAsyncMutation
 } from "../../../services/generated/api";
-import { ShoppingCart, User, LogOut, ChevronLeft, MapPin, Coins, FileText, X, AlertTriangle, Edit3, ArrowDownUp, Activity, DoorOpen } from "lucide-react";
+import { ShoppingCart, User, LogOut, ChevronLeft, MapPin, Coins, FileText, X, AlertTriangle, Edit3, ArrowDownUp, Activity, DoorOpen, Building } from "lucide-react";
 import { ProductModifiersModal } from "./ProductModifiersModal";
 import { PaymentModal } from "./PaymentModal";
 import { CorteCajaModal, useGetResumenCorteQuery } from "./CorteCajaModal";
@@ -145,9 +145,11 @@ export default function PosPage() {
   const [showAperturaModal, setShowAperturaModal] = useState(false);
   const [showPrecuentaModal, setShowPrecuentaModal] = useState(false);
 
+  const authSucursalId = useSelector(selectIdSucursal);
+  const authNombreSucursal = useSelector(selectNombreSucursal);
   const sucursalesList = Array.isArray((sucursalesData as any)?.data) ? (sucursalesData as any).data : [];
-  const rawMesas = Array.isArray((mesasData as any)?.data) ? (mesasData as any).data : (Array.isArray(mesasData) ? mesasData : []);
-  const activeSucursalId = selectedMesa?.idSucursal || rawMesas[0]?.idSucursal || sucursalesList.find((s: any) => s.nombre?.includes('Centro'))?.id || sucursalesList[sucursalesList.length - 1]?.id || 2;
+  const activeSucursalId = authSucursalId || profile?.idSucursal || selectedMesa?.idSucursal || sucursalesList[0]?.id || 2;
+  const activeNombreSucursal = authNombreSucursal || profile?.nombreSucursal || sucursalesList.find((s: any) => s.id === activeSucursalId)?.nombre || `Sucursal #${activeSucursalId}`;
 
   const { data: resumenTurnoData } = useGetResumenCorteQuery({ idSucursal: activeSucursalId });
   const tieneTurnoActivo = !!resumenTurnoData?.data?.idTurno;
@@ -198,9 +200,13 @@ export default function PosPage() {
   const mesas = useCachedFallback<any>(mesasData, "mf_cache_mesas");
   const areas = useCachedFallback<any>(areasData, "mf_cache_areas");
 
-  const filteredMesas = selectedAreaId 
-    ? mesas.filter((m: any) => m.idArea === selectedAreaId) 
+  const branchMesas = activeSucursalId
+    ? mesas.filter((m: any) => !m.idSucursal || m.idSucursal === activeSucursalId)
     : mesas;
+
+  const filteredMesas = selectedAreaId 
+    ? branchMesas.filter((m: any) => m.idArea === selectedAreaId) 
+    : branchMesas;
 
   const estadosMesa = Array.isArray((catEstadosMesa as any)?.data) ? (catEstadosMesa as any).data : [];
   const estadosPedido = Array.isArray((catEstadosPedido as any)?.data) ? (catEstadosPedido as any).data : [];
@@ -520,11 +526,69 @@ export default function PosPage() {
             <User size={20} />
             <span>{profile?.nombreCompleto || profile?.correo || 'Usuario'}</span>
           </div>
+          <div className="pos-branch-badge" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 12px',
+            background: 'rgba(59, 130, 246, 0.1)',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            color: '#2563eb',
+            fontWeight: 600
+          }} title={`Sucursal activa asignada: ${activeNombreSucursal}`}>
+            <Building size={16} />
+            <span>{activeNombreSucursal}</span>
+          </div>
           <button className="pos-btn-icon">
             <LogOut size={20} />
           </button>
         </div>
       </header>
+
+      {!tieneTurnoActivo && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: '#fffbeb',
+          borderBottom: '2px solid #f59e0b',
+          padding: '10px 24px',
+          color: '#92400e',
+          fontSize: '0.9rem',
+          fontWeight: 500,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+            <span>
+              <strong>Atención:</strong> No hay un turno ni corte de caja abierto para <strong>{activeNombreSucursal}</strong>. Abre tu turno antes de cobrar o registrar pedidos para que el arqueo registre los fondos correctamente.
+            </span>
+          </div>
+          <button
+            onClick={() => setShowAperturaModal(true)}
+            style={{
+              background: '#d97706',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '7px 16px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              flexShrink: 0
+            }}
+          >
+            <DoorOpen size={16} />
+            <span>Abrir Turno Ahora</span>
+          </button>
+        </div>
+      )}
 
       <div className="pos-main">
         {/* Main Content: Categories & Products */}

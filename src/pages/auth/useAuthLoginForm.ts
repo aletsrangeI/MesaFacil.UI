@@ -156,12 +156,14 @@ export function useAuthLoginForm(formCatId: FormCategoryId = FORM_CATEGORY_IDS.L
             expiresAt: token.expiresAtUtc ?? undefined,
             usuarioId: session.usuarioId,
             idEmpresa: session.idEmpresa,
+            idSucursal: (session as any).idSucursal,
+            nombreSucursal: (session as any).nombreSucursal,
             correo: session.correo,
             nombreCompleto: session.nombreCompleto ?? undefined,
             roles: session.roles ?? [],
             accesos: session.accesos ?? [],
             permsVersion: session.permsVersion ?? null,
-          })
+          } as any)
         );
 
         // 3) /auth/me para permisos finos y accesos actualizados (idempotente)
@@ -173,6 +175,8 @@ export function useAuthLoginForm(formCatId: FormCategoryId = FORM_CATEGORY_IDS.L
               setFromAuthMe({
                 usuarioId: d.usuarioId,
                 idEmpresa: d.idEmpresa,
+                sucursalId: d.sucursalId,
+                nombreSucursal: (d as any).nombreSucursal,
                 correo: d.correo ?? "",
                 nombre: d.nombre,
                 roles: d.roles,

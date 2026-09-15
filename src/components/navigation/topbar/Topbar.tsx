@@ -24,7 +24,7 @@ export default function Topbar({
   onMenuClick,
 }: TopbarProps) {
   const dispatch = useDispatch();
-  const { nombreCompleto, correo } = useSelector((s: RootState) => s.auth);
+  const { nombreCompleto, correo, nombreSucursal, idSucursal } = useSelector((s: RootState) => s.auth);
 
   return (
     <header className="mf-topbar" role="banner" aria-label="Barra superior">
@@ -67,6 +67,27 @@ export default function Topbar({
 
       <div className="mf-topbar__right">
         {actions}
+        {(nombreSucursal || idSucursal) && (
+          <div
+            className="mf-topbar__branch"
+            title={`Sucursal asignada: ${nombreSucursal || `Sucursal #${idSucursal}`}`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '4px 12px',
+              borderRadius: 8,
+              background: 'rgba(59, 130, 246, 0.08)',
+              border: '1px solid rgba(59, 130, 246, 0.25)',
+              color: '#2563eb',
+              fontSize: '0.85rem',
+              fontWeight: 600
+            }}
+          >
+            <Icon name="MapPin" size={14} />
+            <span>{nombreSucursal || `Sucursal #${idSucursal}`}</span>
+          </div>
+        )}
         <div className="mf-topbar__user">
           <div className="mf-topbar__name">{nombreCompleto ?? "Usuario"}</div>
           <div className="mf-topbar__email">{correo ?? ""}</div>

@@ -1,7 +1,6 @@
-// src/pages/dashboard/DashboardPage.tsx
 import { useState, Component, type ErrorInfo, type ReactNode } from "react";
 import { useSelector } from "react-redux";
-import { selectUserProfile } from "../../state/authSlice";
+import { selectUserProfile, selectIdSucursal, selectNombreSucursal } from "../../state/authSlice";
 import { useToast } from "../../components/ui/toast";
 import Container from "../../components/ui/layout/Container";
 import { 
@@ -94,13 +93,25 @@ export default function DashboardPage() {
   const { data: kdsBoardData, refetch: refetchKds } = useGetKdsBoardDashboardQuery(undefined, { pollingInterval: 6000 });
 
   // Normalización 100% Defensiva de Datos
-  const pedidos: any[] = toArray(pedidosData);
-  const mesas: any[] = toArray(mesasData);
+  const rawPedidos: any[] = toArray(pedidosData);
+  const rawMesas: any[] = toArray(mesasData);
   const areas: any[] = toArray(areasData);
   const estadosMesa: any[] = toArray(catEstadosMesa);
   const ticketsKds: any[] = toArray(kdsBoardData);
 
-  const activeSucursalId = mesas[0]?.idSucursal || pedidos[0]?.idSucursal || areas[0]?.idSucursal || 2;
+  const authSucursalId = useSelector(selectIdSucursal);
+  const authNombreSucursal = useSelector(selectNombreSucursal);
+  const activeSucursalId = authSucursalId || profile?.idSucursal || rawMesas[0]?.idSucursal || rawPedidos[0]?.idSucursal || areas[0]?.idSucursal || 2;
+  const activeNombreSucursal = authNombreSucursal || profile?.nombreSucursal || `Sucursal #${activeSucursalId}`;
+
+  // Filtrar mesas y pedidos por la sucursal del usuario
+  const mesas = activeSucursalId
+    ? rawMesas.filter((m: any) => !m.idSucursal || m.idSucursal === activeSucursalId)
+    : rawMesas;
+  const pedidos = activeSucursalId
+    ? rawPedidos.filter((p: any) => !p.idSucursal || p.idSucursal === activeSucursalId)
+    : rawPedidos;
+
   const { data: resumenTurnoData, refetch: refetchTurno } = useGetResumenCorteQuery({ idSucursal: activeSucursalId }, { pollingInterval: 10000 });
   const resumenTurno = (resumenTurnoData as any)?.data || resumenTurnoData;
 
@@ -218,6 +229,45 @@ export default function DashboardPage() {
           onSeedDemo={handleSeedDemo}
           isSeedingDemo={isSeedingDemo}
         />
+
+        {!resumenTurno?.idTurno && (
+          <div style={{
+            margin: '16px 0 20px 0',
+            padding: '14px 20px',
+            borderRadius: '12px',
+            background: '#fffbeb',
+            border: '1px solid #f59e0b',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            color: '#92400e',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '1.3rem' }}>⚠️</span>
+              <span style={{ fontSize: '0.92rem', fontWeight: 500 }}>
+                <strong>Sin turno abierto:</strong> No hay un turno ni corte de caja abierto para <strong>{activeNombreSucursal}</strong>. Abre tu turno para comenzar las operaciones de caja y registrar cobros en el arqueo en vivo.
+              </span>
+            </div>
+            <button
+              onClick={() => setShowAperturaModal(true)}
+              style={{
+                background: '#d97706',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              Abrir Turno
+            </button>
+          </div>
+        )}
 
         {/* 2. Grid Bento de 4 KPIs Clave */}
         <DashboardKpiCards

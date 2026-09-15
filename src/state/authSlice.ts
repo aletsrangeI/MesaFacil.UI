@@ -9,6 +9,8 @@ export type AuthState = {
   expiresAt?: string;          // ISO string (UTC) de expiración
   usuarioId?: number;
   idEmpresa?: number;
+  idSucursal?: number;         // Sucursal activa del usuario
+  nombreSucursal?: string;     // Nombre de la sucursal activa
   idEstacion?: number;
   correo?: string;
   nombreCompleto?: string;
@@ -174,6 +176,12 @@ const authSlice = createSlice({
 
       state.usuarioId = action.payload.usuarioId;
       state.idEmpresa = action.payload.idEmpresa;
+      if ((action.payload as any).idSucursal !== undefined && (action.payload as any).idSucursal !== null) {
+        state.idSucursal = Number((action.payload as any).idSucursal);
+      }
+      if ((action.payload as any).nombreSucursal) {
+        state.nombreSucursal = (action.payload as any).nombreSucursal;
+      }
       state.correo = action.payload.correo;
       state.nombreCompleto = action.payload.nombreCompleto;
       state.roles = normalizeRoles(action.payload.roles);
@@ -181,6 +189,18 @@ const authSlice = createSlice({
       state.permsVersion = action.payload.permsVersion ?? null;
 
       // no establecemos permissions aquí porque /login no los trae (los trae /me)
+      saveToStorage(state);
+    },
+
+    /** Establece o cambia la sucursal activa del usuario */
+    setSucursalActiva(
+      state,
+      action: PayloadAction<{ idSucursal: number; nombreSucursal?: string }>
+    ) {
+      state.idSucursal = action.payload.idSucursal;
+      if (action.payload.nombreSucursal) {
+        state.nombreSucursal = action.payload.nombreSucursal;
+      }
       saveToStorage(state);
     },
 
@@ -219,8 +239,9 @@ const authSlice = createSlice({
         idEstacion?: number;
         correo?: string;
         nombre?: string | null;
-        sucursalId?: string | null;         // por si lo quieres guardar luego
-        turnoAbierto?: boolean;             // idem
+        sucursalId?: string | null;
+        nombreSucursal?: string | null;
+        turnoAbierto?: boolean;
         roles: string[];
         permissions: string[];
         accesos: string[];
@@ -233,6 +254,16 @@ const authSlice = createSlice({
       state.idEstacion = action.payload.idEstacion ?? state.idEstacion;
       state.correo = action.payload.correo;
       state.nombreCompleto = action.payload.nombre ?? state.nombreCompleto;
+
+      if (action.payload.sucursalId) {
+        const parsed = parseInt(action.payload.sucursalId, 10);
+        if (!isNaN(parsed)) {
+          state.idSucursal = parsed;
+        }
+      }
+      if (action.payload.nombreSucursal) {
+        state.nombreSucursal = action.payload.nombreSucursal;
+      }
 
       state.roles = normalizeRoles(action.payload.roles);
       state.permissions = uniq(action.payload.permissions);
@@ -271,11 +302,12 @@ export const {
   setTokens,
   setSession,
   setAuthResponse,
+  setSucursalActiva,
   hydrateFromStorage,
   logout,
   pruneIfExpired,
-  setFromAuthMe,         // NUEVO
-  setPermissions,        // NUEVO
+  setFromAuthMe,
+  setPermissions,
 } = authSlice.actions;
 
 export default authSlice.reducer;
@@ -286,6 +318,8 @@ export const selectAccessToken = (s: { auth: AuthState }) => s.auth.accessToken;
 export const selectRefreshToken = (s: { auth: AuthState }) => s.auth.refreshToken;
 export const selectIsAuthenticated = (s: { auth: AuthState }) =>
   Boolean(s.auth.accessToken) && !isExpired(s.auth.expiresAt);
+export const selectIdSucursal = (s: { auth: AuthState }) => s.auth.idSucursal;
+export const selectNombreSucursal = (s: { auth: AuthState }) => s.auth.nombreSucursal;
 
 import { createSelector } from '@reduxjs/toolkit';
 
@@ -294,6 +328,8 @@ export const selectUserProfile = createSelector(
   (auth) => ({
     usuarioId: auth.usuarioId,
     idEmpresa: auth.idEmpresa,
+    idSucursal: auth.idSucursal,
+    nombreSucursal: auth.nombreSucursal,
     idEstacion: auth.idEstacion,
     correo: auth.correo,
     nombreCompleto: auth.nombreCompleto,
