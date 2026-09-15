@@ -384,6 +384,28 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
   const pvpSugerido = simulacionData?.precioVentaCalculado ?? precioVenta;
   const pvpConIva = simulacionData?.precioVentaConIva ?? Math.round(pvpSugerido * 1.16);
 
+  const getCostoSimulado = (d: DetalleStudio, idx: number) => {
+    if (!simulacionData?.desglose || simulacionData.desglose.length === 0) {
+      return d.costoLinea ?? d.cantidad * d.costoUnitario;
+    }
+    // 1. Positional matching if ID matches
+    const atIdx = simulacionData.desglose[idx];
+    if (
+      atIdx &&
+      ((d.idInsumo && atIdx.idInsumo === d.idInsumo) ||
+        (d.idSubReceta && atIdx.idSubReceta === d.idSubReceta))
+    ) {
+      return atIdx.costoTotal;
+    }
+    // 2. Lookup by idInsumo / idSubReceta
+    const found = simulacionData.desglose.find(
+      (s) =>
+        (d.idInsumo && s.idInsumo === d.idInsumo) ||
+        (d.idSubReceta && s.idSubReceta === d.idSubReceta)
+    );
+    return found ? found.costoTotal : (d.costoLinea ?? d.cantidad * d.costoUnitario);
+  };
+
   return (
     <>
       <div
@@ -629,7 +651,7 @@ export const RecipeStudioModal: React.FC<RecipeStudioModalProps> = ({
                             />
                           </td>
                           <td style={{ textAlign: "right", fontWeight: 700, color: "var(--color-text, #1f1f1f)" }}>
-                            ${(simulacionData?.desglose?.[idx]?.costoTotal ?? d.costoLinea ?? 0).toFixed(2)}
+                            ${getCostoSimulado(d, idx).toFixed(2)}
                           </td>
                           <td>
                             <button
