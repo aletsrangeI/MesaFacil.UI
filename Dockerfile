@@ -1,5 +1,5 @@
-# Etapa 1: Build de la aplicación Vite con Node.js 22
-FROM node:22-alpine AS builder
+# Etapa 1: Build de la aplicación Vite con Node.js 24
+FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Instalar dependencias aprovechando la caché
