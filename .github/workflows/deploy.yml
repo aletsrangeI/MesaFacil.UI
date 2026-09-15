@@ -1,4 +1,4 @@
-name: CI/CD - MesaFacil.UI
+name: CI/CD - MesaFacil.UI (Docker)
 
 on:
   push:
@@ -11,33 +11,49 @@ concurrency:
   group: deploy-ui-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-deploy:
-    name: Build & Deploy Frontend to Homelab
+    name: Build Docker Image & Deploy to Homelab
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js 24 (LTS)
-        uses: actions/setup-node@v4
+      - name: Obtener nombre de usuario en minúsculas
+        run: |
+          echo "IMAGE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          node-version: 24
-          cache: 'npm'
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Instalar dependencias
-        run: npm ci
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Compilar aplicación (Vite Build)
-        run: npm run build
+      - name: Construir y publicar imagen Docker en GHCR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.IMAGE_OWNER }}/mesafacil-ui:latest
+            ghcr.io/${{ env.IMAGE_OWNER }}/mesafacil-ui:${{ github.sha }}
 
-      # Conexión a Tailscale
+      # Conectar a Tailscale
       - name: Conectar a Tailscale
         uses: tailscale/github-action@v3
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-      # Configurar clave SSH preservando saltos de línea
+      # Configurar clave SSH
       - name: Configurar SSH
         env:
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -47,60 +63,13 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HOMELAB_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      # Prueba de conexión SSH con salida informativa
-      - name: Verificar conexión SSH
-        run: |
-          ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.HOMELAB_HOST }} "echo '>> SSH conectado exitosamente al Homelab'"
-
-      # Transferir con rsync nativo por Tailscale
-      - name: Transferir release a Homelab
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.HOMELAB_HOST }} "mkdir -p /tmp/mesafacil-ui-deploy-${{ github.run_number }}"
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.HOMELAB_HOST }}:/tmp/mesafacil-ui-deploy-${{ github.run_number }}/
-
-      # Despliegue atómico en Nginx via SSH nativo
-      - name: Activar release y recargar Nginx
+      # Despliegue con Docker Compose en Homelab
+      - name: Desplegar en Homelab con Docker Compose
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.HOMELAB_HOST }} bash << 'EOF'
             set -e
-            RELEASES_DIR="/var/www/mesafacil/ui/releases"
-            CURRENT_DIR="/var/www/mesafacil/ui/current"
-            REL_PATH="${RELEASES_DIR}/${{ github.run_number }}-${{ github.sha }}"
-            TMP_DIR="/tmp/mesafacil-ui-deploy-${{ github.run_number }}"
-
-            echo "Creando release en $REL_PATH..."
-            sudo mkdir -p "$REL_PATH"
-            sudo cp -r "$TMP_DIR"/* "$REL_PATH/"
-            rm -rf "$TMP_DIR"
-
-            # Version previa
-            PREV_RELEASE=$(readlink -f "${CURRENT_DIR}" || true)
-
-            # Validar que los archivos esenciales existan
-            if [ ! -f "$REL_PATH/index.html" ]; then
-              echo "ERROR: index.html no encontrado en el paquete."
-              exit 1
-            fi
-
-            # Cambiar symlink atómico
-            sudo ln -sfn "$REL_PATH" "${CURRENT_DIR}"
-            sudo chown -h deploy:deploy "${CURRENT_DIR}" || true
-            sudo chown -R deploy:deploy "${RELEASES_DIR}" || true
-
-            # Validar y recargar Nginx
-            sudo nginx -t
-            sudo systemctl reload nginx
-
-            # Verificar respuesta HTTP
-            echo "Verificando respuesta del servidor web..."
-            if curl -s -I http://localhost | grep -q "200 OK\|301 Moved\|302 Found"; then
-              echo ">> Frontend respondiendo correctamente."
-            else
-              echo "ADVERTENCIA: Respuesta inesperada del frontend. Revisa los logs de Nginx."
-            fi
-
-            # Mantener 5 releases
-            cd "${RELEASES_DIR}"
-            ls -1t | tail -n +6 | xargs -r sudo rm -rf --
-            echo "Despliegue de UI finalizado con éxito."
+            cd /opt/mesafacil
+            docker compose pull ui
+            docker compose up -d --remove-orphans ui
+            echo ">> Contenedor mesafacil-ui desplegado exitosamente."
           EOF
