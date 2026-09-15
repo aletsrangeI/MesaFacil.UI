@@ -1,0 +1,117 @@
+name: CI/CD - MesaFacil.UI
+
+on:
+  push:
+    branches:
+      - Development
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ui-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Frontend (Vite + React)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar aplicación (Vite Build)
+        run: npm run build
+
+      - name: Guardar artefacto dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-dist
+          path: ./dist
+          retention-days: 2
+
+  deploy-homelab:
+    name: Deploy a Homelab (via Tailscale)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar artefacto compilado
+        uses: actions/download-artifact@v4
+        with:
+          name: ui-dist
+          path: ./dist
+
+      # Conexión a Tailscale
+      - name: Conectar a Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      # Transferir el bundle al servidor Homelab
+      - name: Transferir release a Homelab
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOMELAB_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "./dist/*"
+          target: "/tmp/mesafacil-ui-deploy-${{ github.run_number }}"
+          strip_components: 1
+
+      # Despliegue atómico en Nginx
+      - name: Activar release y recargar Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOMELAB_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            RELEASES_DIR="/var/www/mesafacil/ui/releases"
+            CURRENT_DIR="/var/www/mesafacil/ui/current"
+            REL_PATH="${RELEASES_DIR}/${{ github.run_number }}-${{ github.sha }}"
+            TMP_DIR="/tmp/mesafacil-ui-deploy-${{ github.run_number }}"
+
+            echo "Creando release en $REL_PATH..."
+            sudo mkdir -p "$REL_PATH"
+            sudo cp -r "$TMP_DIR"/* "$REL_PATH/"
+            rm -rf "$TMP_DIR"
+
+            # Version previa
+            PREV_RELEASE=$(readlink -f "${CURRENT_DIR}" || true)
+
+            # Validar que los archivos esenciales existan
+            if [ ! -f "$REL_PATH/index.html" ]; then
+              echo "ERROR: index.html no encontrado en el paquete."
+              exit 1
+            fi
+
+            # Cambiar symlink atómico
+            sudo ln -sfn "$REL_PATH" "${CURRENT_DIR}"
+            sudo chown -h deploy:deploy "${CURRENT_DIR}" || true
+            sudo chown -R deploy:deploy "${RELEASES_DIR}" || true
+
+            # Validar y recargar Nginx
+            sudo nginx -t
+            sudo systemctl reload nginx
+
+            # Verificar respuesta HTTP
+            echo "Verificando respuesta del servidor web..."
+            if curl -s -I http://localhost | grep -q "200 OK\|301 Moved\|302 Found"; then
+              echo ">> Frontend respondiendo correctamente."
+            else
+              echo "ADVERTENCIA: Respuesta inesperada del frontend. Revisa los logs de Nginx."
+            fi
+
+            # Mantener 5 releases
+            cd "${RELEASES_DIR}"
+            ls -1t | tail -n +6 | xargs -r sudo rm -rf --
+            echo "Despliegue de UI finalizado con éxito."
