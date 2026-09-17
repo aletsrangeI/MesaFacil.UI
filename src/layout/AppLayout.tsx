@@ -20,6 +20,7 @@ import "../styles/tokens.css";
 import "../components/navigation/sidebar/sidebar.css";
 import "./app-shell.css";
 import Topbar from "../components/navigation/topbar/Topbar";
+import { ModuleSkeletonLoader } from "../components/common/loaders/ModuleSkeletonLoader";
 
 export type AppLayoutProps = {
   /** Roles canónicos del usuario logueado (p.ej. ["admin"]) */
@@ -161,7 +162,9 @@ export default function AppLayout({
             />
           ))}
         <main className={`app-shell__content ${isFlushRoute ? "is-flush" : ""}`}>
-          <Outlet />
+          <React.Suspense fallback={<ModuleSkeletonLoader />}>
+            <Outlet />
+          </React.Suspense>
         </main>
       </div>
     </div>

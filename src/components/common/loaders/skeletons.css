@@ -1,0 +1,219 @@
+/* Shimmer pulse effect for smooth, anti-CLS skeletons */
+@keyframes mf-skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.mf-skeleton-block {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-raised, #f4f6f8) 25%,
+    var(--color-surface-sunken, #e5e7eb) 50%,
+    var(--color-surface-raised, #f4f6f8) 75%
+  );
+  background-size: 200% 100%;
+  animation: mf-skeleton-shimmer 1.6s infinite ease-in-out;
+  border-radius: var(--radius-sm, 6px);
+}
+
+/* Base Backoffice Module Skeleton */
+.mf-module-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6, 24px);
+  padding: var(--space-6, 24px);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.mf-module-skeleton__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mf-module-skeleton__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+
+.mf-module-skeleton__actions {
+  display: flex;
+  gap: var(--space-3, 12px);
+}
+
+.mf-module-skeleton__toolbar {
+  display: flex;
+  gap: var(--space-4, 16px);
+  align-items: center;
+}
+
+.mf-module-skeleton__content-card {
+  flex: 1;
+  min-height: 400px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  border-radius: var(--radius-md, 12px);
+  padding: var(--space-6, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+.mf-module-skeleton__row {
+  display: flex;
+  gap: var(--space-4, 16px);
+  align-items: center;
+}
+
+/* Comandero Móvil Skeleton */
+.mf-comandero-skeleton {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  background: var(--color-bg, #f9f9f9);
+  box-sizing: border-box;
+}
+
+.mf-comandero-skeleton__header {
+  height: 60px;
+  background: var(--color-surface, #ffffff);
+  border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  padding: 0 var(--space-4, 16px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mf-comandero-skeleton__tabs {
+  display: flex;
+  gap: var(--space-2, 8px);
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  background: var(--color-surface, #ffffff);
+  border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  overflow: hidden;
+}
+
+.mf-comandero-skeleton__grid {
+  flex: 1;
+  padding: var(--space-4, 16px);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-3, 12px);
+  overflow: hidden;
+}
+
+.mf-comandero-skeleton__card {
+  height: 110px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  border-radius: var(--radius-md, 12px);
+  padding: var(--space-3, 12px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mf-comandero-skeleton__bottom-nav {
+  height: 64px;
+  background: var(--color-surface, #ffffff);
+  border-top: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 var(--space-4, 16px);
+}
+
+/* POS Terminal Skeleton */
+.mf-pos-skeleton {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 64px);
+  box-sizing: border-box;
+}
+
+.mf-pos-skeleton__catalog {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  padding: var(--space-4, 16px);
+}
+
+.mf-pos-skeleton__categories {
+  display: flex;
+  gap: var(--space-3, 12px);
+  overflow: hidden;
+}
+
+.mf-pos-skeleton__products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3, 12px);
+  flex: 1;
+}
+
+.mf-pos-skeleton__product-card {
+  height: 130px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  border-radius: var(--radius-md, 12px);
+  padding: var(--space-3, 12px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mf-pos-skeleton__ticket {
+  width: 360px;
+  background: var(--color-surface, #ffffff);
+  border-left: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4, 16px);
+  gap: var(--space-4, 16px);
+}
+
+/* KDS Cocina Skeleton */
+.mf-kds-skeleton {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.mf-kds-skeleton__topbar {
+  height: 56px;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6, 24px);
+}
+
+.mf-kds-skeleton__lanes {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4, 16px);
+  padding: var(--space-4, 16px);
+  background: #0f172a;
+}
+
+.mf-kds-skeleton__card {
+  height: 280px;
+  background: #1e293b;
+  border-radius: var(--radius-md, 12px);
+  padding: var(--space-4, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+}

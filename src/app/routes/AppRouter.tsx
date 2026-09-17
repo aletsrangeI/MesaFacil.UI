@@ -1,47 +1,80 @@
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import DashboardPage from "../../pages/dashboard/DashboardPage";
 import { PrivateRoute } from "./PrivateRoute";
-import RegistroUsuario from "../../pages/auth/RegistroUsuario";
-import LoginPin from "../../pages/auth/LoginPin";
-import UsuariosPage from "../../pages/seguridad/usuarios";
 import AppLayout from "../../layout/AppLayout";
-import { RolesPage } from "../../pages/roles";
-import FormulariosPage from "../../pages/formularios";
-import CatalogoPage from "../../pages/catalogos";
 import {
   selectRolesOrGuest,
   selectAccesos,
   selectCanAccess,
 } from "../../state/authSlice";
-import ProductosPage from "../../pages/productos";
-import CategoriasPage from "../../pages/categorias";
-import MenusPage from "../../pages/menues";
-import VariantesPage from "../../pages/variantes";
-import PosPage from "../../pages/operacion/pos";
-import PreciosPage from "../../pages/precios";
-import ModificadoresPage from "../../pages/modificadores";
-import EmpresaPage from "../../pages/gestion/empresa";
-import SucursalesPage from "../../pages/gestion/sucursales";
-import ImpresorasPage from "../../pages/gestion/impresoras";
-import AreasPage from "../../pages/gestion/areas";
-import MesasPage from "../../pages/gestion/mesas";
-import TiposPedidoPage from "../../pages/gestion/tipos-pedido";
-import KdsPage from "../../pages/operacion/kds";
-import MovimientosPage from "../../pages/caja/movimientos";
-import CortesPage from "../../pages/caja/cortes";
-import DeliveryPage from "../../pages/operacion/delivery";
-import DeliveryHistorialPage from "../../pages/operacion/delivery/historial";
-import InventarioPage from "../../pages/inventario";
-import ComprasPage from "../../pages/compras";
-import CxPPage from "../../pages/cxp";
-import PlanesPage from "../../pages/planes";
-import FacturacionPage from "../../pages/facturacion";
-import AutofacturacionPage from "../../pages/public/AutofacturacionPage";
-import ComanderoPage from "../../pages/operacion/comandero";
-
-import { useEffect } from "react";
 import { useToast } from "../../components/ui/toast";
+import {
+  ModuleSkeletonLoader,
+  ComanderoSkeleton,
+  PosSkeleton,
+  KdsSkeleton,
+} from "../../components/common/loaders/ModuleSkeletonLoader";
+
+// Lazy-loaded pages para optimización de bundle y arranque rápido
+const DashboardPage = lazy(() => import("../../pages/dashboard/DashboardPage"));
+const RegistroUsuario = lazy(() => import("../../pages/auth/RegistroUsuario"));
+const LoginPin = lazy(() => import("../../pages/auth/LoginPin"));
+const UsuariosPage = lazy(() => import("../../pages/seguridad/usuarios"));
+const RolesPage = lazy(() =>
+  import("../../pages/roles").then((m) => ({ default: m.RolesPage }))
+);
+const FormulariosPage = lazy(() => import("../../pages/formularios"));
+const CatalogoPage = lazy(() => import("../../pages/catalogos"));
+const ProductosPage = lazy(() => import("../../pages/productos"));
+const CategoriasPage = lazy(() => import("../../pages/categorias"));
+const MenusPage = lazy(() => import("../../pages/menues"));
+const VariantesPage = lazy(() => import("../../pages/variantes"));
+const PosPage = lazy(() => import("../../pages/operacion/pos"));
+const PreciosPage = lazy(() => import("../../pages/precios"));
+const ModificadoresPage = lazy(() => import("../../pages/modificadores"));
+const EmpresaPage = lazy(() => import("../../pages/gestion/empresa"));
+const SucursalesPage = lazy(() => import("../../pages/gestion/sucursales"));
+const ImpresorasPage = lazy(() => import("../../pages/gestion/impresoras"));
+const AreasPage = lazy(() => import("../../pages/gestion/areas"));
+const MesasPage = lazy(() => import("../../pages/gestion/mesas"));
+const TiposPedidoPage = lazy(() => import("../../pages/gestion/tipos-pedido"));
+const KdsPage = lazy(() => import("../../pages/operacion/kds"));
+const MovimientosPage = lazy(() => import("../../pages/caja/movimientos"));
+const CortesPage = lazy(() => import("../../pages/caja/cortes"));
+const DeliveryPage = lazy(() => import("../../pages/operacion/delivery"));
+const DeliveryHistorialPage = lazy(
+  () => import("../../pages/operacion/delivery/historial")
+);
+const InventarioPage = lazy(() => import("../../pages/inventario"));
+const ComprasPage = lazy(() => import("../../pages/compras"));
+const CxPPage = lazy(() => import("../../pages/cxp"));
+const PlanesPage = lazy(() => import("../../pages/planes"));
+const FacturacionPage = lazy(() => import("../../pages/facturacion"));
+const AutofacturacionPage = lazy(
+  () => import("../../pages/public/AutofacturacionPage")
+);
+const ComanderoPage = lazy(() => import("../../pages/operacion/comandero"));
+
+// Utilidades de pre-fetching inteligente en segundo plano tras autenticación
+export const prefetchComandero = () => import("../../pages/operacion/comandero");
+export const prefetchPos = () => import("../../pages/operacion/pos");
+export const prefetchKds = () => import("../../pages/operacion/kds");
+export const prefetchDashboard = () => import("../../pages/dashboard/DashboardPage");
+
+export function prefetchTargetRoute(path?: string | null) {
+  if (!path) return;
+  const p = path.toLowerCase();
+  if (p.startsWith("/operacion/comandero")) {
+    prefetchComandero();
+  } else if (p.startsWith("/ventas/pos")) {
+    prefetchPos();
+  } else if (p.startsWith("/ventas/kds") || p.startsWith("/cocina")) {
+    prefetchKds();
+  } else if (p === "/" || p.startsWith("/dashboard")) {
+    prefetchDashboard();
+  }
+}
 
 /** Guard que valida acceso por path usando selectCanAccess */
 function RequireAccess({
@@ -83,12 +116,40 @@ export default function AppRouter() {
   return (
     <Routes>
       {/* Público */}
-      <Route path="/login" element={<RegistroUsuario />} />
-      <Route path="/login-pin" element={<LoginPin />} />
+      <Route
+        path="/login"
+        element={
+          <Suspense fallback={<ModuleSkeletonLoader />}>
+            <RegistroUsuario />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/login-pin"
+        element={
+          <Suspense fallback={<ModuleSkeletonLoader />}>
+            <LoginPin />
+          </Suspense>
+        }
+      />
 
       {/* Portal Público de Autofacturación (spec 020) — sin login, standalone */}
-      <Route path="/facturar" element={<AutofacturacionPage />} />
-      <Route path="/facturar/:ticketId" element={<AutofacturacionPage />} />
+      <Route
+        path="/facturar"
+        element={
+          <Suspense fallback={<ModuleSkeletonLoader />}>
+            <AutofacturacionPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/facturar/:ticketId"
+        element={
+          <Suspense fallback={<ModuleSkeletonLoader />}>
+            <AutofacturacionPage />
+          </Suspense>
+        }
+      />
 
       {/* Modo Comandero Móvil (spec 025) — requiere sesión (PrivateRoute) pero se renderiza
           FUERA de <AppLayout> a propósito: es una vista a pantalla completa, sin el sidebar
@@ -98,7 +159,9 @@ export default function AppRouter() {
         element={
           <PrivateRoute>
             <RequireAccess path="/operacion/comandero">
-              <ComanderoPage />
+              <Suspense fallback={<ComanderoSkeleton />}>
+                <ComanderoPage />
+              </Suspense>
             </RequireAccess>
           </PrivateRoute>
         }
@@ -126,7 +189,9 @@ export default function AppRouter() {
           path="/ventas/pos"
           element={
             <RequireAccess path="/ventas/pos">
-              <PosPage />
+              <Suspense fallback={<PosSkeleton />}>
+                <PosPage />
+              </Suspense>
             </RequireAccess>
           }
         />
@@ -134,7 +199,9 @@ export default function AppRouter() {
           path="/ventas/kds"
           element={
             <RequireAccess path="/ventas/kds">
-              <KdsPage />
+              <Suspense fallback={<KdsSkeleton />}>
+                <KdsPage />
+              </Suspense>
             </RequireAccess>
           }
         />
@@ -174,7 +241,9 @@ export default function AppRouter() {
           path="/cocina"
           element={
             <RequireAccess path="/cocina">
-              <KdsPage />
+              <Suspense fallback={<KdsSkeleton />}>
+                <KdsPage />
+              </Suspense>
             </RequireAccess>
           }
         />

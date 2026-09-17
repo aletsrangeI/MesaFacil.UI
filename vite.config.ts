@@ -29,6 +29,44 @@ export default defineConfig(({ mode }) => {
           secure: false,
         }
       }
+    },
+    build: {
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const normalizedId = id.replace(/\\/g, '/');
+            if (normalizedId.includes('/node_modules/')) {
+              if (
+                normalizedId.includes('/react/') ||
+                normalizedId.includes('/react-dom/') ||
+                normalizedId.includes('/react-router/') ||
+                normalizedId.includes('/react-router-dom/') ||
+                normalizedId.includes('/scheduler/') ||
+                normalizedId.includes('/@reduxjs/toolkit/') ||
+                normalizedId.includes('/react-redux/')
+              ) {
+                return 'vendor-framework';
+              }
+              if (normalizedId.includes('/@microsoft/signalr/')) {
+                return 'vendor-signalr';
+              }
+              if (normalizedId.includes('/lucide-react/')) {
+                return 'vendor-icons';
+              }
+              if (normalizedId.includes('/formik/') || normalizedId.includes('/yup/')) {
+                return 'vendor-forms';
+              }
+              if (normalizedId.includes('/@tanstack/react-table/')) {
+                return 'vendor-table';
+              }
+              if (normalizedId.includes('/qrcode/')) {
+                return 'vendor-qrcode';
+              }
+            }
+          }
+        }
+      }
     }
   }
 })
