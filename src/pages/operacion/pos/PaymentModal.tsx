@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, FileText } from 'lucide-react';
+import { X, FileText, Lock, ShieldCheck, Percent } from 'lucide-react';
 import { emptySplitApi as api } from '../../../services/baseApi';
 import { useToast } from '../../../components/ui/toast';
 import { useCatalogosGetAllQuery } from '../../../services/generated/api';
 import { ThermalTicketModal } from './ThermalTicketModal';
+import { SupervisorPinModal } from '../../../components/seguridad/SupervisorPinModal';
 import { useTimbrarPedidoMutation } from '../../../services/facturacionApi';
 import {
   DatosFiscalesForm,
@@ -20,7 +21,16 @@ const paymentApi = api.injectEndpoints({
         method: 'POST'
       })
     }),
-    registrarPago: build.mutation<any, { idCuenta: number; monto: number; idMetodoDePago: number; propina: number }>({
+    registrarPago: build.mutation<any, {
+      idCuenta: number;
+      monto: number;
+      idMetodoDePago: number;
+      propina: number;
+      porcentajeDescuento?: number;
+      montoDescuento?: number;
+      motivoDescuento?: string;
+      supervisorAuthToken?: string;
+    }>({
       query: (body) => ({
         url: '/api/Pagos/Registrar',
         method: 'POST',
@@ -49,11 +59,27 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
   const [showFinalTicket, setShowFinalTicket] = useState(false);
   const [finalTicketData, setFinalTicketData] = useState<any>(null);
 
+  // --- Candado de supervisor para descuentos (spec 028) ---
+  const [porcentajeDescuento, setPorcentajeDescuento] = useState<number>(0);
+  const [montoDescuento, setMontoDescuento] = useState<number>(0);
+  const [motivoDescuento, setMotivoDescuento] = useState<string>('');
+  const [supervisorAuthToken, setSupervisorAuthToken] = useState<string | null>(null);
+  const [nombreSupervisor, setNombreSupervisor] = useState<string | null>(null);
+  const [isCustomDiscount, setIsCustomDiscount] = useState<boolean>(false);
+  const [customDiscountInput, setCustomDiscountInput] = useState<string>('');
+  const [showSupervisorModal, setShowSupervisorModal] = useState<boolean>(false);
+  const [pendingDiscountPercentage, setPendingDiscountPercentage] = useState<number | null>(null);
+
   // --- Facturación fiscal (spec 020) ---
   const [solicitaFactura, setSolicitaFactura] = useState(false);
   const [datosFiscales, setDatosFiscales] = useState<DatosFiscalesReceptor>(DATOS_FISCALES_VACIOS);
 
   const metodos = Array.isArray((metodosData as any)?.data) ? (metodosData as any).data : [];
+
+  const baseOriginal = cuenta ? (cuenta.subtotal + cuenta.impuestoTotal) : 0;
+  const totalRecalculado = Math.max(0, Math.round((baseOriginal - montoDescuento) * 100) / 100);
+  const saldoActual = cuenta ? Math.max(0, Math.round((totalRecalculado - (cuenta.totalPagado || 0)) * 100) / 100) : 0;
+  const montoActual = parseFloat(montoRecibido) || 0;
 
   const cargarCuenta = (id: string) => {
     generarCuenta(id).unwrap()
@@ -61,7 +87,16 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
         if (res?.isSuccess) {
           const c = res.data;
           setCuenta(c);
-          const saldo = c.saldoRestante !== undefined ? c.saldoRestante : c.total;
+          const initialDesc = c.descuentoTotal || 0;
+          const initialPct = c.porcentajeDescuento || 0;
+          setPorcentajeDescuento(initialPct);
+          setMontoDescuento(initialDesc);
+          if (c.autorizadoPor) setNombreSupervisor(c.autorizadoPor);
+          if (c.motivoDescuento) setMotivoDescuento(c.motivoDescuento);
+
+          const base = c.subtotal + c.impuestoTotal;
+          const tot = Math.max(0, Math.round((base - initialDesc) * 100) / 100);
+          const saldo = Math.max(0, Math.round((tot - (c.totalPagado || 0)) * 100) / 100);
           setMontoRecibido(saldo.toFixed(2));
           setSelectedSplit(1);
           setPropina('0');
@@ -86,13 +121,102 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
       setSelectedSplit(1);
       setSolicitaFactura(false);
       setDatosFiscales(DATOS_FISCALES_VACIOS);
+      setPorcentajeDescuento(0);
+      setMontoDescuento(0);
+      setMotivoDescuento('');
+      setSupervisorAuthToken(null);
+      setNombreSupervisor(null);
+      setIsCustomDiscount(false);
+      setCustomDiscountInput('');
+      setShowSupervisorModal(false);
+      setPendingDiscountPercentage(null);
       cargarCuenta(idPedido);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, idPedido]);
 
-  const saldoActual = cuenta ? (cuenta.saldoRestante !== undefined ? cuenta.saldoRestante : cuenta.total) : 0;
-  const montoActual = parseFloat(montoRecibido) || 0;
+  const applyDiscountValue = (pct: number, token?: string, motivo?: string, supName?: string) => {
+    const base = cuenta ? (cuenta.subtotal + cuenta.impuestoTotal) : 0;
+    const calcDesc = Math.round((base * (pct / 100)) * 100) / 100;
+    const newTotal = Math.max(0, Math.round((base - calcDesc) * 100) / 100);
+    const newSaldo = Math.max(0, Math.round((newTotal - (cuenta?.totalPagado || 0)) * 100) / 100);
+
+    setPorcentajeDescuento(pct);
+    setMontoDescuento(calcDesc);
+    setMontoRecibido(newSaldo.toFixed(2));
+    setSelectedSplit(1);
+    if (selectedPercentage) {
+      setPropina(((newSaldo * selectedPercentage) / 100).toFixed(2));
+    }
+
+    if (token) setSupervisorAuthToken(token);
+    if (motivo) setMotivoDescuento(motivo);
+    if (supName) setNombreSupervisor(supName);
+  };
+
+  const handleDiscountClick = (pct: number) => {
+    if (pct === -1) {
+      setIsCustomDiscount(prev => !prev);
+      return;
+    }
+
+    setIsCustomDiscount(false);
+    setCustomDiscountInput('');
+
+    if (pct === 0) {
+      setSupervisorAuthToken(null);
+      setMotivoDescuento('');
+      setNombreSupervisor(null);
+      applyDiscountValue(0);
+      return;
+    }
+
+    if (pct <= 10.0) {
+      setSupervisorAuthToken(null);
+      setMotivoDescuento('');
+      setNombreSupervisor(null);
+      applyDiscountValue(pct);
+      return;
+    }
+
+    setPendingDiscountPercentage(pct);
+    setShowSupervisorModal(true);
+  };
+
+  const handleApplyCustomDiscount = () => {
+    const val = parseFloat(customDiscountInput);
+    if (isNaN(val) || val < 0 || val > 100) {
+      addToast({ message: 'Ingresa un porcentaje de descuento válido (0 - 100%)', variant: 'error' });
+      return;
+    }
+
+    if (val === 0) {
+      setSupervisorAuthToken(null);
+      setMotivoDescuento('');
+      setNombreSupervisor(null);
+      applyDiscountValue(0);
+      return;
+    }
+
+    if (val <= 10.0) {
+      setSupervisorAuthToken(null);
+      setMotivoDescuento('');
+      setNombreSupervisor(null);
+      applyDiscountValue(val);
+      return;
+    }
+
+    setPendingDiscountPercentage(val);
+    setShowSupervisorModal(true);
+  };
+
+  const handleSupervisorAutorizado = (token: string, motivo: string, supNombre?: string) => {
+    const pct = pendingDiscountPercentage || 0;
+    applyDiscountValue(pct, token, motivo, supNombre || 'Supervisor');
+    setShowSupervisorModal(false);
+    setPendingDiscountPercentage(null);
+    addToast({ message: `Descuento del ${pct}% autorizado exitosamente`, variant: 'success' });
+  };
 
   const handleSelectSplit = (divisor: number) => {
     setSelectedSplit(divisor);
@@ -136,13 +260,13 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
   const handlePay = async () => {
     if (!cuenta) return;
     const monto = parseFloat(montoRecibido);
-    if (isNaN(monto) || monto <= 0) {
+    if (saldoActual > 0.009 && (isNaN(monto) || monto <= 0)) {
       addToast({ message: 'Ingrese un monto válido a pagar', variant: 'error' });
       return;
     }
 
-    const saldo = cuenta.saldoRestante !== undefined ? cuenta.saldoRestante : cuenta.total;
-    const esPagoFinal = monto >= (saldo - 0.01);
+    const montoEfectivo = isNaN(monto) || monto < 0 ? 0 : monto;
+    const esPagoFinal = saldoActual <= 0.009 || montoEfectivo >= (saldoActual - 0.01);
 
     if (solicitaFactura && esPagoFinal && !datosFiscalesCompletos(datosFiscales)) {
       addToast({ message: 'Completa los datos fiscales (RFC, Régimen, CP y Uso de CFDI) o desactiva la Factura Fiscal', variant: 'error' });
@@ -152,9 +276,13 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
     try {
       const res = await registrarPago({
         idCuenta: cuenta.id,
-        monto: monto,
+        monto: montoEfectivo,
         idMetodoDePago: idMetodo,
-        propina: parseFloat(propina) || 0
+        propina: parseFloat(propina) || 0,
+        porcentajeDescuento: porcentajeDescuento > 0 ? porcentajeDescuento : undefined,
+        montoDescuento: montoDescuento > 0 ? montoDescuento : undefined,
+        motivoDescuento: motivoDescuento || undefined,
+        supervisorAuthToken: supervisorAuthToken || undefined,
       }).unwrap();
 
       if (res?.isSuccess) {
@@ -186,7 +314,7 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
             ...(cuenta.pagosRealizados || []),
             {
               id: Date.now(),
-              monto: monto,
+              monto: montoEfectivo,
               propina: parseFloat(propina) || 0,
               metodoDePago: metodoNombre,
               pagadoEn: new Date().toISOString()
@@ -195,16 +323,22 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
 
           setFinalTicketData({
             ...cuenta,
-            totalPagado: (cuenta.totalPagado || 0) + monto,
+            subtotal: cuenta.subtotal,
+            impuestoTotal: cuenta.impuestoTotal,
+            descuentoTotal: montoDescuento,
+            porcentajeDescuento: porcentajeDescuento,
+            autorizadoPor: nombreSupervisor || cuenta.autorizadoPor,
+            total: totalRecalculado,
+            totalPagado: (cuenta.totalPagado || 0) + montoEfectivo,
             saldoRestante: 0,
             pagosRealizados: nuevosPagos
           });
           setShowFinalTicket(true);
           if (onPaymentSuccess) onPaymentSuccess();
         } else {
-          const nuevoSaldo = Math.max(0, saldo - monto);
+          const nuevoSaldo = Math.max(0, saldoActual - montoEfectivo);
           addToast({ 
-            message: `Abono de $${monto.toFixed(2)} registrado. Saldo pendiente: $${nuevoSaldo.toFixed(2)}`, 
+            message: `Abono de $${montoEfectivo.toFixed(2)} registrado. Saldo pendiente: $${nuevoSaldo.toFixed(2)}`, 
             variant: 'success' 
           });
           if (onPaymentSuccess) onPaymentSuccess();
@@ -257,9 +391,21 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
                   <span style={{ color: 'var(--color-text-muted, #6B7280)' }}>Impuestos</span>
                   <span style={{ color: 'var(--color-text, #1F1F1F)' }}>${cuenta.impuestoTotal.toFixed(2)}</span>
                 </div>
+                {montoDescuento > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-2, 8px)', color: '#b91c1c', fontWeight: 600 }}>
+                    <span>Descuento ({porcentajeDescuento}%)</span>
+                    <span>-${montoDescuento.toFixed(2)}</span>
+                  </div>
+                )}
+                {nombreSupervisor && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-2, 8px)', color: '#15803d', fontSize: '0.82rem', fontWeight: 600, background: 'rgba(34, 197, 94, 0.1)', padding: '4px 8px', borderRadius: 6 }}>
+                    <ShieldCheck size={16} />
+                    <span>Autorizado por: {nombreSupervisor}</span>
+                  </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-2, 8px)' }}>
                   <span style={{ color: 'var(--color-text-muted, #6B7280)' }}>Total de la Cuenta</span>
-                  <span style={{ color: 'var(--color-text, #1F1F1F)', fontWeight: 600 }}>${cuenta.total.toFixed(2)}</span>
+                  <span style={{ color: 'var(--color-text, #1F1F1F)', fontWeight: 600 }}>${totalRecalculado.toFixed(2)}</span>
                 </div>
 
                 {cuenta.totalPagado > 0 && (
@@ -277,6 +423,103 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
                     ${saldoActual.toFixed(2)}
                   </span>
                 </div>
+              </div>
+
+              {/* Selector de Descuentos (Spec 028) */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2, 8px)' }}>
+                  <label style={{ fontWeight: 600, fontSize: 14, color: 'var(--color-text, #1F1F1F)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Percent size={16} /> Descuento / Cortesía
+                  </label>
+                  {porcentajeDescuento > 0 && (
+                    <span style={{ fontSize: 12, color: porcentajeDescuento > 10 ? '#b91c1c' : '#3C8D40', fontWeight: 600 }}>
+                      {porcentajeDescuento}% aplicado (-${montoDescuento.toFixed(2)})
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-2, 8px)', marginBottom: 'var(--space-2, 8px)' }}>
+                  {[
+                    { label: 'Sin Desc.', pct: 0, lock: false },
+                    { label: '5%', pct: 5, lock: false },
+                    { label: '10%', pct: 10, lock: false },
+                    { label: '15%', pct: 15, lock: true },
+                    { label: '20%', pct: 20, lock: true },
+                    { label: '50%', pct: 50, lock: true },
+                    { label: '100% Cortesía', pct: 100, lock: true },
+                    { label: 'Personalizado', pct: -1, lock: false },
+                  ].map((item) => {
+                    const isSelected = item.pct === -1 ? isCustomDiscount : (!isCustomDiscount && porcentajeDescuento === item.pct);
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => handleDiscountClick(item.pct)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 4,
+                          padding: '8px 4px',
+                          borderRadius: 'var(--radius-md, 12px)',
+                          border: isSelected
+                            ? '2px solid var(--color-primary, #D64545)'
+                            : '1px solid var(--color-border, rgba(0,0,0,0.12))',
+                          backgroundColor: isSelected ? 'rgba(214, 69, 69, 0.08)' : 'var(--color-bg, #FFFFFF)',
+                          color: isSelected ? 'var(--color-primary, #D64545)' : 'var(--color-text, #1F1F1F)',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '12px',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <span>{item.label}</span>
+                        {item.lock && <Lock size={12} color={isSelected ? 'var(--color-primary, #D64545)' : '#94a3b8'} />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {isCustomDiscount && (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.5"
+                      placeholder="% de descuento (ej. 25)"
+                      value={customDiscountInput}
+                      onChange={(e) => setCustomDiscountInput(e.target.value)}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        border: '1px solid var(--color-border, #cbd5e1)',
+                        fontSize: '0.9rem',
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCustomDiscount}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: 8,
+                        border: 'none',
+                        background: '#b91c1c',
+                        color: '#fff',
+                        fontWeight: 600,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      {parseFloat(customDiscountInput) > 10 && <Lock size={14} />}
+                      Aplicar
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* División de cuenta rápida */}
@@ -448,7 +691,7 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
           }}>
             <button
               onClick={handlePay}
-              disabled={isPaying || isTimbrando || !montoRecibido || montoActual <= 0}
+              disabled={isPaying || isTimbrando || (saldoActual > 0.009 && (!montoRecibido || montoActual <= 0))}
               style={{
                 width: '100%',
                 background: 'var(--color-primary, #D64545)',
@@ -458,8 +701,8 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
                 borderRadius: 'var(--radius-md, 12px)',
                 fontSize: '1.05rem',
                 fontWeight: 700,
-                cursor: (isPaying || isTimbrando || !montoRecibido || montoActual <= 0) ? 'not-allowed' : 'pointer',
-                opacity: (isPaying || isTimbrando || !montoRecibido || montoActual <= 0) ? 0.6 : 1,
+                cursor: (isPaying || isTimbrando || (saldoActual > 0.009 && (!montoRecibido || montoActual <= 0))) ? 'not-allowed' : 'pointer',
+                opacity: (isPaying || isTimbrando || (saldoActual > 0.009 && (!montoRecibido || montoActual <= 0))) ? 0.6 : 1,
                 boxShadow: '0 4px 12px rgba(214, 69, 69, 0.25)',
                 transition: 'all 0.15s ease'
               }}
@@ -468,6 +711,8 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
                 ? 'Procesando...'
                 : isTimbrando
                 ? 'Timbrando factura...'
+                : saldoActual <= 0.009 && porcentajeDescuento === 100
+                ? 'Confirmar Cortesía Total ($0.00)'
                 : montoActual >= (saldoActual - 0.01)
                 ? 'Confirmar Pago y Liquidar'
                 : `Registrar Abono ($${montoActual.toFixed(2)})`}
@@ -486,6 +731,21 @@ export function PaymentModal({ isOpen, onClose, idPedido, onPaymentSuccess }: an
         idPedido={idPedido}
         tipo="ticket-final"
         cuentaData={finalTicketData}
+      />
+
+      <SupervisorPinModal
+        isOpen={showSupervisorModal}
+        onClose={() => {
+          setShowSupervisorModal(false);
+          setPendingDiscountPercentage(null);
+        }}
+        accionProtegida="DescuentoExcesivo"
+        idPedido={idPedido || (cuenta?.idPedido ?? '')}
+        titulo={`Autorizar Descuento ${pendingDiscountPercentage || 0}%`}
+        descripcion="Descuentos mayores al 10% requieren PIN de supervisor"
+        labelMotivo="Motivo del Descuento"
+        requiereMotivo={true}
+        onAutorizado={handleSupervisorAutorizado}
       />
     </div>
   );

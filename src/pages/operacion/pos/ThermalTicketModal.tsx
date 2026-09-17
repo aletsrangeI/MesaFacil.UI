@@ -197,6 +197,15 @@ export const ThermalTicketModal: React.FC<ThermalTicketModalProps> = ({
                 <span>Subtotal:</span>
                 <span>${cuenta.subtotal?.toFixed(2)}</span>
               </div>
+              {((cuenta.descuentoTotal && cuenta.descuentoTotal > 0) || (cuenta.porcentajeDescuento && cuenta.porcentajeDescuento > 0)) && (
+                <div className="thermal-row-total" style={{ fontWeight: 'bold' }}>
+                  <span>
+                    DESCUENTO {cuenta.porcentajeDescuento ? `${cuenta.porcentajeDescuento}%` : ''}
+                    {cuenta.autorizadoPor ? ` AUT: ${cuenta.autorizadoPor.toUpperCase()}` : ''}:
+                  </span>
+                  <span>-${cuenta.descuentoTotal?.toFixed(2)}</span>
+                </div>
+              )}
               <div className="thermal-row-total">
                 <span>IVA (16%):</span>
                 <span>${cuenta.impuestoTotal?.toFixed(2)}</span>

@@ -23,6 +23,15 @@ const MOTIVOS_FALLBACK = [
   { id: -4, descripcion: 'Cortesía de la casa autorizada' },
 ];
 
+/** Catálogo de motivos para descuentos de supervisor (spec 028, sección 2.2). */
+export const MOTIVOS_DESCUENTO = [
+  { id: 1, descripcion: 'Cortesia de la Casa (Relaciones Públicas / Dueño)' },
+  { id: 2, descripcion: 'Compensación por Demora Excesiva en Cocina' },
+  { id: 3, descripcion: 'Inconformidad de Comensal con Platillo / Calidad' },
+  { id: 4, descripcion: 'Descuento a Colaborador / Empleado del Restaurante' },
+  { id: 5, descripcion: 'Convenio Comercial / Descuento Empresarial' },
+];
+
 export interface SupervisorPinModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -33,9 +42,13 @@ export interface SupervisorPinModalProps {
   /** Título contextual opcional, ej. nombre del platillo a cancelar. */
   titulo?: string;
   descripcion?: string;
-  /** Si el motivo no aplica (ej. descuento excesivo) se puede omitir el selector. */
+  /** Si el motivo no aplica se puede omitir el selector. */
   requiereMotivo?: boolean;
-  onAutorizado: (tokenAutorizacion: string, motivo: string) => void;
+  /** Etiqueta personalizada para el motivo (ej. "Motivo del Descuento") */
+  labelMotivo?: string;
+  /** Catálogo alternativo de motivos (por defecto MOTIVOS_DESCUENTO si accionProtegida === "DescuentoExcesivo") */
+  catalogoMotivos?: { id: number; descripcion: string }[];
+  onAutorizado: (tokenAutorizacion: string, motivo: string, nombreSupervisor?: string) => void;
 }
 
 export function SupervisorPinModal({
@@ -47,6 +60,8 @@ export function SupervisorPinModal({
   titulo,
   descripcion,
   requiereMotivo = true,
+  labelMotivo,
+  catalogoMotivos,
   onAutorizado,
 }: SupervisorPinModalProps) {
   const [pin, setPin] = useState('');
@@ -55,12 +70,18 @@ export function SupervisorPinModal({
   const [shake, setShake] = useState(false);
   const [bloqueadoHasta, setBloqueadoHasta] = useState<string | null>(null);
 
+  const esDescuento = accionProtegida === 'DescuentoExcesivo';
+
   const { data: motivosData, isFetching: isFetchingMotivos } = useGetMotivosCancelacionQuery(undefined, {
-    skip: !isOpen || !requiereMotivo,
+    skip: !isOpen || !requiereMotivo || esDescuento || Boolean(catalogoMotivos),
   });
   const [autorizarPin, { isLoading }] = useAutorizarSupervisorPinMutation();
 
-  const motivosCatalogo = Array.isArray(motivosData?.data) && motivosData.data.length > 0
+  const motivosCatalogo = catalogoMotivos && catalogoMotivos.length > 0
+    ? catalogoMotivos
+    : esDescuento
+    ? MOTIVOS_DESCUENTO
+    : Array.isArray(motivosData?.data) && motivosData.data.length > 0
     ? motivosData.data
     : MOTIVOS_FALLBACK;
 
@@ -119,7 +140,7 @@ export function SupervisorPinModal({
       }).unwrap();
 
       if (res.autorizado && res.tokenAutorizacion) {
-        onAutorizado(res.tokenAutorizacion, motivo);
+        onAutorizado(res.tokenAutorizacion, motivo, res.nombreSupervisor || undefined);
       } else if (res.bloqueado) {
         setBloqueadoHasta(res.bloqueadoHastaUtc ?? null);
         dispararError(res.mensaje || 'PIN de supervisor bloqueado temporalmente por intentos fallidos.');
@@ -200,7 +221,7 @@ export function SupervisorPinModal({
           {requiereMotivo && (
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-text-muted, #64748b)', marginBottom: 6 }}>
-                Motivo de Cancelación <span style={{ color: '#dc2626' }}>*</span>
+                {labelMotivo || (esDescuento ? 'Motivo del Descuento' : 'Motivo de Cancelación')} <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <select
                 value={motivo}
