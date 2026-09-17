@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { selectIdSucursal, selectNombreSucursal } from '../../../state/authSlice';
 import { useGetResumenCorteQuery } from './CorteCajaModal';
 import { DollarSign, CreditCard, X, Printer, Activity, Bike, AlertCircle } from 'lucide-react';
+import { printThermalTicket } from '../../../helpers/printThermalTicket';
 
 interface CorteXModalProps {
   isOpen: boolean;
@@ -35,7 +36,11 @@ export function CorteXModal({ isOpen, onClose, idSucursal: propSucursal, idTurno
   const fechaActual = new Date();
 
   const handlePrint = () => {
-    window.print();
+    if (printRef.current) {
+      printThermalTicket(printRef.current, 'Corte X');
+    } else {
+      window.print();
+    }
   };
 
   return (

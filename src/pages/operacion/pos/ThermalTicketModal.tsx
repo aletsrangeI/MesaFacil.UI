@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { Printer, X } from 'lucide-react';
 import { useGenerarCuentaMutation } from './PaymentModal';
+import { printThermalTicket } from '../../../helpers/printThermalTicket';
+import './pos.css';
 
 interface ThermalTicketModalProps {
   isOpen: boolean;
@@ -54,7 +56,11 @@ export const ThermalTicketModal: React.FC<ThermalTicketModalProps> = ({
   if (!isOpen) return null;
 
   const handlePrint = () => {
-    window.print();
+    if (ticketRef.current) {
+      printThermalTicket(ticketRef.current, tipo === 'pre-cuenta' ? 'Pre-cuenta' : 'Ticket de Pago');
+    } else {
+      window.print();
+    }
   };
 
   const fechaFormateada = new Date().toLocaleString('es-MX', {
@@ -139,12 +145,12 @@ export const ThermalTicketModal: React.FC<ThermalTicketModalProps> = ({
 
               <div className="thermal-divider" />
 
-              {/* Tabla de �tems consumidos */}
+              {/* Tabla de ítems consumidos */}
               <table className="thermal-items-table">
                 <thead>
                   <tr>
                     <th style={{ width: '12%' }}>Cant</th>
-                    <th style={{ width: '56%' }}>Descripci�n</th>
+                    <th style={{ width: '56%' }}>Descripción</th>
                     <th style={{ width: '32%', textAlign: 'right' }}>Total</th>
                   </tr>
                 </thead>
@@ -284,9 +290,9 @@ export const ThermalTicketModal: React.FC<ThermalTicketModalProps> = ({
 
                   <div className="thermal-divider" />
                   <div className="thermal-footer">
-                    <div>�GRACIAS POR SU PREFERENCIA!</div>
+                    <div>¡GRACIAS POR SU PREFERENCIA!</div>
                     <div>Este comprobante no es deducible de impuestos</div>
-                    <div>Solicite su factura en caja o v�a web</div>
+                    <div>Solicite su factura en caja o vía web</div>
                   </div>
                 </div>
               )}
@@ -294,7 +300,7 @@ export const ThermalTicketModal: React.FC<ThermalTicketModalProps> = ({
               {tipo === 'pre-cuenta' && (
                 <div className="thermal-footer">
                   <div>Por favor verifique sus consumos antes de pagar</div>
-                  <div>�Gracias por su visita!</div>
+                  <div>¡Gracias por su visita!</div>
                 </div>
               )}
             </div>

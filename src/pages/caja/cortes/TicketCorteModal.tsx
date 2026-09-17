@@ -1,6 +1,7 @@
-﻿import { useRef } from 'react';
+import { useRef } from 'react';
 import type { CorteCajaHistorialItem } from '../../../services/corteCajaApi';
 import { Printer, X } from 'lucide-react';
+import { printThermalTicket } from '../../../helpers/printThermalTicket';
 
 interface TicketCorteModalProps {
   isOpen: boolean;
@@ -14,7 +15,11 @@ export function TicketCorteModal({ isOpen, onClose, corte }: TicketCorteModalPro
   if (!isOpen || !corte) return null;
 
   const handlePrint = () => {
-    window.print();
+    if (printRef.current) {
+      printThermalTicket(printRef.current, 'Ticket de Corte de Caja');
+    } else {
+      window.print();
+    }
   };
 
   const fInicio = new Date(corte.fechaInicio);
