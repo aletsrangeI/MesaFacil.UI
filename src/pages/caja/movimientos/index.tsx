@@ -1,19 +1,24 @@
 import { useState, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIdSucursal, selectNombreSucursal } from '../../../state/authSlice';
 import { useGetHistorialMovimientosQuery } from '../../../services/movimientoCajaApi';
 import Container from '../../../components/ui/layout/Container';
 import { ArrowDownRight, ArrowUpRight, ArrowUpDown, Calendar, DollarSign, RefreshCw, Search } from 'lucide-react';
 
 export default function MovimientosPage() {
+  const authSucursalId = useSelector(selectIdSucursal);
+  const authNombreSucursal = useSelector(selectNombreSucursal);
   const hoyStr = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [fechaSeleccionada, setFechaSeleccionada] = useState(hoyStr);
   const [filtroTipo, setFiltroTipo] = useState<'Todos' | 'Egreso' | 'Ingreso'>('Todos');
   const [busqueda, setBusqueda] = useState('');
 
-  // Rango del día completo en UTC
+  // Rango del día completo en UTC respetando el huso horario local
   const { fechaInicio, fechaFin } = useMemo(() => {
     if (!fechaSeleccionada) return {};
-    const dInicio = new Date(`${fechaSeleccionada}T00:00:00Z`);
-    const dFin = new Date(`${fechaSeleccionada}T23:59:59Z`);
+    const [year, month, day] = fechaSeleccionada.split('-').map(Number);
+    const dInicio = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const dFin = new Date(year, month - 1, day, 23, 59, 59, 999);
     return {
       fechaInicio: dInicio.toISOString(),
       fechaFin: dFin.toISOString()
@@ -22,7 +27,8 @@ export default function MovimientosPage() {
 
   const { data, isLoading, refetch, isFetching } = useGetHistorialMovimientosQuery({
     fechaInicio,
-    fechaFin
+    fechaFin,
+    idSucursal: authSucursalId
   });
 
   const movimientos = data?.data || [];
@@ -56,11 +62,30 @@ export default function MovimientosPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
-          <h1 style={{ margin: '0 0 6px 0', fontSize: '1.6rem', fontWeight: 700, color: 'var(--color-text, #1F1F1F)' }}>
-            Movimientos de Caja & Auditoría
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700, color: 'var(--color-text, #1F1F1F)' }}>
+              Movimientos de Caja & Auditoría
+            </h1>
+            {authNombreSucursal && (
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: '3px 10px',
+                  borderRadius: 20,
+                  background: 'rgba(214, 69, 69, 0.08)',
+                  color: 'var(--color-primary, #D64545)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                📍 {authNombreSucursal}
+              </span>
+            )}
+          </div>
           <p style={{ margin: 0, fontSize: 14, color: 'var(--color-text-muted, #6B7280)' }}>
-            Registro y control de entradas, compras de insumos, retiros a caja fuerte y gastos operativos.
+            Registro y control de cobros de mesas, entradas de efectivo, compras de insumos, retiros y gastos operativos.
           </p>
         </div>
 
@@ -315,7 +340,7 @@ export default function MovimientosPage() {
 
                     <td style={{ padding: '14px 16px' }}>
                       <span style={{ padding: '3px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.04)', fontWeight: 600, fontSize: 12 }}>
-                        Turno #{m.idTurno}
+                        {m.idTurno > 0 ? `Turno #${m.idTurno}` : 'General'}
                       </span>
                     </td>
 
