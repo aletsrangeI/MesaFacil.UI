@@ -8,6 +8,7 @@ import {
 } from "../../services/generated/api";
 import { useAppDispatch } from "../../app/hooks";
 import { setAuthResponse, setFromAuthMe } from "../../state/authSlice";
+import { prefetchTargetRoute } from "../../app/routes/AppRouter";
 
 export function useAuthLoginPin() {
   const dispatch = useAppDispatch();
@@ -156,6 +157,7 @@ export function useAuthLoginPin() {
       }
 
       const next = pickNextPath(session.accesos);
+      prefetchTargetRoute(next);
       navigate(next, { replace: true });
     } catch (err) {
       const apiError = err as { data?: { message?: string; title?: string }; error?: string; message?: string };

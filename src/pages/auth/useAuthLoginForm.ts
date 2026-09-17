@@ -16,6 +16,7 @@ import type {
 import { FORM_CATEGORY_IDS } from "../../forms/types";
 import { useAppDispatch } from "../../app/hooks";
 import { setAuthResponse, setFromAuthMe } from "../../state/authSlice";
+import { prefetchTargetRoute } from "../../app/routes/AppRouter";
 
 export type LoginValues = { username?: string; password?: string };
 
@@ -193,6 +194,7 @@ export function useAuthLoginForm(formCatId: FormCategoryId = FORM_CATEGORY_IDS.L
 
         // 4) Redirección
         const next = pickNextPath(session.accesos);
+        prefetchTargetRoute(next);
         navigate(next, { replace: true });
       } catch (e: any) {
         const msg =
