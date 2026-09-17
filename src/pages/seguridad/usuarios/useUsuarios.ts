@@ -1,199 +1,300 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   useUsuarioGetAllQuery,
   useUsuarioInsertMutation,
   useUsuarioUpdateMutation,
   useUsuarioDeleteMutation,
   useRolGetAllQuery,
-  useEmpresaGetAllQuery,
-  type UsuarioDto,
+  useSucursalesGetAllQuery,
 } from "../../../services/generated/api";
 import { useToast } from "../../../components/ui/toast/Toast";
 import { useConfirm } from "../../../components/ui/confirm-dialog";
-import { useUsuariosForm } from "./useUsuariosForm";
+import type {
+  UsuarioExtendedDto,
+  UsuarioFiltersState,
+  UsuarioStats,
+  UsuarioFormData,
+} from "./types";
 
 export function useUsuarios() {
   const { addToast } = useToast();
   const confirm = useConfirm();
-  const { data: resp, isLoading: isLoadingUsers, isError, refetch } = useUsuarioGetAllQuery();
-  
-  const { data: rolesResp } = useRolGetAllQuery();
-  const { data: empresasResp } = useEmpresaGetAllQuery();
 
+  // Queries
+  const { data: usersResp, isLoading: isLoadingUsers, isError, refetch } = useUsuarioGetAllQuery();
+  const { data: rolesResp, isLoading: isLoadingRoles } = useRolGetAllQuery();
+  const { data: sucursalesResp, isLoading: isLoadingSucursales } = useSucursalesGetAllQuery();
+
+  // Mutations
   const [insertUser, { isLoading: isInserting }] = useUsuarioInsertMutation();
   const [updateUser, { isLoading: isUpdating }] = useUsuarioUpdateMutation();
   const [deleteUser, { isLoading: isDeleting }] = useUsuarioDeleteMutation();
 
-  const [search, setSearch] = useState("");
-  
-  // Modal states & SDUI fields
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [editingUser, setEditingUser] = useState<UsuarioDto | null>(null);
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UsuarioExtendedDto | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const { formId, fields, isLoadingFields, isFieldsError } = useUsuariosForm();
+  // Filters State
+  const [filters, setFilters] = useState<UsuarioFiltersState>({
+    search: "",
+    idSucursal: "",
+    idRol: "",
+    estado: "ALL",
+  });
 
-  const dataSources = useMemo(() => {
-    return {
-      roles: Array.isArray(rolesResp?.data)
-        ? rolesResp.data.map((r) => ({ id: r.id ?? 0, nombre: r.nombre ?? "" }))
-        : [],
-      empresas: Array.isArray(empresasResp?.data)
-        ? empresasResp.data.map((e) => ({ id: e.id ?? 0, nombre: e.nombre ?? "" }))
-        : [],
-    };
-  }, [rolesResp, empresasResp]);
-
-  const dynamicFields = useMemo(() => {
-    if (!editingUser) {
-      // Crear: la contraseña es obligatoria
-      return fields.map((f) => {
-        if (f.name === "password") {
-          return {
-            ...f,
-            validations: [...(f.validations ?? []), { type: "required" as const, value: 1 }],
-          };
-        }
-        return f;
-      });
-    } else {
-      // Editar: la contraseña es opcional, cambiamos label/placeholder para que sea amigable
-      return fields.map((f) => {
-        if (f.name === "password") {
-          return {
-            ...f,
-            label: "Nueva Contraseña (opcional)",
-            placeholder: "Dejar en blanco para mantener la contraseña actual",
-            validations: (f.validations ?? []).filter((v) => v.type !== "required"),
-          };
-        }
-        return f;
-      });
-    }
-  }, [fields, editingUser]);
-
-  // Users list
-  const users: UsuarioDto[] = useMemo(() => {
-    if (Array.isArray(resp?.data)) {
-      return resp.data;
+  // Normalización de listas
+  const users: UsuarioExtendedDto[] = useMemo(() => {
+    if (Array.isArray(usersResp?.data)) {
+      return usersResp.data as UsuarioExtendedDto[];
     }
     return [];
-  }, [resp]);
+  }, [usersResp]);
 
-  // Filter users by search query
-  const filteredUsers = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return users;
-    return users.filter(
-      (u) =>
-        u.nombreCompleto?.toLowerCase().includes(q) ||
-        u.correo?.toLowerCase().includes(q) ||
-        u.nombreEmpresa?.toLowerCase().includes(q) ||
-        u.nombreRol?.toLowerCase().includes(q)
-    );
-  }, [users, search]);
-
-  const openModal = (user: UsuarioDto | null = null) => {
-    setFormError(null);
-    if (user) {
-      setEditingUser(user);
-    } else {
-      setEditingUser(null);
+  const roles = useMemo(() => {
+    if (Array.isArray(rolesResp?.data)) {
+      return rolesResp.data.map((r) => ({ id: r.id ?? 0, nombre: r.nombre ?? "" }));
     }
-    dialogRef.current?.showModal();
+    return [];
+  }, [rolesResp]);
+
+  const sucursales = useMemo(() => {
+    if (Array.isArray(sucursalesResp?.data)) {
+      return sucursalesResp.data.map((s) => ({ id: s.id ?? 0, nombre: s.nombre ?? "" }));
+    }
+    return [];
+  }, [sucursalesResp]);
+
+  // Cálculo de estadísticas / KPIs
+  const stats: UsuarioStats = useMemo(() => {
+    const total = users.length;
+    let activos = 0;
+    let enTurno = 0;
+    let conPinSupervisor = 0;
+    let supervisoresBloqueados = 0;
+
+    for (const u of users) {
+      if (u.isActive !== false) activos++;
+      if (u.hasOpenTurno) enTurno++;
+      if (u.hasPinSupervisor) conPinSupervisor++;
+      if (u.isPinSupervisorLocked) supervisoresBloqueados++;
+    }
+
+    return {
+      total,
+      activos,
+      enTurno,
+      conPinSupervisor,
+      supervisoresBloqueados,
+    };
+  }, [users]);
+
+  // Filtrado reactivo de usuarios
+  const filteredUsers = useMemo(() => {
+    const q = filters.search.toLowerCase().trim();
+    const branchId = filters.idSucursal ? Number(filters.idSucursal) : null;
+    const roleId = filters.idRol ? Number(filters.idRol) : null;
+    const estado = filters.estado;
+
+    return users.filter((u) => {
+      // Búsqueda por texto
+      if (q) {
+        const matchesName = u.nombreCompleto?.toLowerCase().includes(q);
+        const matchesEmail = u.correo?.toLowerCase().includes(q);
+        const matchesRole = u.nombreRol?.toLowerCase().includes(q);
+        const matchesBranch = u.nombreSucursal?.toLowerCase().includes(q);
+        if (!matchesName && !matchesEmail && !matchesRole && !matchesBranch) {
+          return false;
+        }
+      }
+
+      // Filtro por Sucursal
+      if (branchId !== null) {
+        if (u.idSucursal !== branchId) return false;
+      }
+
+      // Filtro por Rol
+      if (roleId !== null) {
+        if (u.idRol !== roleId) return false;
+      }
+
+      // Filtro por Estado
+      if (estado === "ACTIVE" && u.isActive === false) return false;
+      if (estado === "INACTIVE" && u.isActive !== false) return false;
+      if (estado === "OPEN_TURNO" && !u.hasOpenTurno) return false;
+      if (estado === "SUPERVISOR_LOCKED" && !u.isPinSupervisorLocked) return false;
+
+      return true;
+    });
+  }, [users, filters]);
+
+  // Modales
+  const openCreateModal = () => {
+    setFormError(null);
+    setEditingUser(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (user: UsuarioExtendedDto) => {
+    setFormError(null);
+    setEditingUser(user);
+    setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    dialogRef.current?.close();
+    setIsModalOpen(false);
+    setEditingUser(null);
+    setFormError(null);
   };
 
-  const initialValuesOverride = useMemo(() => {
-    if (!editingUser) return undefined;
-    return {
-      nombreCompleto: editingUser.nombreCompleto ?? "",
-      correo: editingUser.correo ?? "",
-      password: "",
-      pin: editingUser.pin ?? "",
-      idRol: editingUser.idRol ? String(editingUser.idRol) : "",
-      idEmpresa: editingUser.idEmpresa ? String(editingUser.idEmpresa) : "1",
-    };
-  }, [editingUser]);
+  // Manejo de Filtros
+  const setFilterField = <K extends keyof UsuarioFiltersState>(
+    key: K,
+    value: UsuarioFiltersState[K]
+  ) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
-  const handleFormikSubmit = async (values: Record<string, unknown>) => {
+  const resetFilters = () => {
+    setFilters({
+      search: "",
+      idSucursal: "",
+      idRol: "",
+      estado: "ALL",
+    });
+  };
+
+  // Enviar formulario (Crear / Actualizar)
+  const handleFormSubmit = async (formData: UsuarioFormData): Promise<boolean> => {
     setFormError(null);
-
-    const name = String(values.nombreCompleto ?? "").trim();
-    const email = String(values.correo ?? "").trim();
-    const password = String(values.password ?? "").trim();
-    const pin = values.pin ? String(values.pin).trim() : undefined;
-    const idRol = values.idRol ? Number(values.idRol) : undefined;
-    const idEmpresa = values.idEmpresa ? Number(values.idEmpresa) : 1;
-
-    if (!name || !email) {
-      setFormError("Todos los campos son obligatorios.");
-      return;
-    }
 
     try {
       if (editingUser) {
-        // Update user
+        // Actualizar usuario
         const res = await updateUser({
           usuarioDto: {
             id: editingUser.id,
-            idEmpresa,
-            nombreCompleto: name,
-            correo: email,
-            password: password || undefined,
-            pin: pin || undefined,
-            idRol,
+            idEmpresa: formData.idEmpresa,
+            idSucursal: formData.idSucursal ?? undefined,
+            nombreCompleto: formData.nombreCompleto,
+            correo: formData.correo || undefined,
+            isActive: formData.isActive,
+            password: formData.password || undefined,
+            pin: formData.pin || undefined,
+            idRol: formData.idRol ?? undefined,
+            ...({
+              pinSupervisor: formData.pinSupervisor || undefined,
+              desbloquearPinSupervisor: formData.desbloquearPinSupervisor || undefined,
+            } as any),
           },
         }).unwrap();
 
         if (res.isSuccess) {
           addToast({ message: "Usuario actualizado con éxito.", variant: "success" });
-          closeModal();
           refetch();
+          return true;
         } else {
           setFormError(res.message || "Error al actualizar el usuario.");
+          return false;
         }
       } else {
-        // Create user
+        // Crear nuevo usuario
         const res = await insertUser({
           usuarioDto: {
-            idEmpresa,
-            nombreCompleto: name,
-            correo: email,
-            password: password || undefined,
-            pin: pin || undefined,
-            idRol,
+            idEmpresa: formData.idEmpresa,
+            idSucursal: formData.idSucursal ?? undefined,
+            nombreCompleto: formData.nombreCompleto,
+            correo: formData.correo || undefined,
+            isActive: formData.isActive,
+            password: formData.password || undefined,
+            pin: formData.pin || undefined,
+            idRol: formData.idRol ?? undefined,
+            ...({
+              pinSupervisor: formData.pinSupervisor || undefined,
+            } as any),
           },
         }).unwrap();
 
         if (res.isSuccess) {
           addToast({ message: "Usuario creado con éxito.", variant: "success" });
-          closeModal();
           refetch();
+          return true;
         } else {
           setFormError(res.message || "Error al crear el usuario.");
+          return false;
         }
       }
     } catch (err) {
       const apiError = err as { data?: { message?: string } };
       setFormError(apiError?.data?.message || "Ocurrió un error inesperado al guardar.");
+      return false;
     }
   };
 
-  const handleDelete = async (id: number, name: string) => {
+  // Desbloqueo rápido de supervisor (1 clic desde la fila de la tabla)
+  const handleQuickUnlockSupervisor = async (user: UsuarioExtendedDto) => {
+    const ok = await confirm({
+      title: "¿Desbloquear Candado de Supervisor?",
+      message: `El supervisor "${user.nombreCompleto}" fue bloqueado por 3 intentos fallidos. ¿Deseas restablecer su candado de seguridad inmediatamente?`,
+      confirmLabel: "Sí, desbloquear",
+      variant: "info",
+    });
+    if (!ok) return;
+
+    try {
+      const res = await updateUser({
+        usuarioDto: {
+          id: user.id,
+          idEmpresa: user.idEmpresa,
+          idSucursal: user.idSucursal ?? undefined,
+          nombreCompleto: user.nombreCompleto,
+          correo: user.correo || undefined,
+          isActive: user.isActive ?? true,
+          idRol: user.idRol ?? undefined,
+          ...({
+            desbloquearPinSupervisor: true,
+          } as any),
+        },
+      }).unwrap();
+
+      if (res.isSuccess) {
+        addToast({
+          message: `Candado de supervisor de "${user.nombreCompleto}" desbloqueado con éxito.`,
+          variant: "success",
+        });
+        refetch();
+      } else {
+        addToast({ message: res.message || "Error al desbloquear el supervisor.", variant: "error" });
+      }
+    } catch (err) {
+      const apiError = err as { data?: { message?: string } };
+      addToast({
+        message: apiError?.data?.message || "No fue posible desbloquear el supervisor.",
+        variant: "error",
+      });
+    }
+  };
+
+  // Eliminación con validación de seguridad de turno
+  const handleDelete = async (user: UsuarioExtendedDto) => {
+    if (user.hasOpenTurno) {
+      addToast({
+        message: `No es posible eliminar al usuario "${user.nombreCompleto}" porque tiene un turno de caja abierto en el POS. Debe cerrar el turno antes de continuar.`,
+        variant: "error",
+      });
+      return;
+    }
+
     const ok = await confirm({
       title: "¿Eliminar usuario?",
-      message: `Se eliminará al usuario "${name}" de forma permanente.`,
+      message: `Se eliminará la cuenta de "${user.nombreCompleto}". Esta acción revocará sus accesos y es irreversible.`,
       confirmLabel: "Sí, eliminar",
       variant: "danger",
     });
     if (!ok) return;
 
     try {
-      const res = await deleteUser({ id }).unwrap();
+      const res = await deleteUser({ id: user.id ?? 0 }).unwrap();
       if (res.isSuccess) {
         addToast({ message: "Usuario eliminado correctamente.", variant: "success" });
         refetch();
@@ -210,27 +311,32 @@ export function useUsuarios() {
   };
 
   return {
-    search,
-    setSearch,
-    isLoadingUsers,
+    // Data
+    users,
+    filteredUsers,
+    sucursales,
+    roles,
+    stats,
+    isLoading: isLoadingUsers || isLoadingRoles || isLoadingSucursales,
     isError,
     refetch,
+    // Mutations loading
+    isSubmitting: isInserting || isUpdating,
     isDeleting,
-    filteredUsers,
-    dialogRef,
+    // Modals
+    isModalOpen,
     editingUser,
     formError,
-    formId,
-    dynamicFields,
-    isLoadingFields,
-    isFieldsError,
-    dataSources,
-    initialValuesOverride,
-    openModal,
+    openCreateModal,
+    openEditModal,
     closeModal,
-    handleFormikSubmit,
+    handleFormSubmit,
+    // Actions
+    handleQuickUnlockSupervisor,
     handleDelete,
-    isInserting,
-    isUpdating,
+    // Filters
+    filters,
+    setFilterField,
+    resetFilters,
   };
 }
