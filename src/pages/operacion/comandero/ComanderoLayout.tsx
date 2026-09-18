@@ -18,19 +18,20 @@ import {
   useTiposPedidoGetAllQuery,
   useCatalogosGetAllQuery,
   useSucursalesGetAllQuery,
-  useMesasUpdateAsyncMutation,
   usePedidosInsertConDetallesAsyncMutation,
   usePedidosGetAllAsyncQuery,
 } from "../../../services/generated/api";
 import {
   useComanderoGetPedidoActivoByMesaQuery,
   useComanderoAgregarDetallesMutation,
+  useComanderoSolicitarCuentaMutation,
 } from "./comanderoApi";
 import { ComanderoMesasGrid } from "./ComanderoMesasGrid";
 import { ComanderoMenuBrowser } from "./ComanderoMenuBrowser";
 import { ComanderoModifierSheet } from "./ComanderoModifierSheet";
 import { ComanderoStickyBar } from "./ComanderoStickyBar";
 import "./comandero.css";
+import "../../../styles/mesa-estados.css";
 
 /**
  * Modo Comandero Móvil (spec 025) — /operacion/comandero
@@ -98,7 +99,7 @@ export default function ComanderoLayout() {
   const { data: catEstadosPedidoDetalle } = useCatalogosGetAllQuery({ catalog: "estados-pedido-detalle" });
   const { data: catImpuestos } = useCatalogosGetAllQuery({ catalog: "impuestos" });
 
-  const [updateMesa, { isLoading: isPidiendoCuenta }] = useMesasUpdateAsyncMutation();
+  const [solicitarCuenta, { isLoading: isPidiendoCuenta }] = useComanderoSolicitarCuentaMutation();
   const [insertarPedido, { isLoading: isInsertando }] = usePedidosInsertConDetallesAsyncMutation();
   const [agregarDetalles, { isLoading: isAgregando }] = useComanderoAgregarDetallesMutation();
 
@@ -222,13 +223,16 @@ export default function ComanderoLayout() {
 
   const handlePedirCuenta = async () => {
     if (!selectedMesa) return;
-    const estadoPorCobrar =
-      estadosMesa.find((e: any) => (e.descripcion || "").toLowerCase().includes("cobrar")) ||
-      estadosMesa.find((e: any) => (e.descripcion || "").toLowerCase().includes("cuenta")) ||
-      { id: 91, descripcion: "Por Cobrar" };
 
     try {
-      await updateMesa({ mesaDto: { ...selectedMesa, idEstadoMesa: estadoPorCobrar.id } }).unwrap();
+      await solicitarCuenta(selectedMesa.id).unwrap();
+      // Feedback háptico (spec 025)
+      try {
+        if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+          navigator.vibrate([40, 60, 40]);
+        }
+      } catch {}
+
       addToast({ message: `Cuenta solicitada para la mesa ${selectedMesa.codigo || selectedMesa.id}`, variant: "success" });
       refetchMesas();
       handleVolverAMesas();
@@ -236,12 +240,12 @@ export default function ComanderoLayout() {
       // Spec 019: Tolerancia a fallos en modo offline al pedir la cuenta
       try {
         const offlineRequests = JSON.parse(localStorage.getItem('mf_offline_cuenta_requests') || '[]');
-        offlineRequests.push({ idMesa: selectedMesa.id, idEstadoMesa: estadoPorCobrar.id, requestedAt: new Date().toISOString() });
+        offlineRequests.push({ idMesa: selectedMesa.id, idEstadoMesa: 4, requestedAt: new Date().toISOString() });
         localStorage.setItem('mf_offline_cuenta_requests', JSON.stringify(offlineRequests));
         addToast({ message: `Cuenta solicitada en modo local para la mesa ${selectedMesa.codigo || selectedMesa.id}`, variant: "info" });
         // Actualizar optimísticamente mesa en cache local
         const cachedMesas = JSON.parse(localStorage.getItem('mf_cache_mesas') || '[]');
-        const updatedCached = cachedMesas.map((m: any) => m.id === selectedMesa.id ? { ...m, idEstadoMesa: estadoPorCobrar.id } : m);
+        const updatedCached = cachedMesas.map((m: any) => m.id === selectedMesa.id ? { ...m, idEstadoMesa: 4 } : m);
         localStorage.setItem('mf_cache_mesas', JSON.stringify(updatedCached));
         refetchMesas();
         handleVolverAMesas();

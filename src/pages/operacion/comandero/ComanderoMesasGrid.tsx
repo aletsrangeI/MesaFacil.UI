@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Users } from "lucide-react";
+import { Users, ReceiptText } from "lucide-react";
 
 /**
  * Grid táctil de mesas por área para el Modo Comandero Móvil (spec 025).
@@ -28,11 +28,13 @@ export function ComanderoMesasGrid({
     : mesas;
 
   const getEstadoInfo = (idEstadoMesa: number) => {
+    if (idEstadoMesa === 4) return { text: "Por Cobrar", cls: "por-cobrar" };
     const estado = estadosMesa.find((e: any) => e.id === idEstadoMesa);
     const desc = (estado?.descripcion || "").toLowerCase();
-    if (desc.includes("cobrar")) return { text: estado?.descripcion || "Por Cobrar", cls: "por-cobrar" };
-    if (desc.includes("ocupada")) return { text: estado?.descripcion || "Ocupada", cls: "ocupada" };
-    if (desc.includes("disponible")) return { text: estado?.descripcion || "Libre", cls: "libre" };
+    if (desc.includes("cobrar") || desc.includes("cuenta")) return { text: "Por Cobrar", cls: "por-cobrar" };
+    if (idEstadoMesa === 2 || desc.includes("ocupada")) return { text: estado?.descripcion || "Ocupada", cls: "ocupada" };
+    if (idEstadoMesa === 1 || desc.includes("disponible")) return { text: estado?.descripcion || "Libre", cls: "libre" };
+    if (idEstadoMesa === 5 || desc.includes("sucia")) return { text: estado?.descripcion || "Sucia", cls: "otro" };
     return { text: estado?.descripcion || "—", cls: "otro" };
   };
 
@@ -91,7 +93,12 @@ export function ComanderoMesasGrid({
                   <Users size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
                   {mesa.asientos} pax
                 </div>
-                <div className="comandero-mesa-meta">{estado.text}</div>
+                <div className="comandero-mesa-meta">
+                  {estado.cls === "por-cobrar" && (
+                    <ReceiptText size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
+                  )}
+                  {estado.text}
+                </div>
                 {typeof minutos === "number" && (
                   <div className="comandero-mesa-minutos">{minutos} min</div>
                 )}
