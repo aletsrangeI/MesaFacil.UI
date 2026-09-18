@@ -22,7 +22,9 @@ import {
   useSucursalesGetAllQuery,
   useMesasUpdateAsyncMutation
 } from "../../../services/generated/api";
-import { ShoppingCart, User, LogOut, ChevronLeft, MapPin, Coins, FileText, X, AlertTriangle, Edit3, ArrowDownUp, Activity, DoorOpen, Building } from "lucide-react";
+import { ShoppingCart, User, LogOut, ChevronLeft, MapPin, Coins, FileText, X, AlertTriangle, Edit3, ArrowDownUp, Activity, DoorOpen, Building, ReceiptText } from "lucide-react";
+import * as signalR from "@microsoft/signalr";
+import "../../../styles/mesa-estados.css";
 import { ProductModifiersModal } from "./ProductModifiersModal";
 import { PaymentModal } from "./PaymentModal";
 import { CorteCajaModal, useGetResumenCorteQuery } from "./CorteCajaModal";
@@ -204,27 +206,47 @@ export default function PosPage() {
     ? mesas.filter((m: any) => !m.idSucursal || m.idSucursal === activeSucursalId)
     : mesas;
 
-  const filteredMesas = selectedAreaId 
-    ? branchMesas.filter((m: any) => m.idArea === selectedAreaId) 
-    : branchMesas;
+  const [selectedEstadoFiltro, setSelectedEstadoFiltro] = useState<'todos' | 'libres' | 'ocupadas' | 'por-cobrar'>('todos');
 
   const estadosMesa = Array.isArray((catEstadosMesa as any)?.data) ? (catEstadosMesa as any).data : [];
   const estadosPedido = Array.isArray((catEstadosPedido as any)?.data) ? (catEstadosPedido as any).data : [];
   const estadosPedidoDetalle = Array.isArray((catEstadosPedidoDetalle as any)?.data) ? (catEstadosPedidoDetalle as any).data : [];
 
   const getEstadoMesaLabel = (idEstadoMesa: number) => {
+    if (idEstadoMesa === 4) {
+      return { text: "Por Cobrar", color: "#f59e0b", isPorCobrar: true };
+    }
     const estado = estadosMesa.find((e: any) => e.id === idEstadoMesa);
-    if (!estado) return { text: "Desconocido", color: "var(--color-text-muted, #94a3b8)" };
+    if (!estado) return { text: "Desconocido", color: "var(--color-text-muted, #94a3b8)", isPorCobrar: false };
     
     const desc = estado.descripcion.toLowerCase();
+    const isPorCobrar = desc.includes("cobrar") || desc.includes("cuenta") || idEstadoMesa === 4;
     let color = "var(--color-text-muted, #94a3b8)";
-    if (desc.includes("disponible")) color = "var(--color-success, #10b981)";
-    if (desc.includes("ocupada")) color = "var(--color-error, #ef4444)";
-    if (desc.includes("reservada")) color = "var(--color-warning, #f59e0b)";
-    if (desc.includes("sucia")) color = "#f97316";
+    if (desc.includes("disponible") || idEstadoMesa === 1) color = "var(--color-success, #10b981)";
+    if (desc.includes("ocupada") || idEstadoMesa === 2) color = "var(--color-error, #ef4444)";
+    if (desc.includes("reservada") || idEstadoMesa === 3) color = "var(--color-warning, #f59e0b)";
+    if (isPorCobrar) color = "#f59e0b";
+    if (desc.includes("sucia") || idEstadoMesa === 5) color = "#f97316";
 
-    return { text: estado.descripcion, color };
+    return { text: isPorCobrar ? "Por Cobrar" : estado.descripcion, color, isPorCobrar };
   };
+
+  const areaFilteredMesas = selectedAreaId 
+    ? branchMesas.filter((m: any) => m.idArea === selectedAreaId) 
+    : branchMesas;
+
+  const countLibres = areaFilteredMesas.filter((m: any) => (m.idEstadoMesa || 1) === 1).length;
+  const countOcupadas = areaFilteredMesas.filter((m: any) => m.idEstadoMesa === 2).length;
+  const countPorCobrar = areaFilteredMesas.filter((m: any) => m.idEstadoMesa === 4 || getEstadoMesaLabel(m.idEstadoMesa || 1).isPorCobrar).length;
+
+  const filteredMesas = areaFilteredMesas.filter((m: any) => {
+    if (selectedEstadoFiltro === 'todos') return true;
+    const st = getEstadoMesaLabel(m.idEstadoMesa || 1);
+    if (selectedEstadoFiltro === 'por-cobrar') return m.idEstadoMesa === 4 || st.isPorCobrar;
+    if (selectedEstadoFiltro === 'ocupadas') return m.idEstadoMesa === 2;
+    if (selectedEstadoFiltro === 'libres') return (m.idEstadoMesa || 1) === 1;
+    return true;
+  });
 
   // Group variants by product instead of flattening
   const productos = rawProductos.map((p: any) => {
@@ -249,7 +271,7 @@ export default function PosPage() {
   useEffect(() => {
     if (selectedMesa?.id) {
       const statusLabel = getEstadoMesaLabel(selectedMesa.idEstadoMesa || 1);
-      const isOcupada = statusLabel.text.toLowerCase().includes('ocupada');
+      const isOcupada = statusLabel.text.toLowerCase().includes('ocupada') || statusLabel.isPorCobrar || selectedMesa.idEstadoMesa === 4;
       if (isOcupada) {
         setSkipPedidoQuery(false);
       } else {
@@ -263,6 +285,35 @@ export default function PosPage() {
       setModoRetomar(false);
     }
   }, [selectedMesa]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Spec 029: Sincronización reactiva de estado de mesas en tiempo real con SignalR
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl('/hubs/mesas', { withCredentials: true })
+      .withAutomaticReconnect()
+      .build();
+
+    connection
+      .start()
+      .then(() => {
+        connection.on('MesaEstadoActualizado', (data: any) => {
+          refetchMesas();
+          if (data?.idEstadoMesa === 4) {
+            addToast({
+              message: `¡Mesa ${data.codigoMesa || data.idMesa} está pidiendo la cuenta!`,
+              variant: 'info'
+            });
+          }
+        });
+      })
+      .catch(() => {
+        // Degrada silenciosamente si el hub no está disponible
+      });
+
+    return () => {
+      connection.stop();
+    };
+  }, [refetchMesas, addToast]);
 
   useEffect(() => {
     if (pedidoActivoData?.isSuccess && pedidoActivoData?.data) {
@@ -1111,36 +1162,117 @@ export default function PosPage() {
                 ))}
               </div>
 
+              {/* Filtro rápido por estado (spec 029) */}
+              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 14, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+                <button
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    border: '1px solid #e2e8f0',
+                    background: selectedEstadoFiltro === 'todos' ? '#1e293b' : '#ffffff',
+                    color: selectedEstadoFiltro === 'todos' ? '#ffffff' : '#64748b',
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s',
+                    flexShrink: 0
+                  }}
+                  onClick={() => setSelectedEstadoFiltro('todos')}
+                >
+                  Todas ({areaFilteredMesas.length})
+                </button>
+                <button
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    border: '1px solid #e2e8f0',
+                    background: selectedEstadoFiltro === 'libres' ? '#10b981' : '#ffffff',
+                    color: selectedEstadoFiltro === 'libres' ? '#ffffff' : '#64748b',
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s',
+                    flexShrink: 0
+                  }}
+                  onClick={() => setSelectedEstadoFiltro('libres')}
+                >
+                  🟢 Libres ({countLibres})
+                </button>
+                <button
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    border: '1px solid #e2e8f0',
+                    background: selectedEstadoFiltro === 'ocupadas' ? '#ef4444' : '#ffffff',
+                    color: selectedEstadoFiltro === 'ocupadas' ? '#ffffff' : '#64748b',
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s',
+                    flexShrink: 0
+                  }}
+                  onClick={() => setSelectedEstadoFiltro('ocupadas')}
+                >
+                  🔵 Ocupadas ({countOcupadas})
+                </button>
+                <button
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    border: selectedEstadoFiltro === 'por-cobrar' ? '1px solid #f59e0b' : '1px solid #e2e8f0',
+                    background: selectedEstadoFiltro === 'por-cobrar' ? '#f59e0b' : '#ffffff',
+                    color: selectedEstadoFiltro === 'por-cobrar' ? '#ffffff' : (countPorCobrar > 0 ? '#b45309' : '#64748b'),
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    flexShrink: 0
+                  }}
+                  onClick={() => setSelectedEstadoFiltro('por-cobrar')}
+                >
+                  <ReceiptText size={14} /> Por Cobrar ({countPorCobrar})
+                </button>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 12, paddingRight: 4 }}>
                 {filteredMesas.map((mesa: any) => {
                   const status = getEstadoMesaLabel(mesa.idEstadoMesa || 1);
                   const isSelected = selectedMesa?.id === mesa.id;
-                  const isOcupada = status.text.toLowerCase().includes("ocupada");
+                  const isPorCobrar = mesa.idEstadoMesa === 4 || status.isPorCobrar;
+                  const isOcupada = (status.text.toLowerCase().includes("ocupada") || mesa.idEstadoMesa === 2) && !isPorCobrar;
                   return (
                     <button
                       key={mesa.id}
+                      className={isPorCobrar ? "mesa-card--pidiendo-cuenta" : undefined}
                       style={{ 
                         padding: 24, 
-                        border: isSelected ? '2px solid var(--color-primary, #3b82f6)' : '1px solid transparent',
-                        background: isSelected ? 'var(--color-primary-light, #eff6ff)' : (isOcupada ? 'rgba(239, 68, 68, 0.1)' : '#ffffff'),
+                        border: isSelected ? '2px solid var(--color-primary, #3b82f6)' : (isPorCobrar ? '2px solid #f59e0b' : '1px solid transparent'),
+                        background: isSelected ? 'var(--color-primary-light, #eff6ff)' : (isPorCobrar ? '#fef3c7' : (isOcupada ? 'rgba(239, 68, 68, 0.1)' : '#ffffff')),
                         borderRadius: 16, 
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         gap: 8,
-                        boxShadow: isSelected ? '0 4px 12px rgba(59,130,246,0.15)' : '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                        boxShadow: isSelected ? '0 4px 12px rgba(59,130,246,0.15)' : (isPorCobrar ? '0 4px 12px rgba(245,158,11,0.25)' : '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)'),
                         transition: 'transform 0.2s, box-shadow 0.2s',
                         transform: 'scale(1)',
                         position: 'relative'
                       }}
-                      onMouseEnter={e => { if(!isSelected) { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)'; } }}
-                      onMouseLeave={e => { if(!isSelected) { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)'; } }}
+                      onMouseEnter={e => { if(!isSelected) { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = isPorCobrar ? '0 10px 15px -3px rgba(245,158,11,0.3)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)'; } }}
+                      onMouseLeave={e => { if(!isSelected) { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = isPorCobrar ? '0 4px 12px rgba(245,158,11,0.25)' : '0 4px 6px -1px rgba(0, 0, 0, 0.05)'; } }}
                       onClick={async () => {
                         if (isOcupada) {
                           const ok = await confirm({
                             title: "Mesa Ocupada",
-                            message: "Esta mesa ya tiene un pedido activo. ¿Deseas seleccionarla de todos modos para agregar ítems?",
+                            message: "Esta mesa ya tiene un pedido activo. ¿Deseas seleccionarla de todos modos para agregar ítems o cobrar?",
                             confirmLabel: "Sí, seleccionar",
                             variant: "warning"
                           });
@@ -1149,9 +1281,13 @@ export default function PosPage() {
                         setSelectedMesa(mesa);
                         setShowMesaSelector(false);
                       }}
-                      title={isOcupada ? "Mesa ocupada (Pedido activo)" : undefined}
+                      title={isPorCobrar ? "Mesa pidiendo cuenta (Por cobrar)" : (isOcupada ? "Mesa ocupada (Pedido activo)" : undefined)}
                     >
-                      {isOcupada && (
+                      {isPorCobrar ? (
+                        <div style={{ position: 'absolute', top: -10, right: -10, background: '#f59e0b', color: '#fff', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '12px', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <ReceiptText size={12} /> Por Cobrar
+                        </div>
+                      ) : isOcupada && (
                         <div style={{ position: 'absolute', top: -10, right: -10, background: 'var(--color-error, #ef4444)', color: '#fff', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '12px', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
                           Ocupada
                         </div>

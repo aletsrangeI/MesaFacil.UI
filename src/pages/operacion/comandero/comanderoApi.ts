@@ -17,10 +17,19 @@ const comanderoApi = api.injectEndpoints({
       }),
       invalidatesTags: ['Pedido', 'Mesa'],
     }),
+    comanderoSolicitarCuenta: build.mutation<any, number>({
+      query: (idMesa) => ({
+        url: `/api/Mesas/${idMesa}/solicitar-cuenta`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Mesa'],
+    }),
   }),
 });
 
 export const {
   useComanderoGetPedidoActivoByMesaQuery,
   useComanderoAgregarDetallesMutation,
+  useComanderoSolicitarCuentaMutation,
 } = comanderoApi;
+
