@@ -55,6 +55,9 @@ const AutofacturacionPage = lazy(
   () => import("../../pages/public/AutofacturacionPage")
 );
 const ComanderoPage = lazy(() => import("../../pages/operacion/comandero"));
+const MenuEngineeringPage = lazy(
+  () => import("../../pages/analitica/MenuEngineeringPage")
+);
 
 // Utilidades de pre-fetching inteligente en segundo plano tras autenticación
 export const prefetchComandero = () => import("../../pages/operacion/comandero");
@@ -354,6 +357,14 @@ export default function AppRouter() {
           element={
             <RequireAccess path="/menu">
               <ModificadoresPage />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/analitica/ingenieria-menu"
+          element={
+            <RequireAccess path="/menu">
+              <MenuEngineeringPage />
             </RequireAccess>
           }
         />
