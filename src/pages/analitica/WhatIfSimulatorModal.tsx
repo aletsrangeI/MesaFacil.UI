@@ -98,27 +98,32 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
         item,
         isIncluded,
         originalPvp,
-        simulatedPvp,
         originalCost,
         originalMargin,
-        simulatedMargin,
         originalFoodCostPct: item.foodCostPct,
+        simulatedPvp,
+        simulatedMargin,
         simulatedFoodCostPct,
         effectiveUnits,
         itemExtraProfit,
       };
     });
 
-    const originalFoodCostGlobal = originalRevenueTotal > 0 ? (originalCostTotal / originalRevenueTotal) * 100 : 0;
-    const simulatedFoodCostGlobal = simulatedRevenueTotal > 0 ? (originalCostTotal / simulatedRevenueTotal) * 100 : 0;
+    const includedCount = rows.filter((r) => r.isIncluded).length;
+    const originalFoodCostGlobal =
+      originalRevenueTotal > 0 ? (originalCostTotal / originalRevenueTotal) * 100 : 0;
+    const simulatedFoodCostGlobal =
+      simulatedRevenueTotal > 0 ? (originalCostTotal / simulatedRevenueTotal) * 100 : 0;
 
     return {
       rows,
-      extraProfitTotal: Math.round(extraProfitTotal),
-      simulatedProfitTotal: Math.round(originalProfitTotal + extraProfitTotal),
+      includedCount,
+      extraProfitTotal,
+      originalProfitTotal,
+      originalRevenueTotal,
+      simulatedRevenueTotal,
       originalFoodCostGlobal,
       simulatedFoodCostGlobal,
-      includedCount: rows.filter((r) => r.isIncluded).length,
     };
   }, [eligibleItems, selectedProductIds, adjustmentType, adjustmentValue, elasticityPct]);
 
@@ -127,27 +132,27 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(15, 23, 42, 0.5)',
+        backdropFilter: 'blur(3px)',
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '16px',
       }}
     >
       <div
         style={{
-          backgroundColor: '#0f172a',
-          border: '1px solid #334155',
+          backgroundColor: '#ffffff',
+          border: '1px solid #e2e8f0',
           borderRadius: '16px',
           width: '100%',
-          maxWidth: '850px',
+          maxWidth: '880px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-          color: '#f8fafc',
+          boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.18)',
+          color: '#1e293b',
           overflow: 'hidden',
         }}
       >
@@ -155,21 +160,21 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
         <div
           style={{
             padding: '18px 24px',
-            borderBottom: '1px solid #1e293b',
+            borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: '#1e293b',
+            backgroundColor: '#ffffff',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
-                width: '36px',
-                height: '36px',
+                width: '38px',
+                height: '38px',
                 borderRadius: '8px',
-                backgroundColor: 'rgba(2, 132, 199, 0.2)',
-                color: '#38bdf8',
+                backgroundColor: '#e0f2fe',
+                color: '#0284c7',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -178,10 +183,10 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
               <Sparkles size={20} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#f8fafc' }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#0f172a' }}>
                 Simulador de Impacto Financiero ("What-If")
               </h3>
-              <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>
+              <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b' }}>
                 Proyecta el impacto en utilidad y Food Cost al optimizar precios en platillos estratégicos
               </p>
             </div>
@@ -191,25 +196,28 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: '#94a3b8',
+              color: '#64748b',
               cursor: 'pointer',
-              padding: '4px',
+              padding: '6px',
               borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Body Modal */}
-        <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {/* Controles de Simulación */}
           <div
             style={{
-              backgroundColor: '#1e293b',
+              backgroundColor: '#f8fafc',
               padding: '16px 20px',
               borderRadius: '12px',
-              border: '1px solid #334155',
+              border: '1px solid #e2e8f0',
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
@@ -219,8 +227,8 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
           >
             {/* Tipo de Ajuste */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: '600', color: '#cbd5e1' }}>Modo de Ajuste</label>
-              <div style={{ display: 'flex', gap: '4px', backgroundColor: '#0f172a', padding: '3px', borderRadius: '8px', border: '1px solid #334155' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>Modo de Ajuste</label>
+              <div style={{ display: 'flex', gap: '4px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setAdjustmentType('monto')}
@@ -235,7 +243,9 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                     alignItems: 'center',
                     gap: '4px',
                     backgroundColor: adjustmentType === 'monto' ? '#0284c7' : 'transparent',
-                    color: adjustmentType === 'monto' ? '#ffffff' : '#94a3b8',
+                    color: adjustmentType === 'monto' ? '#ffffff' : '#64748b',
+                    boxShadow: adjustmentType === 'monto' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <DollarSign size={14} /> Importe Fijo ($)
@@ -254,7 +264,9 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                     alignItems: 'center',
                     gap: '4px',
                     backgroundColor: adjustmentType === 'porcentaje' ? '#0284c7' : 'transparent',
-                    color: adjustmentType === 'porcentaje' ? '#ffffff' : '#94a3b8',
+                    color: adjustmentType === 'porcentaje' ? '#ffffff' : '#64748b',
+                    boxShadow: adjustmentType === 'porcentaje' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <Percent size={14} /> Porcentaje (%)
@@ -264,7 +276,7 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
 
             {/* Valor de Incremento */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: '600', color: '#cbd5e1' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>
                 {adjustmentType === 'monto' ? 'Subida al Precio ($ MXN)' : 'Incremento Porcentual (%)'}
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -275,14 +287,15 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                   value={adjustmentValue}
                   onChange={(e) => setAdjustmentValue(Math.max(0, parseFloat(e.target.value) || 0))}
                   style={{
-                    width: '100px',
+                    width: '90px',
                     padding: '6px 10px',
-                    backgroundColor: '#0f172a',
-                    border: '1px solid #334155',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #cbd5e1',
                     borderRadius: '6px',
-                    color: '#f8fafc',
+                    color: '#0f172a',
                     fontWeight: '700',
-                    fontSize: '14px',
+                    fontSize: '13px',
+                    outline: 'none',
                   }}
                 />
                 {/* Presets Rápidos */}
@@ -296,11 +309,12 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                           onClick={() => setAdjustmentValue(v)}
                           style={{
                             padding: '4px 8px',
-                            backgroundColor: adjustmentValue === v ? '#0284c7' : '#0f172a',
-                            color: adjustmentValue === v ? '#ffffff' : '#cbd5e1',
-                            border: '1px solid #334155',
+                            backgroundColor: adjustmentValue === v ? '#0284c7' : '#ffffff',
+                            color: adjustmentValue === v ? '#ffffff' : '#475569',
+                            border: `1px solid ${adjustmentValue === v ? '#0284c7' : '#cbd5e1'}`,
                             borderRadius: '4px',
                             fontSize: '11px',
+                            fontWeight: '600',
                             cursor: 'pointer',
                           }}
                         >
@@ -317,11 +331,12 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                           onClick={() => setAdjustmentValue(v)}
                           style={{
                             padding: '4px 8px',
-                            backgroundColor: adjustmentValue === v ? '#0284c7' : '#0f172a',
-                            color: adjustmentValue === v ? '#ffffff' : '#cbd5e1',
-                            border: '1px solid #334155',
+                            backgroundColor: adjustmentValue === v ? '#0284c7' : '#ffffff',
+                            color: adjustmentValue === v ? '#ffffff' : '#475569',
+                            border: `1px solid ${adjustmentValue === v ? '#0284c7' : '#cbd5e1'}`,
                             borderRadius: '4px',
                             fontSize: '11px',
+                            fontWeight: '600',
                             cursor: 'pointer',
                           }}
                         >
@@ -336,7 +351,7 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
 
             {/* Target Cuadrante */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: '600', color: '#cbd5e1' }}>Filtrar Catálogo</label>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>Filtrar Catálogo</label>
               <select
                 value={targetCategory}
                 onChange={(e) => {
@@ -348,11 +363,12 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                 }}
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: '#0f172a',
-                  border: '1px solid #334155',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
                   borderRadius: '6px',
-                  color: '#f8fafc',
+                  color: '#0f172a',
                   fontSize: '12px',
+                  outline: 'none',
                 }}
               >
                 <option value="CaballoBatalla">Solo Caballos de Batalla (Recomendado)</option>
@@ -362,7 +378,7 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
 
             {/* Elasticidad / Retención de Ventas */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: '600', color: '#cbd5e1' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>
                 Retención de Demanda ({elasticityPct}%)
               </label>
               <select
@@ -370,11 +386,12 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                 onChange={(e) => setElasticityPct(Number(e.target.value))}
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: '#0f172a',
-                  border: '1px solid #334155',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
                   borderRadius: '6px',
-                  color: '#f8fafc',
+                  color: '#0f172a',
                   fontSize: '12px',
+                  outline: 'none',
                 }}
               >
                 <option value={100}>100% (Sin caída de demanda)</option>
@@ -388,8 +405,8 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
           {/* Tarjeta de Impacto Proyectado */}
           <div
             style={{
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(2, 132, 199, 0.15))',
-              border: '1px solid #10b981',
+              background: 'linear-gradient(135deg, #ecfdf5 0%, #f0f9ff 100%)',
+              border: '1px solid #a7f3d0',
               borderRadius: '12px',
               padding: '18px 24px',
               display: 'grid',
@@ -399,27 +416,27 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
             }}
           >
             <div>
-              <span style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <span style={{ fontSize: '12px', color: '#047857', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Utilidad Adicional Proyectada
               </span>
-              <div style={{ fontSize: '26px', fontWeight: '800', color: '#34d399', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '24px', fontWeight: '800', color: '#059669', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
                 <TrendingUp size={24} />
                 +${simulationResults.extraProfitTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
               </div>
-              <span style={{ fontSize: '11px', color: '#cbd5e1' }}>
+              <span style={{ fontSize: '11px', color: '#065f46' }}>
                 Sobre {simulationResults.includedCount} platillo(s) simulado(s)
               </span>
             </div>
 
             <div>
-              <span style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <span style={{ fontSize: '12px', color: '#0369a1', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Optimización Food Cost %
               </span>
-              <div style={{ fontSize: '20px', fontWeight: '700', color: '#38bdf8' }}>
+              <div style={{ fontSize: '20px', fontWeight: '800', color: '#0284c7', marginTop: '2px' }}>
                 {simulationResults.originalFoodCostGlobal.toFixed(1)}% ──►{' '}
-                <span style={{ color: '#34d399' }}>{simulationResults.simulatedFoodCostGlobal.toFixed(1)}%</span>
+                <span style={{ color: '#059669' }}>{simulationResults.simulatedFoodCostGlobal.toFixed(1)}%</span>
               </div>
-              <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+              <span style={{ fontSize: '11px', color: '#075985' }}>
                 Reducción de {(simulationResults.originalFoodCostGlobal - simulationResults.simulatedFoodCostGlobal).toFixed(1)} pts porcentuales
               </span>
             </div>
@@ -428,7 +445,7 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
           {/* Tabla de Desglose de Platillos Simulados */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '600', color: '#cbd5e1' }}>
+              <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>
                 Platillos Evaluados ({simulationResults.rows.length})
               </span>
               <button
@@ -437,7 +454,7 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#38bdf8',
+                  color: '#0284c7',
                   fontSize: '12px',
                   cursor: 'pointer',
                   fontWeight: '600',
@@ -449,15 +466,15 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
 
             <div
               style={{
-                border: '1px solid #334155',
+                border: '1px solid #e2e8f0',
                 borderRadius: '8px',
                 overflow: 'hidden',
-                backgroundColor: '#1e293b',
+                backgroundColor: '#ffffff',
               }}
             >
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#0f172a', color: '#94a3b8', textAlign: 'left', borderBottom: '1px solid #334155' }}>
+                  <tr style={{ backgroundColor: '#f8fafc', color: '#64748b', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>
                     <th style={{ padding: '8px 12px', width: '40px' }}></th>
                     <th style={{ padding: '8px 12px' }}>Platillo</th>
                     <th style={{ padding: '8px 12px' }}>Cuadrante</th>
@@ -474,37 +491,38 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                       key={row.item.idProducto}
                       onClick={() => toggleItem(row.item.idProducto)}
                       style={{
-                        borderBottom: '1px solid #334155',
+                        borderBottom: '1px solid #f1f5f9',
                         cursor: 'pointer',
-                        backgroundColor: row.isIncluded ? 'rgba(2, 132, 199, 0.08)' : 'transparent',
+                        backgroundColor: row.isIncluded ? '#f0f9ff' : 'transparent',
+                        transition: 'background 0.15s ease',
                       }}
                     >
                       <td style={{ padding: '8px 12px', textAlign: 'center' }}>
                         {row.isIncluded ? (
-                          <CheckSquare size={16} color="#38bdf8" />
+                          <CheckSquare size={16} color="#0284c7" />
                         ) : (
-                          <Square size={16} color="#64748b" />
+                          <Square size={16} color="#94a3b8" />
                         )}
                       </td>
-                      <td style={{ padding: '8px 12px', fontWeight: '600', color: '#f8fafc' }}>
+                      <td style={{ padding: '8px 12px', fontWeight: '600', color: '#0f172a' }}>
                         {row.item.nombreProducto}
                       </td>
-                      <td style={{ padding: '8px 12px', color: '#cbd5e1' }}>
+                      <td style={{ padding: '8px 12px', color: '#475569' }}>
                         {row.item.cuadrante === 'CaballoBatalla' ? '🐎 Caballo' : row.item.cuadrante}
                       </td>
-                      <td style={{ padding: '8px 12px', color: '#94a3b8' }}>
+                      <td style={{ padding: '8px 12px', color: '#64748b' }}>
                         ${row.originalPvp.toFixed(2)}
                       </td>
-                      <td style={{ padding: '8px 12px', fontWeight: '700', color: row.isIncluded ? '#38bdf8' : '#94a3b8' }}>
+                      <td style={{ padding: '8px 12px', fontWeight: '700', color: row.isIncluded ? '#0284c7' : '#64748b' }}>
                         ${row.simulatedPvp.toFixed(2)}
                       </td>
-                      <td style={{ padding: '8px 12px', color: '#94a3b8' }}>
+                      <td style={{ padding: '8px 12px', color: '#64748b' }}>
                         {row.originalFoodCostPct.toFixed(1)}%
                       </td>
-                      <td style={{ padding: '8px 12px', fontWeight: '600', color: row.isIncluded ? '#34d399' : '#94a3b8' }}>
+                      <td style={{ padding: '8px 12px', fontWeight: '600', color: row.isIncluded ? '#059669' : '#64748b' }}>
                         {row.simulatedFoodCostPct.toFixed(1)}%
                       </td>
-                      <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '700', color: row.itemExtraProfit > 0 ? '#34d399' : '#94a3b8' }}>
+                      <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '700', color: row.itemExtraProfit > 0 ? '#059669' : '#94a3b8' }}>
                         {row.itemExtraProfit > 0
                           ? `+$${row.itemExtraProfit.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
                           : '$0.00'}
@@ -521,14 +539,14 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
         <div
           style={{
             padding: '14px 24px',
-            borderTop: '1px solid #1e293b',
+            borderTop: '1px solid #e2e8f0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: '#1e293b',
+            backgroundColor: '#f8fafc',
           }}
         >
-          <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+          <span style={{ fontSize: '12px', color: '#64748b' }}>
             * Simulación basada en el volumen de ventas histórico del período seleccionado.
           </span>
           <button

@@ -10,10 +10,10 @@ interface BcgScatterChartProps {
 }
 
 const COLOR_MAP: Record<string, { fill: string; border: string; bg: string; name: string; icon: string }> = {
-  Estrella: { fill: '#10b981', border: '#059669', bg: 'rgba(16, 185, 129, 0.12)', name: 'Estrella', icon: '⭐' },
-  CaballoBatalla: { fill: '#0284c7', border: '#0369a1', bg: 'rgba(2, 132, 199, 0.12)', name: 'Caballo de Batalla', icon: '🐎' },
-  Puzzle: { fill: '#8b5cf6', border: '#7c3aed', bg: 'rgba(139, 92, 246, 0.12)', name: 'Puzzle / Enigma', icon: '🧩' },
-  Perro: { fill: '#ef4444', border: '#dc2626', bg: 'rgba(239, 68, 68, 0.12)', name: 'Perro', icon: '🐕' },
+  Estrella: { fill: '#059669', border: '#047857', bg: '#ecfdf5', name: 'Estrella', icon: '⭐' },
+  CaballoBatalla: { fill: '#0284c7', border: '#0369a1', bg: '#f0f9ff', name: 'Caballo de Batalla', icon: '🐎' },
+  Puzzle: { fill: '#7c3aed', border: '#6d28d9', bg: '#faf5ff', name: 'Puzzle / Enigma', icon: '🧩' },
+  Perro: { fill: '#dc2626', border: '#b91c1c', bg: '#fef2f2', name: 'Perro', icon: '🐕' },
 };
 
 export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
@@ -72,47 +72,35 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
         style={{
           width: '100%',
           height: 'auto',
-          backgroundColor: '#0f172a',
+          backgroundColor: '#ffffff',
           borderRadius: '12px',
-          border: '1px solid #334155',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           display: 'block',
         }}
       >
         {/* Definición de sombreado de cuadrantes */}
         <defs>
           <filter id="bubble-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.4" />
+            <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.25" />
           </filter>
         </defs>
 
         {/* 1. Fondo de los 4 Cuadrantes */}
-        {/* Top-Left: PUZZLES (Margen Alto >= Umbral, Popularidad < Umbral) -> Espacialmente: Margen Alto está a la DERECHA, Popularidad Alta ARRIBA */}
-        {/*
-            Eje X = Margen de Contribución ($). Derecha = Alto, Izquierda = Bajo.
-            Eje Y = Popularidad (Unidades). Arriba = Alta, Abajo = Baja.
-            
-            Superior Izquierdo: Margen Bajo, Popularidad Alta -> CABALLOS DE BATALLA
-            Superior Derecho: Margen Alto, Popularidad Alta -> ESTRELLAS
-            Inferior Izquierdo: Margen Bajo, Popularidad Baja -> PERROS
-            Inferior Derecho: Margen Alto, Popularidad Baja -> PUZZLES
-        */}
-
         {/* Cuadrante Superior Izquierdo: CABALLOS DE BATALLA (X < Prom, Y >= Umbral) */}
         <rect
           x={margin.left}
           y={margin.top}
           width={Math.max(0, thresholdX - margin.left)}
           height={Math.max(0, thresholdY - margin.top)}
-          fill="rgba(2, 132, 199, 0.06)"
+          fill="#f0f9ff"
         />
         <text
           x={margin.left + 12}
           y={margin.top + 22}
-          fill="#38bdf8"
+          fill="#0284c7"
           fontSize="11"
-          fontWeight="600"
-          opacity="0.85"
+          fontWeight="700"
         >
           🐎 CABALLOS DE BATALLA (Bajo Margen, Alta Venta)
         </text>
@@ -123,16 +111,15 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
           y={margin.top}
           width={Math.max(0, margin.left + plotWidth - thresholdX)}
           height={Math.max(0, thresholdY - margin.top)}
-          fill="rgba(16, 185, 129, 0.08)"
+          fill="#ecfdf5"
         />
         <text
           x={margin.left + plotWidth - 12}
           y={margin.top + 22}
           textAnchor="end"
-          fill="#34d399"
+          fill="#059669"
           fontSize="11"
-          fontWeight="600"
-          opacity="0.85"
+          fontWeight="700"
         >
           ⭐ ESTRELLAS (Alto Margen, Alta Venta)
         </text>
@@ -143,15 +130,14 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
           y={thresholdY}
           width={Math.max(0, thresholdX - margin.left)}
           height={Math.max(0, margin.top + plotHeight - thresholdY)}
-          fill="rgba(239, 68, 68, 0.05)"
+          fill="#fef2f2"
         />
         <text
           x={margin.left + 12}
           y={margin.top + plotHeight - 12}
-          fill="#f87171"
+          fill="#dc2626"
           fontSize="11"
-          fontWeight="600"
-          opacity="0.85"
+          fontWeight="700"
         >
           🐕 PERROS (Bajo Margen, Baja Venta)
         </text>
@@ -162,16 +148,15 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
           y={thresholdY}
           width={Math.max(0, margin.left + plotWidth - thresholdX)}
           height={Math.max(0, margin.top + plotHeight - thresholdY)}
-          fill="rgba(139, 92, 246, 0.06)"
+          fill="#faf5ff"
         />
         <text
           x={margin.left + plotWidth - 12}
           y={margin.top + plotHeight - 12}
           textAnchor="end"
-          fill="#c084fc"
+          fill="#7c3aed"
           fontSize="11"
-          fontWeight="600"
-          opacity="0.85"
+          fontWeight="700"
         >
           🧩 PUZZLES (Alto Margen, Baja Venta)
         </text>
@@ -190,9 +175,9 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
         <text
           x={thresholdX + 6}
           y={margin.top + plotHeight + 35}
-          fill="#94a3b8"
+          fill="#64748b"
           fontSize="10"
-          fontWeight="500"
+          fontWeight="600"
         >
           Margen Prom. (${margenPromedio.toFixed(2)})
         </text>
@@ -210,9 +195,9 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
         <text
           x={margin.left + 6}
           y={thresholdY - 6}
-          fill="#94a3b8"
+          fill="#64748b"
           fontSize="10"
-          fontWeight="500"
+          fontWeight="600"
         >
           Umbral Popularidad ({umbralPopularidad.toFixed(1)} u.)
         </text>
@@ -223,7 +208,7 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
           y1={margin.top + plotHeight}
           x2={margin.left + plotWidth}
           y2={margin.top + plotHeight}
-          stroke="#475569"
+          stroke="#cbd5e1"
           strokeWidth="1.5"
         />
         <line
@@ -231,7 +216,7 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
           y1={margin.top}
           x2={margin.left}
           y2={margin.top + plotHeight}
-          stroke="#475569"
+          stroke="#cbd5e1"
           strokeWidth="1.5"
         />
 
@@ -240,7 +225,7 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
           x={margin.left + plotWidth / 2}
           y={height - 12}
           textAnchor="middle"
-          fill="#cbd5e1"
+          fill="#475569"
           fontSize="12"
           fontWeight="600"
         >
@@ -252,7 +237,7 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
           y={18}
           transform="rotate(-90)"
           textAnchor="middle"
-          fill="#cbd5e1"
+          fill="#475569"
           fontSize="12"
           fontWeight="600"
         >
@@ -303,8 +288,8 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
                 cy={cy}
                 r={r}
                 fill={config.fill}
-                fillOpacity={selectedItemId && !isSelected ? 0.35 : 0.82}
-                stroke={isSelected ? '#ffffff' : config.border}
+                fillOpacity={selectedItemId && !isSelected ? 0.35 : 0.88}
+                stroke={isSelected ? '#0f172a' : config.border}
                 strokeWidth={isSelected ? 2.5 : 1.5}
                 filter="url(#bubble-glow)"
               />
@@ -319,7 +304,7 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
                   textAnchor="middle"
                   fill="#ffffff"
                   fontSize={r >= 18 ? '10' : '8.5'}
-                  fontWeight="600"
+                  fontWeight="700"
                   pointerEvents="none"
                 >
                   {item.nombreProducto.slice(0, r >= 18 ? 10 : 6)}
@@ -340,18 +325,18 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
             transform: 'translate(-50%, -100%)',
             pointerEvents: 'none',
             zIndex: 9999,
-            backgroundColor: '#0f172a',
-            color: '#f8fafc',
-            border: `1px solid ${COLOR_MAP[hoveredItem.cuadrante]?.fill || '#38bdf8'}`,
+            backgroundColor: '#ffffff',
+            color: '#1e293b',
+            border: `1px solid ${COLOR_MAP[hoveredItem.cuadrante]?.border || '#0284c7'}`,
             borderRadius: '8px',
             padding: '10px 14px',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
             fontSize: '12px',
             minWidth: '220px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-            <span style={{ fontWeight: '700', fontSize: '13px', color: '#f8fafc' }}>
+            <span style={{ fontWeight: '700', fontSize: '13px', color: '#0f172a' }}>
               {hoveredItem.nombreProducto}
             </span>
             <span
@@ -368,36 +353,36 @@ export const BcgScatterChart: React.FC<BcgScatterChartProps> = ({
             </span>
           </div>
 
-          <div style={{ color: '#94a3b8', fontSize: '11px', marginBottom: '8px' }}>
+          <div style={{ color: '#64748b', fontSize: '11px', marginBottom: '8px' }}>
             Categoría: {hoveredItem.categoria}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', borderTop: '1px solid #334155', paddingTop: '6px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', borderTop: '1px solid #e2e8f0', paddingTop: '6px' }}>
             <div>
-              <span style={{ color: '#94a3b8' }}>PVP Promedio:</span>{' '}
-              <strong style={{ color: '#38bdf8' }}>${hoveredItem.precioVentaPromedio.toFixed(2)}</strong>
+              <span style={{ color: '#64748b' }}>PVP Promedio:</span>{' '}
+              <strong style={{ color: '#0284c7' }}>${hoveredItem.precioVentaPromedio.toFixed(2)}</strong>
             </div>
             <div>
-              <span style={{ color: '#94a3b8' }}>Costo Receta:</span>{' '}
-              <strong style={{ color: '#f87171' }}>${hoveredItem.costoReceta.toFixed(2)}</strong>
+              <span style={{ color: '#64748b' }}>Costo Receta:</span>{' '}
+              <strong style={{ color: '#dc2626' }}>${hoveredItem.costoReceta.toFixed(2)}</strong>
             </div>
             <div>
-              <span style={{ color: '#94a3b8' }}>Margen ($):</span>{' '}
-              <strong style={{ color: '#34d399' }}>${hoveredItem.margenContribucion.toFixed(2)}</strong>
+              <span style={{ color: '#64748b' }}>Margen ($):</span>{' '}
+              <strong style={{ color: '#059669' }}>${hoveredItem.margenContribucion.toFixed(2)}</strong>
             </div>
             <div>
-              <span style={{ color: '#94a3b8' }}>Food Cost:</span>{' '}
-              <strong style={{ color: hoveredItem.foodCostPct > 38 ? '#f87171' : '#34d399' }}>
+              <span style={{ color: '#64748b' }}>Food Cost:</span>{' '}
+              <strong style={{ color: hoveredItem.foodCostPct > 38 ? '#dc2626' : '#059669' }}>
                 {hoveredItem.foodCostPct.toFixed(1)}%
               </strong>
             </div>
             <div>
-              <span style={{ color: '#94a3b8' }}>Vendidos:</span>{' '}
-              <strong>{hoveredItem.unidadesVendidas} un.</strong>
+              <span style={{ color: '#64748b' }}>Vendidos:</span>{' '}
+              <strong style={{ color: '#0f172a' }}>{hoveredItem.unidadesVendidas} un.</strong>
             </div>
             <div>
-              <span style={{ color: '#94a3b8' }}>Ingreso Total:</span>{' '}
-              <strong style={{ color: '#fbbf24' }}>${hoveredItem.ingresoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</strong>
+              <span style={{ color: '#64748b' }}>Ingreso Total:</span>{' '}
+              <strong style={{ color: '#d97706' }}>${hoveredItem.ingresoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</strong>
             </div>
           </div>
         </div>
