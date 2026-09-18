@@ -120,5 +120,7 @@ export const emptySplitApi = createApi({
     "FacturaVenta",
     "BolsaTimbres",
     "Impresora",
+    "HostessWaitlist",
+    "HostessReserva",
   ],
 });

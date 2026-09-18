@@ -1,0 +1,665 @@
+﻿/* hostess.css - Hostess Station, Fila de Espera y Reservaciones */
+
+.hostess-container {
+  padding: 1.25rem 1.5rem;
+  max-width: 1700px;
+  margin: 0 auto;
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  color: var(--color-text, #1e293b);
+}
+
+/* Header & KPI summary */
+.hostess-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.hostess-title-group h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hostess-title-group p {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #64748b);
+}
+
+.hostess-header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* KPI Summary Bar */
+.hostess-kpi-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.hostess-kpi-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.hostess-kpi-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.kpi-waitlist { background: #eff6ff; color: #2563eb; }
+.kpi-avg-time { background: #fef3c7; color: #d97706; }
+.kpi-reservations { background: #f3e8ff; color: #9333ea; }
+.kpi-tables-avail { background: #ecfdf5; color: #059669; }
+.kpi-tables-soon { background: #fff7ed; color: #ea580c; }
+
+.hostess-kpi-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.hostess-kpi-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hostess-kpi-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+/* Navigation Tabs */
+.hostess-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--color-border-subtle, #e2e8f0);
+  margin-bottom: 1.25rem;
+}
+
+.hostess-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+}
+
+.hostess-tab-btn:hover {
+  color: var(--color-text, #1e293b);
+}
+
+.hostess-tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+/* Split View: Fila de Espera + Mapa de Mesas */
+.hostess-split-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.25rem;
+  min-height: 600px;
+}
+
+@media (max-width: 1024px) {
+  .hostess-split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Waitlist Column */
+.waitlist-column {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.waitlist-col-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border-subtle, #e2e8f0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-surface-subtle, #f8fafc);
+}
+
+.waitlist-col-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.waitlist-badge-count {
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.waitlist-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 680px;
+}
+
+.waitlist-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.waitlist-empty svg {
+  margin: 0 auto 0.75rem;
+  opacity: 0.4;
+}
+
+/* Waitlist Card */
+.waitlist-card {
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  border-radius: 0.625rem;
+  padding: 0.875rem;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.waitlist-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+}
+
+.waitlist-card.selected-for-seating {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  background: #f8faff;
+}
+
+.waitlist-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.waitlist-client-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text, #1e293b);
+  margin: 0;
+}
+
+.waitlist-party-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.waitlist-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+}
+
+.waitlist-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+.time-warning {
+  color: #ea580c;
+  font-weight: 700;
+}
+
+.waitlist-zone-tag {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.waitlist-notes {
+  font-size: 0.8125rem;
+  background: #fffbeb;
+  color: #92400e;
+  border-left: 3px solid #f59e0b;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.waitlist-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border-subtle, #f1f5f9);
+}
+
+.waitlist-btn-group {
+  display: flex;
+  gap: 0.375rem;
+}
+
+/* Mesas Map / Panel */
+.hostess-map-panel {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.hostess-map-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border-subtle, #e2e8f0);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-surface-subtle, #f8fafc);
+}
+
+.hostess-map-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hostess-area-chips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.hostess-area-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid var(--color-border-subtle, #cbd5e1);
+  background: #ffffff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.hostess-area-chip.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.hostess-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  background: #fdfdfd;
+  border-bottom: 1px solid var(--color-border-subtle, #f1f5f9);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 500;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-disponible { background: #10b981; }
+.dot-ocupada { background: #ef4444; }
+.dot-reservada { background: #8b5cf6; }
+.dot-cuenta { background: #f59e0b; animation: pulseDot 1.5s infinite; }
+.dot-limpieza { background: #64748b; }
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* Mesas Grid */
+.hostess-mesas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.875rem;
+  padding: 1.25rem;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.hostess-mesa-card {
+  border-radius: 0.625rem;
+  padding: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 105px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.hostess-mesa-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mesa-disponible {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.mesa-ocupada {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.mesa-reservada {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #5b21b6;
+}
+
+.mesa-cuenta {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+  animation: pulseCard 2s infinite;
+}
+
+@keyframes pulseCard {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.4); }
+}
+
+.mesa-limpieza {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.mesa-selectable {
+  cursor: pointer;
+  border: 2px dashed #2563eb !important;
+}
+
+.mesa-selected-target {
+  box-shadow: 0 0 0 3px #2563eb !important;
+  background: #dbeafe !important;
+}
+
+.mesa-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mesa-codigo {
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.mesa-capacidad {
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.mesa-status-tag {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+.mesa-timing-hint {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+/* Modal styles */
+.hostess-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 1rem;
+}
+
+.hostess-modal-card {
+  background: #ffffff;
+  border-radius: 0.875rem;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 90vh;
+}
+
+.hostess-modal-header {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--color-border-subtle, #e2e8f0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hostess-modal-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.hostess-modal-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hostess-modal-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--color-border-subtle, #e2e8f0);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  background: #f8fafc;
+}
+
+/* Quick guest counter buttons */
+.guest-counter-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.guest-count-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.guest-count-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* Reservas Calendar / List View */
+.reservas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.reservas-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+}
+
+.reservas-table-wrapper {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  overflow-x: auto;
+}
+
+.reservas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.reservas-table th {
+  background: #f8fafc;
+  padding: 0.875rem 1rem;
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.reservas-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.reservas-table tr:hover td {
+  background: #f8fafc;
+}
+
+/* Badge styles */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-status-pendiente { background: #fef3c7; color: #b45309; }
+.badge-status-confirmada { background: #dbeafe; color: #1d4ed8; }
+.badge-status-sentada { background: #d1fae5; color: #047857; }
+.badge-status-cancelada { background: #fee2e2; color: #b91c1c; }
+.badge-status-noshow { background: #f1f5f9; color: #475569; }
+
+.badge-deposit-paid {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.badge-deposit-none {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
