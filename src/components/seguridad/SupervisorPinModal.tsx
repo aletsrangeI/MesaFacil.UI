@@ -12,6 +12,7 @@ import {
   useGetMotivosCancelacionQuery,
   type AccionProtegida,
 } from '../../services/seguridadSupervisorApi';
+import { useCatalogosGetAllQuery } from '../../services/generated/api';
 
 const PIN_LENGTH = 4;
 
@@ -23,13 +24,13 @@ const MOTIVOS_FALLBACK = [
   { id: -4, descripcion: 'Cortesía de la casa autorizada' },
 ];
 
-/** Catálogo de motivos para descuentos de supervisor (spec 028, sección 2.2). */
-export const MOTIVOS_DESCUENTO = [
-  { id: 1, descripcion: 'Cortesia de la Casa (Relaciones Públicas / Dueño)' },
-  { id: 2, descripcion: 'Compensación por Demora Excesiva en Cocina' },
-  { id: 3, descripcion: 'Inconformidad de Comensal con Platillo / Calidad' },
-  { id: 4, descripcion: 'Descuento a Colaborador / Empleado del Restaurante' },
-  { id: 5, descripcion: 'Convenio Comercial / Descuento Empresarial' },
+/** Catálogo de respaldo para descuentos si /api/catalogos/tipos-descuento no responde o está vacío. */
+const MOTIVOS_DESCUENTO_FALLBACK = [
+  { id: -1, descripcion: 'Cortesía de la Casa' },
+  { id: -2, descripcion: 'Compensación por Demora en Cocina' },
+  { id: -3, descripcion: 'Inconformidad de Comensal con Platillo' },
+  { id: -4, descripcion: 'Descuento a Colaborador / Empleado' },
+  { id: -5, descripcion: 'Convenio Comercial / Descuento Empresarial' },
 ];
 
 export interface SupervisorPinModalProps {
@@ -46,7 +47,7 @@ export interface SupervisorPinModalProps {
   requiereMotivo?: boolean;
   /** Etiqueta personalizada para el motivo (ej. "Motivo del Descuento") */
   labelMotivo?: string;
-  /** Catálogo alternativo de motivos (por defecto MOTIVOS_DESCUENTO si accionProtegida === "DescuentoExcesivo") */
+  /** Catálogo alternativo de motivos (por defecto consulta /api/catalogos/tipos-descuento si accionProtegida === "DescuentoExcesivo") */
   catalogoMotivos?: { id: number; descripcion: string }[];
   onAutorizado: (tokenAutorizacion: string, motivo: string, nombreSupervisor?: string) => void;
 }
@@ -75,12 +76,28 @@ export function SupervisorPinModal({
   const { data: motivosData, isFetching: isFetchingMotivos } = useGetMotivosCancelacionQuery(undefined, {
     skip: !isOpen || !requiereMotivo || esDescuento || Boolean(catalogoMotivos),
   });
+  const { data: tiposDescuentoData, isFetching: isFetchingTiposDescuento } = useCatalogosGetAllQuery(
+    { catalog: 'tipos-descuento' },
+    { skip: !isOpen || !requiereMotivo || !esDescuento || Boolean(catalogoMotivos) }
+  );
   const [autorizarPin, { isLoading }] = useAutorizarSupervisorPinMutation();
+
+  const rawTiposDescuento = (tiposDescuentoData as any)?.data;
+  const catalogoTiposDescuento = Array.isArray(rawTiposDescuento)
+    ? rawTiposDescuento
+        .filter((x: any) => x && (x.isActive === undefined || x.isActive))
+        .map((x: any) => ({
+          id: x.id,
+          descripcion: x.descripcion,
+        }))
+    : [];
+
+  const isFetchingCatalogo = esDescuento ? isFetchingTiposDescuento : isFetchingMotivos;
 
   const motivosCatalogo = catalogoMotivos && catalogoMotivos.length > 0
     ? catalogoMotivos
     : esDescuento
-    ? MOTIVOS_DESCUENTO
+    ? (catalogoTiposDescuento.length > 0 ? catalogoTiposDescuento : MOTIVOS_DESCUENTO_FALLBACK)
     : Array.isArray(motivosData?.data) && motivosData.data.length > 0
     ? motivosData.data
     : MOTIVOS_FALLBACK;
@@ -226,7 +243,7 @@ export function SupervisorPinModal({
               <select
                 value={motivo}
                 onChange={(e) => { setMotivo(e.target.value); setErrorMsg(null); }}
-                disabled={isFetchingMotivos || isLoading}
+                disabled={isFetchingCatalogo || isLoading}
                 style={{
                   width: '100%',
                   padding: '10px 12px',
@@ -237,7 +254,7 @@ export function SupervisorPinModal({
                   color: 'var(--color-text, #1e293b)',
                 }}
               >
-                <option value="">Selecciona un motivo...</option>
+                <option value="">{isFetchingCatalogo ? 'Cargando catálogo...' : 'Selecciona un motivo...'}</option>
                 {motivosCatalogo.map((m) => (
                   <option key={m.id} value={m.descripcion}>{m.descripcion}</option>
                 ))}
