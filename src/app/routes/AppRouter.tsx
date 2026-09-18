@@ -58,6 +58,7 @@ const ComanderoPage = lazy(() => import("../../pages/operacion/comandero"));
 const MenuEngineeringPage = lazy(
   () => import("../../pages/analitica/MenuEngineeringPage")
 );
+const HostessPage = lazy(() => import("../../pages/operacion/hostess"));
 
 // Utilidades de pre-fetching inteligente en segundo plano tras autenticación
 export const prefetchComandero = () => import("../../pages/operacion/comandero");
@@ -221,6 +222,14 @@ export default function AppRouter() {
           element={
             <RequireAccess path="/mesas">
               <Placeholder title="Mesas" />
+            </RequireAccess>
+          }
+        />
+        <Route
+          path="/operacion/hostess"
+          element={
+            <RequireAccess path="/mesas">
+              <HostessPage />
             </RequireAccess>
           }
         />

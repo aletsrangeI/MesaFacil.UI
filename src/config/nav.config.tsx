@@ -89,6 +89,15 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         allowedRoles: ["admin", "manager", "waiter"],
       },
       {
+        key: "hostess",
+        label: "Hostess & Espera",
+        path: "/operacion/hostess",
+        acceso: "/mesas",
+        icon: <Icon name="Users" />,
+        sortOrder: 35,
+        allowedRoles: ["admin", "manager", "waiter", "cashier"],
+      },
+      {
         key: "delivery",
         label: "Delivery",
         path: "/delivery",
