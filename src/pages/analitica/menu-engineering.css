@@ -1,0 +1,541 @@
+﻿/* menu-engineering.css - Estilos dedicados para la Suite de Inteligencia Gastronómica y Matriz BCG */
+
+.bcg-page {
+  padding: 1.5rem 0;
+  color: #f1f5f9;
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+}
+
+/* Header de la Página */
+.bcg-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.bcg-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.bcg-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bcg-title {
+  font-size: 1.625rem;
+  font-weight: 700;
+  margin: 0;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.bcg-model-badge {
+  background: rgba(2, 132, 199, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bcg-subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.bcg-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Botones */
+.bcg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+.bcg-btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+}
+
+.bcg-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  transform: translateY(-1px);
+}
+
+.bcg-btn-secondary {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-color: #334155;
+}
+
+.bcg-btn-secondary:hover:not(:disabled) {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.bcg-btn-icon {
+  padding: 0.5rem;
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.bcg-btn-icon:hover:not(:disabled) {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.bcg-btn:disabled, .bcg-btn-icon:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Barra de Filtros */
+.bcg-filter-bar {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.bcg-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.bcg-filter-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.bcg-period-pills {
+  display: flex;
+  background: #090d16;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid #1e293b;
+  gap: 0.25rem;
+}
+
+.bcg-pill-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: none;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bcg-pill-btn:hover {
+  color: #f8fafc;
+}
+
+.bcg-pill-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.bcg-date-input, .bcg-select {
+  background: #090d16;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8125rem;
+  color: #f8fafc;
+  outline: none;
+}
+
+.bcg-date-input:focus, .bcg-select:focus {
+  border-color: #0284c7;
+}
+
+/* Grilla de KPIs */
+.bcg-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.bcg-kpi-card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 0.75rem;
+  padding: 1.125rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.2s ease;
+}
+
+.bcg-kpi-card:hover {
+  border-color: #334155;
+}
+
+.bcg-kpi-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bcg-kpi-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bcg-kpi-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-top: 0.25rem;
+  line-height: 1.2;
+}
+
+.bcg-kpi-subtitle {
+  font-size: 0.75rem;
+  margin-top: 0.35rem;
+  font-weight: 500;
+}
+
+.bcg-kpi-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-emerald { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.icon-sky { background: rgba(2, 132, 199, 0.15); color: #38bdf8; }
+.icon-purple { background: rgba(139, 92, 246, 0.15); color: #a855f7; }
+.icon-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+/* Status Badges */
+.badge-health-saludable {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-top: 0.35rem;
+}
+
+.badge-health-ajustado {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-top: 0.35rem;
+}
+
+.badge-health-critico {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-top: 0.35rem;
+}
+
+/* Banner de Aviso (Sin Recetas) */
+.bcg-alert-banner {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .bcg-alert-banner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.bcg-alert-content {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.bcg-alert-icon {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bcg-alert-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fde68a;
+}
+
+.bcg-alert-text {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(253, 230, 138, 0.85);
+}
+
+.bcg-alert-btn {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.bcg-alert-btn:hover {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+/* Matriz BCG / Card Visual */
+.bcg-matrix-card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bcg-matrix-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .bcg-matrix-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.bcg-section-title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.bcg-section-desc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0.25rem 0 0;
+}
+
+/* Pestañas de Cuadrantes */
+.bcg-quadrant-pills {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  background: #090d16;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid #1e293b;
+}
+
+.bcg-quadrant-btn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: #94a3b8;
+  transition: all 0.15s ease;
+}
+
+.bcg-quadrant-btn:hover {
+  color: #ffffff;
+}
+
+.bcg-quadrant-btn.active-todos { background: #334155; color: #ffffff; }
+.bcg-quadrant-btn.active-estrella { background: #059669; color: #ffffff; }
+.bcg-quadrant-btn.active-caballo { background: #0284c7; color: #ffffff; }
+.bcg-quadrant-btn.active-puzzle { background: #7c3aed; color: #ffffff; }
+.bcg-quadrant-btn.active-perro { background: #dc2626; color: #ffffff; }
+
+/* Tabla de Acciones Prescriptivas */
+.bcg-table-card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-bottom: 2rem;
+}
+
+.bcg-table-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #141f36;
+}
+
+.bcg-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.bcg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  text-align: left;
+}
+
+.bcg-table th {
+  background: #090d16;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #1e293b;
+  white-space: nowrap;
+}
+
+.bcg-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+.bcg-table tr {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bcg-table tr:hover {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.bcg-table tr.selected-row {
+  background: rgba(2, 132, 199, 0.15) !important;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Badges de Cuadrante para la Tabla */
+.badge-cuadrante {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge-estrella {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-caballo {
+  background: rgba(2, 132, 199, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(2, 132, 199, 0.3);
+}
+
+.badge-puzzle {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.badge-perro {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
