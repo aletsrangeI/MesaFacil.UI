@@ -267,6 +267,15 @@ export const NAV_SECTIONS_ALL: NavSectionConfig[] = [
         sortOrder: 60,
         allowedRoles: ["admin", "manager"],
       },
+      {
+        key: "ingenieria-menu",
+        label: "Ingeniería de Menú (BCG)",
+        path: "/analitica/ingenieria-menu",
+        acceso: "/menu",
+        icon: <Icon name="LineChart" />,
+        sortOrder: 70,
+        allowedRoles: ["admin", "manager"],
+      },
     ],
   },
   {
@@ -705,6 +714,8 @@ function filterByAccesos(
         if ((roles?.includes("manager") || roles?.includes("cashier")) && (pathNorm === "/cxp" || pathNorm.startsWith("/cxp"))) return true;
         // Respaldo para facturación CFDI
         if ((roles?.includes("manager") || roles?.includes("cashier")) && pathNorm === "/facturacion") return true;
+        // Respaldo para analítica e ingeniería de menú
+        if (roles?.includes("manager") && (pathNorm.startsWith("/analitica") || pathNorm.startsWith("/menu"))) return true;
         return false;
       }),
     }))
