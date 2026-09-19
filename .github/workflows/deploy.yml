@@ -52,6 +52,7 @@ jobs:
         uses: tailscale/github-action@v3
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          args: --accept-routes --hostname=gha-deploy-ui
 
       # Esperar a que el túnel Tailscale hacia Homelab esté caliente y listo
       - name: Verificar conectividad Tailscale hacia Homelab
@@ -81,6 +82,7 @@ jobs:
             ServerAliveInterval 15
             ServerAliveCountMax 3
             StrictHostKeyChecking no
+            ConnectTimeout 30
           EOF
           chmod 600 ~/.ssh/config
           ssh-keyscan -H ${{ secrets.HOMELAB_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
@@ -90,10 +92,29 @@ jobs:
         run: |
           SSH_USER=$(echo "${{ secrets.SSH_USER }}" | tr -d '\r\n[:space:]')
           HOMELAB_HOST=$(echo "${{ secrets.HOMELAB_HOST }}" | tr -d '\r\n[:space:]')
-          ssh -v -o KexAlgorithms=curve25519-sha256 -o IPQoS=throughput -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 "$SSH_USER@$HOMELAB_HOST" bash << 'EOF'
-            set -e
-            cd /opt/mesafacil
-            docker compose pull ui
-            docker compose up -d --remove-orphans ui
-            echo ">> Contenedor mesafacil-ui desplegado exitosamente."
-          EOF
+          
+          cat << 'DEPLOY_SCRIPT_EOF' > deploy_remote.sh
+          set -e
+          cd /opt/mesafacil
+          docker compose pull ui
+          echo ">> Liberando contenedor previo de ui..."
+          docker compose stop ui || true
+          docker rm -f mesafacil-ui 2>/dev/null || true
+          docker compose up -d --remove-orphans ui
+          echo ">> Contenedor mesafacil-ui desplegado exitosamente."
+          DEPLOY_SCRIPT_EOF
+          
+          MAX_RETRIES=3
+          COUNT=0
+          until [ "$COUNT" -ge "$MAX_RETRIES" ]
+          do
+            ssh -v -o KexAlgorithms=curve25519-sha256 -o IPQoS=throughput -o StrictHostKeyChecking=no -o ConnectTimeout=30 -i ~/.ssh/id_ed25519 "$SSH_USER@$HOMELAB_HOST" "bash -s" < deploy_remote.sh && break
+            COUNT=$((COUNT+1))
+            if [ "$COUNT" -lt "$MAX_RETRIES" ]; then
+              echo ">> Falló conexión SSH. Reintentando en 5 segundos (intento $((COUNT+1))/$MAX_RETRIES)..."
+              sleep 5
+            else
+              echo ">> Error crítico: Se agotaron los reintentos de SSH."
+              exit 1
+            fi
+          done
