@@ -114,7 +114,13 @@ export const ReservasCalendarView: React.FC<ReservasCalendarViewProps> = ({
                 </td>
               </tr>
             ) : (
-              reservas.map((res) => (
+              reservas.map((res) => {
+                const estado = res.estado || res.estadoReserva || "Confirmada";
+                const comensales = res.comensales || res.numeroPersonas || 2;
+                const contacto = res.telefono || res.telefonoCliente || res.correo || "Sin contacto";
+                const deposito = res.depositoGarantia || res.anticipoPagado || 0;
+
+                return (
                 <tr key={res.id}>
                   <td>
                     <span style={{ fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
@@ -125,13 +131,13 @@ export const ReservasCalendarView: React.FC<ReservasCalendarViewProps> = ({
                   <td>
                     <div style={{ fontWeight: 700, color: "#0f172a" }}>{res.nombreCliente}</div>
                     <div style={{ fontSize: "0.75rem", color: "#64748b" }}>
-                      {res.telefono || res.correo || "Sin contacto"}
+                      {contacto}
                     </div>
                   </td>
                   <td>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", fontWeight: 600 }}>
                       <Users size={14} />
-                      {res.comensales} pers.
+                      {comensales} pers.
                     </span>
                   </td>
                   <td>
@@ -153,14 +159,14 @@ export const ReservasCalendarView: React.FC<ReservasCalendarViewProps> = ({
                     )}
                   </td>
                   <td>
-                    <span className={getBadgeClass(res.estado)}>
-                      {res.estado}
+                    <span className={getBadgeClass(estado)}>
+                      {estado}
                     </span>
                   </td>
                   <td>
-                    {res.depositoGarantia > 0 ? (
+                    {deposito > 0 ? (
                       <span className="badge-deposit-paid">
-                        ${res.depositoGarantia.toFixed(2)} {res.depositoPagado ? "✓ Pagado" : "Pendiente"}
+                        ${deposito.toFixed(2)} {res.depositoPagado ? "✓ Pagado" : "Pendiente"}
                       </span>
                     ) : (
                       <span className="badge-deposit-none">Sin depósito</span>
@@ -171,7 +177,7 @@ export const ReservasCalendarView: React.FC<ReservasCalendarViewProps> = ({
                   </td>
                   <td style={{ textAlign: "right" }}>
                     <div style={{ display: "inline-flex", gap: "0.35rem" }}>
-                      {res.estado === "Pendiente" && (
+                      {estado === "Pendiente" && (
                         <button
                           type="button"
                           onClick={() => onConfirmar(res.id)}
@@ -240,9 +246,10 @@ export const ReservasCalendarView: React.FC<ReservasCalendarViewProps> = ({
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
+              );
+            })
+          )}
+        </tbody>
         </table>
       </div>
     </div>

@@ -74,7 +74,11 @@ export const WaitlistColumn: React.FC<WaitlistColumnProps> = ({
         ) : (
           activeItems.map((item) => {
             const isSelected = selectedItem?.id === item.id;
-            const isExceeded = item.minutosTranscurridos > item.tiempoEsperaEstimadoMinutos;
+            const comensales = item.comensales || (item as any).numeroPersonas || 2;
+            const telefono = item.telefono || (item as any).telefonoCliente;
+            const minutosEst = item.tiempoEsperaEstimadoMinutos ?? (item as any).minutosEstimados ?? 15;
+            const urlWhatsApp = item.urlWhatsApp || (item as any).enlaceWhatsApp;
+            const isExceeded = item.minutosTranscurridos > minutosEst;
 
             return (
               <div
@@ -87,19 +91,19 @@ export const WaitlistColumn: React.FC<WaitlistColumnProps> = ({
                   <div>
                     <h4 className="waitlist-client-name">{item.nombreCliente}</h4>
                     <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "2px" }}>
-                      {item.telefono ? item.telefono : "Sin teléfono"}
+                      {telefono ? telefono : "Sin teléfono"}
                     </div>
                   </div>
                   <span className="waitlist-party-size">
                     <Users size={13} />
-                    {item.comensales} {item.comensales === 1 ? "pers." : "pers."}
+                    {comensales} {comensales === 1 ? "pers." : "pers."}
                   </span>
                 </div>
 
                 <div className="waitlist-meta">
                   <span className={`waitlist-time-badge ${isExceeded ? "time-warning" : ""}`}>
                     <Clock size={12} />
-                    Espera: {item.minutosTranscurridos} min (Est. ~{item.tiempoEsperaEstimadoMinutos} min)
+                    Espera: {item.minutosTranscurridos} min (Est. ~{minutosEst} min)
                   </span>
                   {item.zonaPreferencia && (
                     <span className="waitlist-zone-tag">
@@ -116,9 +120,9 @@ export const WaitlistColumn: React.FC<WaitlistColumnProps> = ({
 
                 <div className="waitlist-card-actions" onClick={(e) => e.stopPropagation()}>
                   <div>
-                    {item.urlWhatsApp ? (
+                    {urlWhatsApp ? (
                       <a
-                        href={item.urlWhatsApp}
+                        href={urlWhatsApp}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{

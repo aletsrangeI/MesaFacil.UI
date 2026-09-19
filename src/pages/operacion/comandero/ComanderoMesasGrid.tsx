@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Users, ReceiptText } from "lucide-react";
+import { Users, ReceiptText, Link2 } from "lucide-react";
 
 /**
  * Grid táctil de mesas por área para el Modo Comandero Móvil (spec 025).
@@ -86,12 +86,28 @@ export function ComanderoMesasGrid({
                 key={mesa.id}
                 type="button"
                 className={`comandero-mesa-card ${estado.cls}`}
-                onClick={() => onSelectMesa(mesa)}
+                onClick={() => {
+                  const target = mesa.idMesaPrincipal
+                    ? (mesas.find((m: any) => m.id === mesa.idMesaPrincipal) || mesa)
+                    : mesa;
+                  onSelectMesa(target);
+                }}
               >
                 <div className="comandero-mesa-codigo">{mesa.codigo || `M${mesa.id}`}</div>
+                {mesa.idMesaPrincipal ? (
+                  <div className="comandero-mesa-meta" style={{ color: '#8b5cf6', fontWeight: 700 }}>
+                    <Link2 size={12} style={{ verticalAlign: "-2px", marginRight: 3 }} />
+                    Unida a M{mesa.codigoMesaPrincipal || mesa.idMesaPrincipal}
+                  </div>
+                ) : mesa.idsMesasUnidas && mesa.idsMesasUnidas.length > 0 ? (
+                  <div className="comandero-mesa-meta" style={{ color: '#2563eb', fontWeight: 700 }}>
+                    <Link2 size={12} style={{ verticalAlign: "-2px", marginRight: 3 }} />
+                    +{mesa.codigosMesasUnidas?.join(', ') || mesa.idsMesasUnidas.length}
+                  </div>
+                ) : null}
                 <div className="comandero-mesa-meta">
                   <Users size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
-                  {mesa.asientos} pax
+                  {mesa.asientosTotalesGrupo || mesa.asientos} pax
                 </div>
                 <div className="comandero-mesa-meta">
                   {estado.cls === "por-cobrar" && (
