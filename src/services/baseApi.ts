@@ -84,6 +84,7 @@ export const emptySplitApi = createApi({
     "GrupoModificador",
     "Menu",
     "Mesa",
+    "Mesas",
     "MovimientoCaja",
     "OpcionModificador",
     "Pago",

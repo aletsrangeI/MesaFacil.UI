@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as signalR from "@microsoft/signalr";
-import { Users, Clock, Check, Utensils } from "lucide-react";
+import { Users, Clock, Check, Utensils, Link2 } from "lucide-react";
 import type { FilaEsperaItemDTO } from "../../../services/hostessApi";
 
 interface HostessMesasMapProps {
@@ -196,9 +196,19 @@ export const HostessMesasMap: React.FC<HostessMesasMapProps> = ({
                 <span className="mesa-codigo">M-{mesa.numero || mesa.codigo || mesa.id}</span>
                 <span className="mesa-capacidad">
                   <Users size={12} style={{ display: "inline", verticalAlign: "middle", marginRight: "2px" }} />
-                  {mesa.capacidad || 4}p
+                  {mesa.asientosTotalesGrupo || mesa.capacidad || mesa.asientos || 4}p
                 </span>
               </div>
+
+              {mesa.idMesaPrincipal ? (
+                <div style={{ fontSize: '0.7rem', color: '#7c3aed', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 3, margin: '2px 0' }}>
+                  <Link2 size={11} /> Unida a M-{mesa.codigoMesaPrincipal || mesa.idMesaPrincipal}
+                </div>
+              ) : mesa.idsMesasUnidas && mesa.idsMesasUnidas.length > 0 ? (
+                <div style={{ fontSize: '0.7rem', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 3, margin: '2px 0' }}>
+                  <Link2 size={11} /> +{mesa.codigosMesasUnidas?.join(', ') || mesa.idsMesasUnidas.length}
+                </div>
+              ) : null}
 
               <div>
                 <div className="mesa-status-tag">{status.badge}</div>

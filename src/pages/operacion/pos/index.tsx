@@ -22,7 +22,7 @@ import {
   useSucursalesGetAllQuery,
   useMesasUpdateAsyncMutation
 } from "../../../services/generated/api";
-import { ShoppingCart, User, LogOut, ChevronLeft, MapPin, Coins, FileText, X, AlertTriangle, Edit3, ArrowDownUp, Activity, DoorOpen, Building, ReceiptText } from "lucide-react";
+import { ShoppingCart, User, LogOut, ChevronLeft, MapPin, Coins, FileText, X, AlertTriangle, Edit3, ArrowDownUp, Activity, DoorOpen, Building, ReceiptText, Link2 } from "lucide-react";
 import * as signalR from "@microsoft/signalr";
 import "../../../styles/mesa-estados.css";
 import { ProductModifiersModal } from "./ProductModifiersModal";
@@ -32,6 +32,7 @@ import { MovimientoCajaModal } from "./MovimientoCajaModal";
 import { CorteXModal } from "./CorteXModal";
 import { AperturaTurnoModal } from "./AperturaTurnoModal";
 import { ThermalTicketModal } from "./ThermalTicketModal";
+import { UnirMesasModal } from "./UnirMesasModal";
 import { emptySplitApi as api } from '../../../services/baseApi';
 import { SupervisorPinModal } from "../../../components/seguridad/SupervisorPinModal";
 
@@ -146,6 +147,7 @@ export default function PosPage() {
   const [showCorteXModal, setShowCorteXModal] = useState(false);
   const [showAperturaModal, setShowAperturaModal] = useState(false);
   const [showPrecuentaModal, setShowPrecuentaModal] = useState(false);
+  const [showUnirMesasModal, setShowUnirMesasModal] = useState(false);
 
   const authSucursalId = useSelector(selectIdSucursal);
   const authNombreSucursal = useSelector(selectNombreSucursal);
@@ -525,13 +527,42 @@ export default function PosPage() {
           <div className="pos-brand">
             <h2>MesaFácil POS</h2>
             {isComedor && (
-              <button 
-                onClick={() => setShowMesaSelector(true)}
-                className={`pos-assign-mesa-btn ${selectedMesa ? "selected" : ""}`}
-              >
-                <MapPin size={20} color={selectedMesa ? "#3b82f6" : "#ffffff"} />
-                {selectedMesa ? `Mesa: ${selectedMesa.codigo || selectedMesa.id} (${selectedMesa.asientos} pax)` : "Asignar Mesa"}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button 
+                  onClick={() => setShowMesaSelector(true)}
+                  className={`pos-assign-mesa-btn ${selectedMesa ? "selected" : ""}`}
+                >
+                  <MapPin size={20} color={selectedMesa ? "#3b82f6" : "#ffffff"} />
+                  {selectedMesa ? `Mesa: ${selectedMesa.codigo || selectedMesa.id} (${selectedMesa.asientosTotalesGrupo || selectedMesa.asientos} pax)` : "Asignar Mesa"}
+                </button>
+                {selectedMesa && (
+                  <button
+                    onClick={() => setShowUnirMesasModal(true)}
+                    className="pos-header-btn-caja"
+                    style={{
+                      background: (selectedMesa.idsMesasUnidas?.length || selectedMesa.idMesaPrincipal) ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                      color: (selectedMesa.idsMesasUnidas?.length || selectedMesa.idMesaPrincipal) ? '#60a5fa' : '#ffffff',
+                      border: (selectedMesa.idsMesasUnidas?.length || selectedMesa.idMesaPrincipal) ? '1px solid #3b82f6' : '1px solid rgba(255, 255, 255, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '6px 12px',
+                      borderRadius: 10,
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                    }}
+                    title={selectedMesa.idsMesasUnidas?.length ? "Gestionar mesas unidas" : "Juntar esta mesa con otras"}
+                  >
+                    <Link2 size={15} />
+                    {selectedMesa.idsMesasUnidas?.length > 0
+                      ? `+${selectedMesa.codigosMesasUnidas?.join(', ') || selectedMesa.idsMesasUnidas.length}`
+                      : selectedMesa.idMesaPrincipal
+                      ? `Unida a M${selectedMesa.codigoMesaPrincipal || selectedMesa.idMesaPrincipal}`
+                      : "Juntar Mesas"}
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -1269,6 +1300,17 @@ export default function PosPage() {
                       onMouseEnter={e => { if(!isSelected) { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = isPorCobrar ? '0 10px 15px -3px rgba(245,158,11,0.3)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)'; } }}
                       onMouseLeave={e => { if(!isSelected) { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = isPorCobrar ? '0 4px 12px rgba(245,158,11,0.25)' : '0 4px 6px -1px rgba(0, 0, 0, 0.05)'; } }}
                       onClick={async () => {
+                        let target = mesa;
+                        if (mesa.idMesaPrincipal) {
+                          const principal = (mesasData?.data as any[])?.find((m: any) => m.id === mesa.idMesaPrincipal);
+                          if (principal) {
+                            addToast({
+                              message: `Mesa ${mesa.codigo || mesa.id} está unida a ${principal.codigo || principal.id}. Seleccionando la mesa principal del grupo.`,
+                              variant: 'info'
+                            });
+                            target = principal;
+                          }
+                        }
                         if (isOcupada) {
                           const ok = await confirm({
                             title: "Mesa Ocupada",
@@ -1278,11 +1320,21 @@ export default function PosPage() {
                           });
                           if (!ok) return;
                         }
-                        setSelectedMesa(mesa);
+                        setSelectedMesa(target);
                         setShowMesaSelector(false);
                       }}
                       title={isPorCobrar ? "Mesa pidiendo cuenta (Por cobrar)" : (isOcupada ? "Mesa ocupada (Pedido activo)" : undefined)}
                     >
+                      {mesa.idMesaPrincipal ? (
+                        <div style={{ position: 'absolute', top: -10, left: -6, background: '#7c3aed', color: '#fff', fontSize: '0.65rem', padding: '3px 7px', borderRadius: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 3, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                          <Link2 size={10} /> Unida a M{mesa.codigoMesaPrincipal || mesa.idMesaPrincipal}
+                        </div>
+                      ) : mesa.idsMesasUnidas && mesa.idsMesasUnidas.length > 0 ? (
+                        <div style={{ position: 'absolute', top: -10, left: -6, background: '#2563eb', color: '#fff', fontSize: '0.65rem', padding: '3px 7px', borderRadius: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 3, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                          <Link2 size={10} /> +{mesa.codigosMesasUnidas?.join(', ') || mesa.idsMesasUnidas.length}
+                        </div>
+                      ) : null}
+
                       {isPorCobrar ? (
                         <div style={{ position: 'absolute', top: -10, right: -10, background: '#f59e0b', color: '#fff', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '12px', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 4 }}>
                           <ReceiptText size={12} /> Por Cobrar
@@ -1294,7 +1346,7 @@ export default function PosPage() {
                       )}
                       <div style={{ fontWeight: '800', fontSize: '1.5rem', color: '#1e293b' }}>{mesa.codigo || `M ${mesa.id}`}</div>
                       <div style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <User size={14} /> {mesa.asientos} pax
+                        <User size={14} /> {mesa.asientosTotalesGrupo || mesa.asientos} pax
                       </div>
                       <div style={{ 
                         fontSize: '0.75rem', 
@@ -1382,6 +1434,16 @@ export default function PosPage() {
         isOpen={showAperturaModal}
         onClose={() => setShowAperturaModal(false)}
         idSucursal={activeSucursalId}
+      />
+
+      {/* Modal de Juntar / Fusionar Mesas */}
+      <UnirMesasModal
+        isOpen={showUnirMesasModal}
+        onClose={() => setShowUnirMesasModal(false)}
+        mesaPrincipal={selectedMesa}
+        todasMesas={Array.isArray(mesasData?.data) ? mesasData.data : []}
+        areas={Array.isArray(areasData?.data) ? areasData.data : []}
+        onSuccess={() => refetchMesas()}
       />
     </div>
   );

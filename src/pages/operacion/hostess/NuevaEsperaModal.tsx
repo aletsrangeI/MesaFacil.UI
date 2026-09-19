@@ -34,7 +34,9 @@ export const NuevaEsperaModal: React.FC<NuevaEsperaModalProps> = ({
         idSucursal,
         nombreCliente: nombre.trim(),
         telefono: telefono.trim() || undefined,
+        telefonoCliente: telefono.trim() || undefined,
         comensales,
+        numeroPersonas: comensales,
         zonaPreferencia: zonaPreferencia === "Cualquiera" ? undefined : zonaPreferencia,
         notas: notas.trim() || undefined,
       });

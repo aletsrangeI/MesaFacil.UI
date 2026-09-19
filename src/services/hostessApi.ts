@@ -1,4 +1,4 @@
-﻿import { emptySplitApi } from './baseApi';
+import { emptySplitApi } from './baseApi';
 
 export interface FilaEsperaItemDTO {
   id: number;
@@ -21,7 +21,9 @@ export interface RegistrarWaitlistDTO {
   idSucursal: number;
   nombreCliente: string;
   telefono?: string;
+  telefonoCliente?: string;
   comensales: number;
+  numeroPersonas?: number;
   notas?: string;
   zonaPreferencia?: string;
 }
@@ -35,13 +37,18 @@ export interface ReservaMesaDTO {
   idSucursal: number;
   nombreCliente: string;
   telefono?: string;
+  telefonoCliente?: string;
   correo?: string;
   comensales: number;
+  numeroPersonas?: number;
   fechaHoraReserva: string;
+  idMesa?: number;
   idMesaAsignada?: number;
   codigoMesa?: string;
   estado: 'Pendiente' | 'Confirmada' | 'Sentada' | 'Cancelada' | 'NoShow';
+  estadoReserva?: string;
   depositoGarantia: number;
+  anticipoPagado?: number;
   depositoPagado: boolean;
   notas?: string;
   creadoEn: string;
@@ -51,11 +58,15 @@ export interface CrearReservaDTO {
   idSucursal: number;
   nombreCliente: string;
   telefono?: string;
+  telefonoCliente?: string;
   correo?: string;
   comensales: number;
+  numeroPersonas?: number;
   fechaHoraReserva: string;
+  idMesa?: number;
   idMesaAsignada?: number;
   depositoGarantia?: number;
+  anticipoPagado?: number;
   depositoPagado?: boolean;
   notas?: string;
 }

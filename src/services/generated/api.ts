@@ -5262,6 +5262,11 @@ export type MesaDto = {
   codigo?: string;
   asientos?: number;
   idEstadoMesa?: number;
+  idMesaPrincipal?: number | null;
+  codigoMesaPrincipal?: string | null;
+  idsMesasUnidas?: number[];
+  codigosMesasUnidas?: string[];
+  asientosTotalesGrupo?: number;
 };
 export type ResponseOfIEnumerableOfMesaDto = {
   data?: MesaDto[] | null;
@@ -5276,6 +5281,11 @@ export type MesaDto2 = {
   codigo?: string;
   asientos?: number;
   idEstadoMesa?: number;
+  idMesaPrincipal?: number | null;
+  codigoMesaPrincipal?: string | null;
+  idsMesasUnidas?: number[];
+  codigosMesasUnidas?: string[];
+  asientosTotalesGrupo?: number;
 } | null;
 export type ResponseOfMesaDto = {
   data?: MesaDto2;

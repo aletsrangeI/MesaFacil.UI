@@ -45,15 +45,17 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
     ? safeMesas.filter(m => m?.idArea === selectedAreaId) 
     : safeMesas;
 
-  // Busca si la mesa tiene un pedido activo
-  const getPedidoDeMesa = (idMesa: number) => {
-    return safePedidos.find(p => p?.idMesa === idMesa && p?.idEstadoPedido !== 5 && p?.idEstadoPedido !== 6);
+  // Busca si la mesa tiene un pedido activo (o la mesa principal del grupo si está unida)
+  const getPedidoDeMesa = (mesa: any) => {
+    if (!mesa) return undefined;
+    const targetId = mesa.idMesaPrincipal ?? mesa.id;
+    return safePedidos.find(p => p?.idMesa === targetId && p?.idEstadoPedido !== 5 && p?.idEstadoPedido !== 6);
   };
 
   const handleMesaClick = (mesa: any) => {
     if (!mesa) return;
     const estadoInfo = getEstadoInfo(mesa.idEstadoMesa || 1);
-    const pedido = getPedidoDeMesa(mesa.id);
+    const pedido = getPedidoDeMesa(mesa);
     setSelectedMesaDetail({ mesa, estadoInfo, pedido });
   };
 
@@ -104,7 +106,7 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
           filteredMesas.map(mesa => {
             if (!mesa) return null;
             const estado = getEstadoInfo(mesa.idEstadoMesa || 1);
-            const pedido = getPedidoDeMesa(mesa.id);
+            const pedido = getPedidoDeMesa(mesa);
             const tieneCuenta = !!pedido;
 
             return (
@@ -115,8 +117,17 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
                 title={`Mesa ${mesa.codigo || mesa.id} - ${estado.text}`}
               >
                 <span className="dash-table-code">{mesa.codigo || `M${mesa.id}`}</span>
+                {mesa.idMesaPrincipal ? (
+                  <span style={{ fontSize: '0.65rem', color: '#7c3aed', fontWeight: 700 }}>
+                    🔗 M{mesa.codigoMesaPrincipal || mesa.idMesaPrincipal}
+                  </span>
+                ) : mesa.idsMesasUnidas && mesa.idsMesasUnidas.length > 0 ? (
+                  <span style={{ fontSize: '0.65rem', color: '#2563eb', fontWeight: 700 }}>
+                    🔗 +{mesa.codigosMesasUnidas?.join(', ') || mesa.idsMesasUnidas.length}
+                  </span>
+                ) : null}
                 <span className="dash-table-pax">
-                  <Icon name="User" /> {mesa.asientos || 2} pax
+                  <Icon name="User" /> {mesa.asientosTotalesGrupo || mesa.asientos || 2} pax
                 </span>
                 <span 
                   className="dash-table-status-pill"
@@ -179,7 +190,12 @@ export const DashboardFloorPlan: React.FC<DashboardFloorPlanProps> = ({
               </span>
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #64748b)', marginTop: 2 }}>
-              Capacidad: {selectedMesaDetail.mesa.asientos} comensales
+              Capacidad: {selectedMesaDetail.mesa.asientosTotalesGrupo || selectedMesaDetail.mesa.asientos} comensales
+              {selectedMesaDetail.mesa.idMesaPrincipal ? (
+                <span style={{ color: '#7c3aed', fontWeight: 600 }}> • Unida a M{selectedMesaDetail.mesa.codigoMesaPrincipal || selectedMesaDetail.mesa.idMesaPrincipal}</span>
+              ) : selectedMesaDetail.mesa.idsMesasUnidas?.length > 0 ? (
+                <span style={{ color: '#2563eb', fontWeight: 600 }}> • Unidas: +{selectedMesaDetail.mesa.codigosMesasUnidas?.join(', ') || selectedMesaDetail.mesa.idsMesasUnidas.length}</span>
+              ) : null}
               {selectedMesaDetail.pedido && (
                 <span> • Orden #{selectedMesaDetail.pedido.folioDiario ?? selectedMesaDetail.pedido.id} activa</span>
               )}
