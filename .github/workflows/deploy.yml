@@ -99,8 +99,8 @@ jobs:
           docker compose pull ui
           echo ">> Liberando contenedor previo de ui..."
           docker compose stop ui || true
-          docker rm -f mesafacil-ui 2>/dev/null || true
-          docker compose up -d --remove-orphans ui
+          docker compose up -d --no-deps --remove-orphans ui
+          docker ps --filter "name=mesafacil"
           echo ">> Contenedor mesafacil-ui desplegado exitosamente."
           DEPLOY_SCRIPT_EOF
           
