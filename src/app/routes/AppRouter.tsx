@@ -59,6 +59,7 @@ const MenuEngineeringPage = lazy(
   () => import("../../pages/analitica/MenuEngineeringPage")
 );
 const HostessPage = lazy(() => import("../../pages/operacion/hostess"));
+const OnboardingWizardPage = lazy(() => import("../../pages/onboarding/OnboardingWizardPage"));
 
 // Utilidades de pre-fetching inteligente en segundo plano tras autenticación
 export const prefetchComandero = () => import("../../pages/operacion/comandero");
@@ -167,6 +168,18 @@ export default function AppRouter() {
                 <ComanderoPage />
               </Suspense>
             </RequireAccess>
+          </PrivateRoute>
+        }
+      />
+
+      {/* Asistente de Puesta en Marcha (Setup Wizard - Spec 035) — pantalla completa inmersiva */}
+      <Route
+        path="/onboarding"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<ModuleSkeletonLoader />}>
+              <OnboardingWizardPage />
+            </Suspense>
           </PrivateRoute>
         }
       />

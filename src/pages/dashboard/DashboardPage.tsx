@@ -1,4 +1,5 @@
 import { useState, Component, type ErrorInfo, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectUserProfile, selectIdSucursal, selectNombreSucursal } from "../../state/authSlice";
 import { useToast } from "../../components/ui/toast";
@@ -13,6 +14,7 @@ import {
 import { useGetResumenCorteQuery } from "../operacion/pos/CorteCajaModal";
 import { useGetKdsBoardDashboardQuery } from "../../services/dashboardApi";
 import { useSeedRestauranteCompletoMutation } from "../../services/demoApi";
+import { useGetOnboardingEstadoQuery } from "../../services/onboardingApi";
 
 // Componentes del Dashboard Bento
 import { DashboardHeader } from "./DashboardHeader";
@@ -82,8 +84,11 @@ function toArray(data: any): any[] {
 }
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const profile = useSelector(selectUserProfile);
   const { addToast } = useToast();
+
+  const { data: onboardingData } = useGetOnboardingEstadoQuery();
 
   // Queries de Datos con Polling en tiempo real
   const { data: pedidosData, refetch: refetchPedidos } = usePedidosGetAllAsyncQuery(undefined, { pollingInterval: 8000 });
@@ -229,6 +234,51 @@ export default function DashboardPage() {
           onSeedDemo={handleSeedDemo}
           isSeedingDemo={isSeedingDemo}
         />
+
+        {onboardingData && (!onboardingData.onboardingCompletado || mesas.length === 0) && (
+          <div style={{
+            margin: '16px 0 20px 0',
+            padding: '16px 20px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(3, 105, 161, 0.15) 100%)',
+            border: '1px solid #0284c7',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            color: '#f8fafc',
+            boxShadow: '0 4px 14px rgba(2, 132, 199, 0.2)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <span style={{ fontSize: '1.8rem' }}>🚀</span>
+              <div>
+                <strong style={{ fontSize: '1.05rem', display: 'block', color: '#38bdf8' }}>
+                  ¡Bienvenido a MesaFacil! Configura tu restaurante en 5 minutos
+                </strong>
+                <span style={{ fontSize: '0.875rem', color: '#cbd5e1' }}>
+                  Tu restaurante aún no tiene mesas o menú configurados. Inicia el asistente de puesta en marcha para operar y cobrar hoy mismo.
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/onboarding')}
+              style={{
+                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '10px 22px',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(2, 132, 199, 0.4)'
+              }}
+            >
+              Iniciar Asistente ➔
+            </button>
+          </div>
+        )}
 
         {!resumenTurno?.idTurno && (
           <div style={{
