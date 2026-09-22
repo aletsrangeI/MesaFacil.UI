@@ -38,6 +38,8 @@ export interface EmpresaSuscripcion {
   comanderosAddons: number;
   enPeriodoGracia: boolean;
   maxKdsPermitidos: number;
+  motivoSuspension?: string;
+  contactoWhatsApp?: string;
 }
 
 export interface AsignarPlanSuscripcionRequest {

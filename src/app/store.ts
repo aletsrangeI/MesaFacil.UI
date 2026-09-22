@@ -4,8 +4,9 @@ import { emptySplitApi } from "../services/baseApi";
 import authReducer, { logout } from "../state/authSlice";
 import authListener from "../state/auth.listeners";
 import cartReducer from "../state/cartSlice";
+import subscriptionReducer, { setSubscriptionSuspended } from "../state/subscriptionSlice";
 
-const rtkQuery401Middleware: Middleware = ({ dispatch }) => (next) => (action) => {
+const rtkQueryStatusMiddleware: Middleware = ({ dispatch }) => (next) => (action) => {
   if (isRejectedWithValue(action)) {
     const status =
       (action as any)?.payload?.status ??
@@ -14,6 +15,19 @@ const rtkQuery401Middleware: Middleware = ({ dispatch }) => (next) => (action) =
 
     if (status === 401) {
       dispatch(logout());
+    } else if (status === 402) {
+      const data = (action as any)?.payload?.data;
+      dispatch(
+        setSubscriptionSuspended({
+          errorCode: data?.errorCode || "SUBSCRIPTION_SUSPENDED",
+          message:
+            data?.message ||
+            "El servicio de MesaFácil se encuentra temporalmente suspendido por falta de pago.",
+          contactoWhatsApp: data?.contactoWhatsApp,
+          fechaFinVigencia: data?.fechaFinVigencia,
+          motivo: data?.motivo,
+        })
+      );
     }
   }
   return next(action);
@@ -24,12 +38,13 @@ export const store = configureStore({
     [emptySplitApi.reducerPath]: emptySplitApi.reducer,
     auth: authReducer,
     cart: cartReducer,
+    subscription: subscriptionReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .prepend(authListener.middleware)
       .concat(emptySplitApi.middleware)
-      .concat(rtkQuery401Middleware),
+      .concat(rtkQueryStatusMiddleware),
   devTools: import.meta.env.MODE !== "production",
 });
 
