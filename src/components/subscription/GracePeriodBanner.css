@@ -1,0 +1,49 @@
+.mf-grace-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  background: #fffbeb;
+  color: #92400e;
+  border-bottom: 1px solid #fef3c7;
+  font-size: 0.875rem;
+  z-index: 50;
+}
+
+.mf-grace-banner__content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mf-grace-banner__icon {
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.mf-grace-banner__text {
+  line-height: 1.4;
+}
+
+.mf-grace-banner__actions {
+  display: flex;
+  align-items: center;
+}
+
+.mf-grace-banner__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #b45309;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-size: 0.8125rem;
+  transition: color 0.15s ease;
+}
+
+.mf-grace-banner__link:hover {
+  color: #78350f;
+}

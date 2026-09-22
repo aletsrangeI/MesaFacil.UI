@@ -21,6 +21,7 @@ import "../components/navigation/sidebar/sidebar.css";
 import "./app-shell.css";
 import Topbar from "../components/navigation/topbar/Topbar";
 import { ModuleSkeletonLoader } from "../components/common/loaders/ModuleSkeletonLoader";
+import { GracePeriodBanner } from "../components/subscription/GracePeriodBanner";
 
 export type AppLayoutProps = {
   /** Roles canónicos del usuario logueado (p.ej. ["admin"]) */
@@ -151,6 +152,7 @@ export default function AppLayout({
       </aside>
 
       <div className="app-shell__main">
+        <GracePeriodBanner />
         <NetworkStatusBanner />
         {showTopbar && !isFlushRoute &&
           (topbar ?? (

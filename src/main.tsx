@@ -36,6 +36,7 @@ try {
 }
 
 import { useOfflineSync } from "./hooks/useOfflineSync";
+import { SuspendedScreenModal } from "./components/subscription/SuspendedScreenModal";
 
 store.dispatch(hydrateFromStorage());
 store.dispatch(pruneIfExpired());
@@ -52,6 +53,7 @@ function SessionTimersGate() {
       <ToastProvider position="bottom-right" max={4}>
         <ConfirmProvider>
           <OfflineSyncGate />
+          <SuspendedScreenModal />
           <AppRouter />
         </ConfirmProvider>
       </ToastProvider>
